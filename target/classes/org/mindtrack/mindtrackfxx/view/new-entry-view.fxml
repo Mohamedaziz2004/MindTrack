@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.geometry.Insets?>
+
+<GridPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.mindtrack.mindtrackfxx.controller.NewEntryController" hgap="10" vgap="10">
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10" />
+    </padding>
+    <children>
+        <Label text="Title" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+        <TextField fx:id="titleField" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+
+        <Label text="Note" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+        <TextArea fx:id="noteArea" prefRowCount="5" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+
+        <Label text="Mood" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+        <ComboBox fx:id="moodBox" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+
+        <Button fx:id="addBtn" text="Add" onAction="#onAdd" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+    </children>
+</GridPane>

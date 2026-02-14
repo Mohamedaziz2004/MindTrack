@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.mindtrack.mindtrackfxx.controller.MainController" fx:id="root">
+    <top>
+        <MenuBar>
+            <Menu text="File">
+                <MenuItem text="Exit" onAction="#onExit" />
+            </Menu>
+            <Menu text="View">
+                <MenuItem text="Entries" onAction="#showEntries" />
+                <MenuItem text="New Entry" onAction="#showNewEntry" />
+                <MenuItem text="Humeurs" onAction="#showHumeurs" />
+                <MenuItem text="Journal" onAction="#showJournal" />
+            </Menu>
+            <Menu text="Help">
+                <MenuItem text="About" />
+            </Menu>
+        </MenuBar>
+    </top>
+</BorderPane>

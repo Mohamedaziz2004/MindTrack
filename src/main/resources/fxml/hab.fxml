@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.HabitudeController"
+            stylesheets="@/css/hab.css"
+            fitToWidth="true"
+            pannable="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED">
+
+    <content>
+        <VBox spacing="12" styleClass="section">
+            <padding>
+                <Insets top="15" right="15" bottom="15" left="15"/>
+            </padding>
+
+            <Label text="MindTrack - Habitudes "
+                   styleClass="title"/>
+
+            <!-- ================= HABITUDES CRUD ================= -->
+            <TitledPane text="1) Habitudes - CRUD" expanded="true">
+                <VBox spacing="10" styleClass="card">
+
+                    <TableView fx:id="tvHabitudes" prefHeight="220">
+                        <columns>
+                            <TableColumn fx:id="colNom" text="Nom" prefWidth="200"/>
+                            <TableColumn fx:id="colFrequence" text="Fréquence" prefWidth="150"/>
+                            <TableColumn fx:id="colObjectif" text="Objectif" prefWidth="420"/>
+                        </columns>
+                    </TableView>
+
+                    <HBox spacing="10">
+                        <TextField fx:id="tfNom" promptText="Nom"/>
+                        <TextField fx:id="tfFrequence" promptText="Fréquence"/>
+                        <TextField fx:id="tfObjectif" promptText="Objectif"/>
+                    </HBox>
+
+                    <HBox spacing="10">
+                        <Button text="Ajouter" onAction="#ajouterHabitude" styleClass="btn-primary"/>
+                        <Button text="Modifier" onAction="#modifierHabitude" styleClass="btn-secondary"/>
+                        <Button text="Supprimer" onAction="#supprimerHabitude" styleClass="btn-danger"/>
+                        <Button text="Rafraîchir" onAction="#loadHabitudes" styleClass="btn-outline"/>
+                    </HBox>
+
+                </VBox>
+            </TitledPane>
+
+            <!-- ================= SUIVI + HISTORIQUE ================= -->
+            <TitledPane text="2) Suivi - Marquer faite/non faite + Historique" expanded="false">
+                <VBox spacing="10" styleClass="card">
+
+                    <HBox spacing="10">
+                        <Label text="Date:"/>
+                        <DatePicker fx:id="dpDate"/>
+                        <CheckBox fx:id="chkEtat" text="Faite"/>
+                        <Button text="Marquer" onAction="#marquerAujourdHui" styleClass="btn-primary"/>
+                        <Button text="Charger historique" onAction="#chargerHistorique" styleClass="btn-secondary"/>
+                    </HBox>
+
+                    <TableView fx:id="tvHistorique" prefHeight="180">
+                        <columns>
+                            <TableColumn fx:id="colDate" text="Date" prefWidth="200"/>
+                            <TableColumn fx:id="colEtat" text="Etat" prefWidth="120"/>
+                        </columns>
+                    </TableView>
+
+                </VBox>
+            </TitledPane>
+
+            <!-- ================= STATS ================= -->
+            <TitledPane text="3) Stats - Streak + Taux semaine/mois" expanded="false">
+                <VBox spacing="10" styleClass="card">
+
+                    <HBox spacing="10">
+                        <Button text="Calculer stats (habitude sélectionnée)"
+                                onAction="#calculerStats"
+                                styleClass="btn-primary"/>
+
+                        <Label text="Streak:"/>
+                        <Label fx:id="lbStreak" text="-" style="-fx-font-weight:bold;"/>
+                        <Label text="Semaine:"/>
+                        <Label fx:id="lbSemaine" text="-" style="-fx-font-weight:bold;"/>
+                        <Label text="Mois:"/>
+                        <Label fx:id="lbMois" text="-" style="-fx-font-weight:bold;"/>
+                    </HBox>
+
+                </VBox>
+            </TitledPane>
+
+            <!-- ================= RAPPELS ================= -->
+            <TitledPane text="4) Rappels - Ajouter + Actifs + Toggle" expanded="false">
+                <VBox spacing="10" styleClass="card">
+
+                    <HBox spacing="10">
+                        <Label text="Heure:"/>
+                        <Spinner fx:id="spH" prefWidth="80"/>
+                        <Label text=":"/>
+                        <Spinner fx:id="spM" prefWidth="80"/>
+
+                        <CheckBox fx:id="chkActifRappel" text="Actif" selected="true"/>
+                        <TextField fx:id="tfMsg" promptText="Message du rappel" prefWidth="320"/>
+                    </HBox>
+
+                    <HBox spacing="10">
+                        <Label text="Jours:"/>
+                        <CheckBox fx:id="jLun" text="Lun"/>
+                        <CheckBox fx:id="jMar" text="Mar"/>
+                        <CheckBox fx:id="jMer" text="Mer"/>
+                        <CheckBox fx:id="jJeu" text="Jeu"/>
+                        <CheckBox fx:id="jVen" text="Ven"/>
+                        <CheckBox fx:id="jSam" text="Sam"/>
+                        <CheckBox fx:id="jDim" text="Dim"/>
+                    </HBox>
+
+                    <HBox spacing="10">
+                        <Button text="Ajouter rappel (habitude sélectionnée)"
+                                onAction="#ajouterRappel"
+                                styleClass="btn-primary"/>
+
+                        <Button text="Afficher rappels actifs"
+                                onAction="#chargerRappelsActifs"
+                                styleClass="btn-secondary"/>
+
+                        <Button text="Basculer actif"
+                                onAction="#toggleRappelActif"
+                                styleClass="btn-outline"/>
+
+                        <Button text="Supprimer rappel sélectionné"
+                                onAction="#supprimerRappel"
+                                styleClass="btn-danger"/>
+                    </HBox>
+
+                    <TableView fx:id="tvRappels" prefHeight="180">
+                        <columns>
+                            <TableColumn fx:id="colHeureR" text="Heure" prefWidth="120"/>
+                            <TableColumn fx:id="colJoursR" text="Jours" prefWidth="220"/>
+                            <TableColumn fx:id="colMsgR" text="Message" prefWidth="420"/>
+                            <TableColumn fx:id="colActifR" text="Actif" prefWidth="80"/>
+                        </columns>
+                    </TableView>
+
+                </VBox>
+            </TitledPane>
+
+        </VBox>
+    </content>
+</ScrollPane>

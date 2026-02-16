@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.MainController"
+            prefWidth="1000" prefHeight="650">
+
+    <left>
+        <VBox spacing="10" padding="15" style="-fx-background-color:#20242a;">
+            <Label text="MindTrack" style="-fx-text-fill:white; -fx-font-size:18px; -fx-font-weight:bold;"/>
+            <Separator />
+
+            <Button text="Habitudes (CRUD)" onAction="#goHabitudes" maxWidth="Infinity"/>
+            <Button text="Suivi / Historique" onAction="#goSuivi" maxWidth="Infinity"/>
+            <Button text="Stats (Streak + %)" onAction="#goStats" maxWidth="Infinity"/>
+            <Button text="Rappels" onAction="#goRappels" maxWidth="Infinity"/>
+
+            <Pane VBox.vgrow="ALWAYS"/>
+            <Button text="Quitter" onAction="#quitter" maxWidth="Infinity"/>
+        </VBox>
+    </left>
+
+    <center>
+        <AnchorPane>
+            <Label text="Chargement..." layoutX="20" layoutY="20" style="-fx-font-size:16px;"/>
+        </AnchorPane>
+    </center>
+
+</BorderPane>

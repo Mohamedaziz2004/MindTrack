@@ -31,6 +31,7 @@ public class ProfileController {
 
     @FXML
     public void initialize() {
+
         currentUser = UserSession.getCurrentUser();
 
         if (currentUser == null) {
@@ -41,6 +42,7 @@ public class ProfileController {
         loadUserData();
         loadProfileData();
     }
+
 
 
     private void loadUserData() {
@@ -65,41 +67,140 @@ public class ProfileController {
 
     @FXML
     public void handleUpdate() {
+
+        // 🔹 Sanitize inputs
+        String nom = nomField.getText() != null ? nomField.getText().trim() : "";
+        String prenom = prenomField.getText() != null ? prenomField.getText().trim() : "";
+        String email = emailField.getText() != null ? emailField.getText().trim() : "";
+        String ageText = ageField.getText() != null ? ageField.getText().trim() : "";
+        String stressText = stressField.getText() != null ? stressField.getText().trim() : "";
+        String motivationText = motivationField.getText() != null ? motivationField.getText().trim() : "";
+        String description = descriptionArea.getText() != null ? descriptionArea.getText().trim() : "";
+
+        messageLabel.setStyle("-fx-text-fill: red;");
+
+        // 🔹 Empty check
+        if (nom.isEmpty() || prenom.isEmpty() || email.isEmpty() || ageText.isEmpty()
+                || stressText.isEmpty() || motivationText.isEmpty()) {
+
+            messageLabel.setText("All fields must be filled.");
+            return;
+        }
+
+        // 🔹 Name validation
+        if (!nom.matches("^[A-Za-zÀ-ÿ\\- ]{2,}$")) {
+            messageLabel.setText("Invalid last name.");
+            return;
+        }
+
+        if (!prenom.matches("^[A-Za-zÀ-ÿ\\- ]{2,}$")) {
+            messageLabel.setText("Invalid first name.");
+            return;
+        }
+
+        // 🔹 Email format
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            messageLabel.setText("Invalid email format.");
+            return;
+        }
+
+        // 🔹 Numeric validations
+        int age, stress, motivation;
+
         try {
-            // Update user
-            currentUser.setNomU(nomField.getText());
-            currentUser.setPrenomU(prenomField.getText());
-            currentUser.setEmailU(emailField.getText());
-            currentUser.setAgeU(Integer.parseInt(ageField.getText()));
+            age = Integer.parseInt(ageText);
+            if (age < 10 || age > 100) {
+                messageLabel.setText("Age must be between 10 and 100.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            messageLabel.setText("Age must be a valid number.");
+            return;
+        }
+
+        try {
+            stress = Integer.parseInt(stressText);
+            if (stress < 0 || stress > 10) {
+                messageLabel.setText("Stress must be between 0 and 10.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            messageLabel.setText("Stress must be a number.");
+            return;
+        }
+
+        try {
+            motivation = Integer.parseInt(motivationText);
+            if (motivation < 0 || motivation > 10) {
+                messageLabel.setText("Motivation must be between 0 and 10.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            messageLabel.setText("Motivation must be a number.");
+            return;
+        }
+
+        try {
+
+            // 🔹 Update user entity
+            currentUser.setNomU(nom);
+            currentUser.setPrenomU(prenom);
+            currentUser.setEmailU(email);
+            currentUser.setAgeU(age);
 
             userService.update(currentUser);
 
-            // Update profile
-            profile.setNiveauStress(Integer.parseInt(stressField.getText()));
-            profile.setNiveauMotivation(Integer.parseInt(motivationField.getText()));
-            profile.setDescription(descriptionArea.getText());
+            // 🔹 Update profile entity (1–1 relation safe)
+            profile.setNiveauStress(stress);
+            profile.setNiveauMotivation(motivation);
+            profile.setDescription(description);
 
             profileService.update(profile);
 
             messageLabel.setStyle("-fx-text-fill: green;");
-            messageLabel.setText("Profile updated successfully");
+            messageLabel.setText("Profile updated successfully.");
 
-        } catch (Exception e) {
-            messageLabel.setText("Update failed");
+        } catch (SQLException e) {
+            messageLabel.setText("Database error during update.");
             e.printStackTrace();
         }
     }
 
     @FXML
     public void handleDelete() {
+
         try {
+
+            if (currentUser == null) {
+                messageLabel.setText("No user session found.");
+                return;
+            }
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Delete Account");
+            confirm.setHeaderText("Are you sure?");
+            confirm.setContentText("This action cannot be undone.");
+
+            if (confirm.showAndWait().get() != ButtonType.OK) {
+                return;
+            }
+
             userService.supprimer(currentUser.getIdU());
+
             UserSession.clear();
-            messageLabel.setText("Account deleted");
+
+            messageLabel.setStyle("-fx-text-fill: green;");
+            messageLabel.setText("Account deleted successfully.");
+
+            // 🔹 Optionally redirect to login page
+            // openLogin();
+
         } catch (SQLException e) {
-            messageLabel.setText("Delete failed");
+            messageLabel.setStyle("-fx-text-fill: red;");
+            messageLabel.setText("Delete failed. Try again.");
             e.printStackTrace();
         }
     }
+
+
 }
 

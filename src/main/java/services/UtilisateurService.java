@@ -11,6 +11,8 @@ public class UtilisateurService implements IService<Utilisateur> {
 
     private Connection connection;
 
+
+
     public UtilisateurService() {
         connection = DatabaseConnection.getConnection();
     }
@@ -99,6 +101,17 @@ public class UtilisateurService implements IService<Utilisateur> {
             );
         }
         return null;
+    }
+
+    public boolean emailExists(String email) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM utilisateur WHERE emailU = ?";
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, email);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1) > 0;
+        }
+        return false;
     }
 
 }

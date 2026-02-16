@@ -4,28 +4,40 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <StackPane xmlns="http://javafx.com/javafx/17"
            xmlns:fx="http://javafx.com/fxml"
            fx:controller="controllers.LoginController"
-           styleClass="auth-root">
+           styleClass="root">
 
     <children>
 
         <VBox alignment="CENTER"
               spacing="18"
               maxWidth="360"
-              styleClass="auth-card">
+              styleClass="card">
 
-            <!-- App Name -->
-            <Label text="Mind Track" styleClass="app-title"/>
+            <!-- LOGO + APP NAME -->
+            <HBox spacing="8" alignment="CENTER">
+                <children>
+                    <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
+                        <image>
+                            <Image url="@../logo.png"/>
+                        </image>
+                    </ImageView>
+
+                    <Label text="Mind Track" styleClass="app-title"/>
+                </children>
+            </HBox>
 
             <!-- Welcome -->
-            <Label text="Welcome Back!" styleClass="auth-title"/>
+            <Label text="Welcome Back!" styleClass="title"/>
 
             <!-- Subtitle -->
             <Label text="Your journey to mental wellness begins with a single step."
                    wrapText="true"
-                   styleClass="auth-subtitle"
+                   styleClass="subtitle"
                    textAlignment="CENTER"/>
 
             <!-- Email -->

@@ -153,3 +153,9 @@
     -fx-background: transparent;
     -fx-border-color: transparent;
 }
+
+.field-label {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #111827;
+}

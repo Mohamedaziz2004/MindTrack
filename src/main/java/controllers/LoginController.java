@@ -32,33 +32,69 @@ public class LoginController {
 
     @FXML
     public void handleLogin() {
-        String email = emailField.getText();
-        String password = passwordField.getText();
+
+        String email = emailField.getText() != null ? emailField.getText().trim() : "";
+        String password = passwordField.getText() != null ? passwordField.getText().trim() : "";
+
+
+        messageLabel.setStyle("-fx-text-fill: red;");
+
 
         if (email.isEmpty() || password.isEmpty()) {
-            messageLabel.setText("Please fill all fields");
+            messageLabel.setText("Please fill in all fields.");
             return;
         }
 
+
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            messageLabel.setText("Invalid email format.");
+            return;
+        }
+
+        if (password.length() < 4) {
+            messageLabel.setText("Password must be at least 4 characters.");
+            return;
+        }
+
+        emailField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.contains(" ")) {
+                emailField.setText(newVal.replace(" ", ""));
+            }
+        });
+
+
         try {
+
+            // 6️⃣ Attempt login via service
             Utilisateur user = userService.login(email, password);
 
             if (user != null) {
+
+                // 7️⃣ Store session
                 UserSession.setCurrentUser(user);
-                openProfile();
+
+                // 8️⃣ Success message
                 messageLabel.setStyle("-fx-text-fill: green;");
                 messageLabel.setText("Welcome " + user.getPrenomU());
+
                 System.out.println("Logged in user: " + user.getEmailU());
 
+                // 9️⃣ Open profile page
+                openProfile();
+
             } else {
-                messageLabel.setText("Invalid email or password");
+                messageLabel.setText("Invalid email or password.");
             }
 
-        } catch (SQLException | IOException e) {
-            messageLabel.setText("Database error");
+        } catch (SQLException e) {
+            messageLabel.setText("Database error. Please try again.");
+            e.printStackTrace();
+        } catch (IOException e) {
+            messageLabel.setText("Navigation error.");
             e.printStackTrace();
         }
     }
+
 
     @FXML
     public void openRegister() throws IOException {

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/17"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="controllers.LoginController"
+           styleClass="auth-root">
+
+    <children>
+
+        <VBox alignment="CENTER"
+              spacing="18"
+              maxWidth="360"
+              styleClass="auth-card">
+
+            <!-- App Name -->
+            <Label text="Mind Track" styleClass="app-title"/>
+
+            <!-- Welcome -->
+            <Label text="Welcome Back!" styleClass="auth-title"/>
+
+            <!-- Subtitle -->
+            <Label text="Your journey to mental wellness begins with a single step."
+                   wrapText="true"
+                   styleClass="auth-subtitle"
+                   textAlignment="CENTER"/>
+
+            <!-- Email -->
+            <VBox alignment="CENTER_LEFT" spacing="5">
+                <Label text="Email or Username" styleClass="field-label"/>
+                <TextField fx:id="emailField"
+                           promptText="your.email@example.com"
+                           styleClass="auth-field"/>
+            </VBox>
+
+            <!-- Password -->
+            <VBox alignment="CENTER_LEFT" spacing="5">
+                <Label text="Password" styleClass="field-label"/>
+                <PasswordField fx:id="passwordField"
+                               promptText="••••••••"
+                               styleClass="auth-field"/>
+            </VBox>
+
+            <!-- Login Button -->
+            <Button text="Log In"
+                    onAction="#handleLogin"
+                    maxWidth="Infinity"
+                    styleClass="primary-button"/>
+
+            <!-- Forgot password -->
+            <Hyperlink text="Forgot Password?"
+                       styleClass="link-button"/>
+
+            <!-- Create account -->
+            <Button text="Create New Account"
+                    onAction="#openRegister"
+                    maxWidth="Infinity"
+                    styleClass="secondary-button"/>
+
+            <!-- Message label -->
+            <Label fx:id="messageLabel"
+                   wrapText="true"
+                   textAlignment="CENTER"
+                   styleClass="error-text"/>
+
+        </VBox>
+
+    </children>
+</StackPane>

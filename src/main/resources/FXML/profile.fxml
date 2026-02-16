@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefWidth="900" prefHeight="600"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="controllers.ProfileController">
+
+    <!-- SIDEBAR -->
+    <left>
+        <VBox spacing="15" styleClass="sidebar" prefWidth="180">
+            <children>
+                <Label text="Mind Track" styleClass="sidebar-title"/>
+
+                <Button text="Journal" styleClass="sidebar-button"/>
+                <Button text="Goals" styleClass="sidebar-button"/>
+                <Button text="Exercises" styleClass="sidebar-button"/>
+                <Button text="Habits" styleClass="sidebar-button"/>
+                <Button text="Profile" styleClass="sidebar-button-active"/>
+                <Button text="Statistics" styleClass="sidebar-button"/>
+                <Button text="Admin" styleClass="sidebar-button"/>
+                <Button text="Settings" styleClass="sidebar-button"/>
+                <Button text="Log Out" styleClass="sidebar-button"/>
+            </children>
+            <padding>
+                <Insets top="20" left="15"/>
+            </padding>
+        </VBox>
+    </left>
+
+    <!-- MAIN CONTENT -->
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="main-scroll">
+            <content>
+
+                <VBox spacing="20" styleClass="main-content">
+
+                    <!-- TITLE -->
+                    <Label text="Psychological Profile Manager" styleClass="page-title"/>
+
+                    <!-- USER CARD -->
+                    <VBox spacing="12" styleClass="card">
+
+                        <Label text="Your Profile" styleClass="section-title"/>
+
+                        <TextField fx:id="nomField" promptText="Last Name" styleClass="input"/>
+                        <TextField fx:id="prenomField" promptText="First Name" styleClass="input"/>
+                        <TextField fx:id="emailField" promptText="Email" styleClass="input"/>
+                        <TextField fx:id="ageField" promptText="Age" styleClass="input"/>
+
+                    </VBox>
+
+                    <!-- PSYCHOLOGICAL PROFILE CARD -->
+                    <VBox spacing="12" styleClass="card">
+
+                        <Label text="Psychological Data" styleClass="section-title"/>
+
+                        <TextField fx:id="stressField" promptText="Stress Level" styleClass="input"/>
+                        <TextField fx:id="motivationField" promptText="Motivation Level" styleClass="input"/>
+                        <TextArea fx:id="descriptionArea"
+                                  promptText="Description"
+                                  prefHeight="80"
+                                  styleClass="textarea"/>
+
+                    </VBox>
+
+                    <!-- ACTION BUTTONS -->
+                    <HBox spacing="15">
+                        <Button text="Update"
+                                onAction="#handleUpdate"
+                                styleClass="primary-button"/>
+
+                        <Button text="Delete Account"
+                                onAction="#handleDelete"
+                                styleClass="danger-button"/>
+                    </HBox>
+
+                    <Label fx:id="messageLabel" styleClass="message-label"/>
+
+                </VBox>
+
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.view.PlanActionViewController"
+            prefWidth="1400" prefHeight="900"
+            stylesheets="@styles.css"
+            style="-fx-background-color: #f5f7fa;">
+
+    <!-- ===== TOP GRADIENT HEADER ===== -->
+    <top>
+        <VBox spacing="0" style="-fx-background: linear-gradient(to right, #00d2ff 0%, #3a7bd5 100%); -fx-padding: 20 40;">
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Button text="←" fx:id="backBtn" 
+                       style="-fx-padding: 8px 12px; -fx-font-size: 14px; -fx-background: linear-gradient(to right, #00d2ff, #3a7bd5); -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-border-radius: 5;"/>
+                <Label text="Action Plans " style="-fx-font-size: 30px; 
+              -fx-font-weight: bold; 
+              -fx-text-fill: #4A9EEB;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- ===== CENTER CONTENT ===== -->
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: #f5f7fa; -fx-background: #f5f7fa;">
+            <HBox spacing="35" alignment="TOP_LEFT" style="-fx-padding: 40;">
+
+                <!-- LEFT PANEL: CREATE ACTION PLAN -->
+                <VBox spacing="18" prefWidth="360"
+                      style="-fx-border-radius: 15; -fx-padding: 30; -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 15, 0, 0, 8);">
+                    
+                    <Label text="⚡ Create Action Step" 
+                           style="-fx-font-size: 19px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;"/>
+                    
+                    <!-- Select Goal -->
+                    <VBox spacing="7">
+                        <Label text="Target Goal" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #f39c12;"/>
+                        <ComboBox fx:id="objectifComboBox" 
+                                 promptText="Choose a goal"
+                                 prefWidth="Infinity"
+                                 style="-fx-padding: 12px 14px; -fx-border-radius: 8; -fx-font-size: 13px; -fx-border-color: #e8ecf1; -fx-border-width: 2; -fx-background-color: #fafbfc; -fx-text-fill: #4A9EEB;"/>
+                    </VBox>
+
+                    <!-- Step Description -->
+                    <VBox spacing="7">
+                        <Label text="Step Description" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #f39c12;"/>
+                        <TextArea fx:id="descriptionTextArea" 
+                                 promptText="Describe the action step..."
+                                 prefRowCount="4"
+                                 wrapText="true"
+                                 style="-fx-padding: 12px 14px; -fx-border-radius: 8; -fx-font-size: 12px; -fx-border-color: #e8ecf1; -fx-border-width: 2; -fx-text-fill: #34495e; -fx-background-color: #fafbfc;"/>
+                    </VBox>
+
+                    <!-- Priority -->
+                    <VBox spacing="7">
+                        <Label text="Priority Level" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #f39c12;"/>
+                        <ComboBox fx:id="priorityComboBox" 
+                                 promptText="Select priority"
+                                 prefWidth="Infinity"
+                                 style="-fx-padding: 12px 14px; -fx-border-radius: 8; -fx-font-size: 13px; -fx-border-color: #e8ecf1; -fx-border-width: 2; -fx-background-color: #fafbfc; -fx-text-fill: #4A9EEB;"/>
+                    </VBox>
+
+                    <!-- Create Button -->
+                    <Button text="Add Action Step ▶" 
+                           fx:id="createActionBtn"
+                           style="-fx-padding: 13px; -fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: white; -fx-background: linear-gradient(to right, #00d2ff, #3a7bd5); -fx-border-radius: 8; -fx-cursor: hand;"
+                           prefWidth="Infinity"/>
+
+                </VBox>
+
+                <!-- RIGHT PANEL: ACTIONS LIST -->
+                <VBox spacing="18" prefWidth="900" alignment="TOP_LEFT">
+                    
+                    <Label text="Your Action Steps" 
+                           style="-fx-font-size: 23px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;"/>
+                    
+                    <!-- Actions Container -->
+                    <ScrollPane fitToWidth="true" prefHeight="520"
+                               style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                        <VBox fx:id="actionsContainerVBox" spacing="14" style="-fx-padding: 5;"/>
+                    </ScrollPane>
+
+                </VBox>
+
+            </HBox>
+        </ScrollPane>
+    </center>
+
+    <!-- ===== BOTTOM STATISTICS ===== -->
+    <bottom>
+        <VBox spacing="0" style="-fx-background-color: white; -fx-border-color: #e8ecf1; -fx-border-width: 1 0 0 0;">
+            <padding>
+                <Insets top="25" bottom="25" left="40" right="40"/>
+            </padding>
+            
+            <HBox alignment="CENTER" spacing="100">
+                <VBox alignment="CENTER" spacing="8">
+                    <Label text="📋" style="-fx-font-size: 32px;"/>
+                    <Label fx:id="totalActionsLabel" text="0" 
+                           style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #00d2ff;"/>
+                    <Label text="Total Steps" 
+                           style="-fx-font-size: 12px; -fx-text-fill: #95a5a6; -fx-font-weight: bold;"/>
+                </VBox>
+                
+                <Separator orientation="VERTICAL" prefHeight="60"/>
+                
+                <VBox alignment="CENTER" spacing="8">
+                    <Label text="🔥" style="-fx-font-size: 32px;"/>
+                    <Label fx:id="highPriorityLabel" text="0" 
+                           style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;"/>
+                    <Label text="High Priority" 
+                           style="-fx-font-size: 12px; -fx-text-fill: #95a5a6; -fx-font-weight: bold;"/>
+                </VBox>
+                
+                <Separator orientation="VERTICAL" prefHeight="60"/>
+                
+                <VBox alignment="CENTER" spacing="8">
+                    <Label text="⭐" style="-fx-font-size: 32px;"/>
+                    <Label fx:id="mediumPriorityLabel" text="0" 
+                           style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #f39c12;"/>
+                    <Label text="Medium" 
+                           style="-fx-font-size: 12px; -fx-text-fill: #95a5a6; -fx-font-weight: bold;"/>
+                </VBox>
+            </HBox>
+
+        </VBox>
+    </bottom>
+
+</BorderPane>

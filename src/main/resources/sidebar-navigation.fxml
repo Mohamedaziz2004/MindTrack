@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+
+<!-- SIDEBAR NAVIGATION TEMPLATE -->
+<!-- This can be included in other views for consistent navigation -->
+<VBox xmlns:fx="http://javafx.com/fxml"
+      spacing="8"
+      prefWidth="220"
+      style="-fx-background-color: #4A9EEB; -fx-padding: 20;">
+    
+    <!-- Logo Section -->
+    <VBox alignment="CENTER" spacing="8" style="-fx-padding: 0 0 20 0;">
+        <ImageView fitWidth="50" fitHeight="50" preserveRatio="true">
+            <image>
+                <Image url="/logo.png"/>
+            </image>
+        </ImageView>
+        <Label text="MindTrack" 
+               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #ffffff;"/>
+    </VBox>
+    
+    <Separator style="-fx-background-color: rgba(255,255,255,0.2);"/>
+    
+    <!-- Navigation Menu -->
+    <VBox spacing="5" style="-fx-padding: 15 0;">
+        
+        <!-- Dashboard -->
+        <Button text="📊  Dashboard" 
+                style="-fx-background-color: transparent; -fx-text-fill: #ecf0f1; -fx-font-size: 13px; -fx-padding: 12 20; -fx-cursor: hand; -fx-alignment: CENTER_LEFT; -fx-border-radius: 8; -fx-background-radius: 8;">
+        </Button>
+        
+        <!-- Goals -->
+        <Button text="🎯  Goals" 
+                style="-fx-background: linear-gradient(to right, #00d2ff, #3a7bd5); -fx-text-fill: white; -fx-font-size: 13px; -fx-padding: 12 20; -fx-cursor: hand; -fx-alignment: CENTER_LEFT; -fx-border-radius: 8; -fx-background-radius: 8; -fx-font-weight: bold;">
+        </Button>
+        
+        <!-- Exercises -->
+        <Button text="💪  Exercises" 
+                style="-fx-background-color: transparent; -fx-text-fill: #ecf0f1; -fx-font-size: 13px; -fx-padding: 12 20; -fx-cursor: hand; -fx-alignment: CENTER_LEFT; -fx-border-radius: 8; -fx-background-radius: 8;">
+        </Button>
+        
+        <!-- Habit -->
+        <Button text="🔄  Habits" 
+                style="-fx-background-color: transparent; -fx-text-fill: #ecf0f1; -fx-font-size: 13px; -fx-padding: 12 20; -fx-cursor: hand; -fx-alignment: CENTER_LEFT; -fx-border-radius: 8; -fx-background-radius: 8;">
+        </Button>
+        
+        <!-- Statistics -->
+        <Button text="📈  Statistics" 
+                style="-fx-background-color: transparent; -fx-text-fill: #ecf0f1; -fx-font-size: 13px; -fx-padding: 12 20; -fx-cursor: hand; -fx-alignment: CENTER_LEFT; -fx-border-radius: 8; -fx-background-radius: 8;">
+        </Button>
+        
+    </VBox>
+    
+    <Separator style="-fx-background-color: rgba(255,255,255,0.2);"/>
+    
+    <!-- Bottom Navigation -->
+    <VBox spacing="5" style="-fx-padding: 15 0;">
+        
+        <!-- Settings -->
+        <Button text="⚙️  Settings" 
+                style="-fx-background-color: transparent; -fx-text-fill: #ecf0f1; -fx-font-size: 13px; -fx-padding: 12 20; -fx-cursor: hand; -fx-alignment: CENTER_LEFT; -fx-border-radius: 8; -fx-background-radius: 8;">
+        </Button>
+        
+        <!-- Log Out -->
+        <Button text="🚪  Log Out" 
+                style="-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-font-size: 13px; -fx-padding: 12 20; -fx-cursor: hand; -fx-alignment: CENTER_LEFT; -fx-border-radius: 8; -fx-background-radius: 8;">
+        </Button>
+        
+    </VBox>
+    
+    <!-- Spacer to push content to top -->
+    <Region VBox.vgrow="ALWAYS"/>
+    
+    <!-- User Profile Section -->
+    <VBox alignment="CENTER" spacing="8" 
+          style="-fx-padding: 15; -fx-background-color: rgba(255,255,255,0.1); -fx-border-radius: 10; -fx-background-radius: 10;">
+        <Label text="👤" style="-fx-font-size: 32px;"/>
+        <Label text="User Profile" 
+               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+        <Label text="Level 5 - Goal Crusher" 
+               style="-fx-font-size: 10px; -fx-text-fill: rgba(255,255,255,0.7);"/>
+    </VBox>
+    
+</VBox>

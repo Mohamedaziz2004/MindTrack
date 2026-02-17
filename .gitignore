@@ -1,0 +1,131 @@
+# ========================================
+# MIND TRACK - Git Ignore Configuration
+# ========================================
+
+# ========================================
+# MAVEN
+# ========================================
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# ========================================
+# JAVA / IDE
+# ========================================
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+.idea_modules/
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+*.launch
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# ========================================
+# COMPILED FILES
+# ========================================
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# ========================================
+# LOG FILES
+# ========================================
+*.log
+logs/
+
+# ========================================
+# OS GENERATED FILES
+# ========================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# ========================================
+# JAVAFX
+# ========================================
+# JavaFX packaged applications
+*.jfx
+jfx/
+
+# ========================================
+# SENSITIVE DATA
+# ========================================
+# API keys, credentials, secrets
+*.env
+.env
+.env.local
+.env.*.local
+secrets.properties
+application-secret.properties
+
+# ========================================
+# TEMPORARY FILES
+# ========================================
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.backup
+*~
+
+# ========================================
+# DATABASE
+# ========================================
+*.db
+*.sqlite
+*.sqlite3
+# Keep this if you have local database files you don't want to commit
+
+# ========================================
+# PACKAGE FILES
+# ========================================
+*.zip
+*.tar.gz
+*.rar

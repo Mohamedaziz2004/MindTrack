@@ -1,11 +1,13 @@
 package servives;
 
 import okhttp3.*;
+import com.google.gson.*;
 import java.util.*;
 
 public class JournalAnalysisService {
     private final OkHttpClient client = new OkHttpClient();
     private final String apiKey;
+    private final Gson gson = new Gson();
 
     public JournalAnalysisService(String apiKey) {
         this.apiKey = apiKey;
@@ -15,7 +17,7 @@ public class JournalAnalysisService {
         try {
             String apiResponse = callCohereAPI(journalText);
             String cleanAnalysis = extractCleanAnalysis(apiResponse);
-            return formatDisplayResults(cleanAnalysis);
+            return cleanAnalysis;
         } catch (Exception e) {
             return "Error: " + e.getMessage();
         }
@@ -64,36 +66,73 @@ public class JournalAnalysisService {
     }
 
     private String extractCleanAnalysis(String jsonResponse) {
-        StringBuilder result = new StringBuilder();
-        String content = jsonResponse;
-        String[] lines = content.split("\n");
-        boolean inSuggestions = false;
-        for (String line : lines) {
-            line = line.trim();
-            if (!line.isEmpty()) {
-                if (line.startsWith("EMOTION:")) {
-                    result.append("EMOTION: ").append(line.substring(8).trim()).append("\n");
-                } else if (line.startsWith("CONFIDENCE:")) {
-                    result.append("CONFIDENCE: ").append(line.substring(11).trim()).append("\n");
-                } else if (line.startsWith("SENTIMENT:")) {
-                    result.append("SENTIMENT: ").append(line.substring(10).trim()).append("\n");
-                } else if (line.startsWith("SUGGESTIONS:")) {
-                    result.append("SUGGESTIONS:\n");
-                    inSuggestions = true;
-                } else if (inSuggestions && (line.matches("^\\d+\\.\\s.*") || line.matches("^[-•*]\\s.*"))) {
-                    result.append(line).append("\n");
+        try {
+            // Parse the JSON response
+            JsonObject root = gson.fromJson(jsonResponse, JsonObject.class);
+
+            // Extract the content from the response
+            String content = "";
+            if (root.has("message")) {
+                JsonObject message = root.getAsJsonObject("message");
+                if (message.has("content")) {
+                    JsonArray contentArray = message.getAsJsonArray("content");
+                    if (contentArray.size() > 0) {
+                        JsonObject firstContent = contentArray.get(0).getAsJsonObject();
+                        if (firstContent.has("text")) {
+                            content = firstContent.get("text").getAsString();
+                        }
+                    }
                 }
             }
-        }
-        return result.toString();
-    }
 
-    private String formatDisplayResults(String analysis) {
-        StringBuilder display = new StringBuilder();
-        display.append("============================\n");
-        display.append("Analysis Results\n");
-        display.append("============================\n");
-        display.append(analysis);
-        return display.toString();
+            // If still empty, try alternative structure
+            if (content.isEmpty() && root.has("text")) {
+                content = root.get("text").getAsString();
+            }
+
+            // If still empty, try generations array (older API format)
+            if (content.isEmpty() && root.has("generations")) {
+                JsonArray generations = root.getAsJsonArray("generations");
+                if (generations.size() > 0) {
+                    content = generations.get(0).getAsJsonObject().get("text").getAsString();
+                }
+            }
+
+            if (content.isEmpty()) {
+                return "EMOTION: Unable to parse\nCONFIDENCE: 0.0\nSENTIMENT: neutral\nSUGGESTIONS:\n1. Please try again";
+            }
+
+            // Parse the content to extract structured data
+            StringBuilder result = new StringBuilder();
+            String[] lines = content.split("\n");
+            boolean inSuggestions = false;
+
+            for (String line : lines) {
+                line = line.trim();
+                if (!line.isEmpty()) {
+                    if (line.toUpperCase().startsWith("EMOTION:")) {
+                        result.append("EMOTION:").append(line.substring(8).trim()).append("\n");
+                    } else if (line.toUpperCase().startsWith("CONFIDENCE:")) {
+                        result.append("CONFIDENCE:").append(line.substring(11).trim()).append("\n");
+                    } else if (line.toUpperCase().startsWith("SENTIMENT:")) {
+                        result.append("SENTIMENT:").append(line.substring(10).trim()).append("\n");
+                    } else if (line.toUpperCase().startsWith("SUGGESTIONS:")) {
+                        result.append("SUGGESTIONS:\n");
+                        inSuggestions = true;
+                    } else if (inSuggestions && (line.matches("^\\d+\\..*") || line.matches("^[-•*].*"))) {
+                        result.append(line).append("\n");
+                    }
+                }
+            }
+
+            // If no structured result found, return the raw content formatted
+            if (result.length() == 0) {
+                result.append("ANALYSIS:\n").append(content);
+            }
+
+            return result.toString();
+        } catch (Exception e) {
+            return "EMOTION: Error parsing response\nCONFIDENCE: 0.0\nSENTIMENT: neutral\nSUGGESTIONS:\n1. " + e.getMessage();
+        }
     }
 }

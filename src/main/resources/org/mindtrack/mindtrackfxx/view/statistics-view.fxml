@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.mindtrack.mindtrackfxx.controller.StatisticsController"
+      stylesheets="@../styles/styles.css"
+      styleClass="stats-root" spacing="24" prefWidth="800" prefHeight="600">
+
+    <padding><Insets top="32" right="32" bottom="32" left="32"/></padding>
+
+    <!-- Header -->
+    <HBox spacing="16" alignment="CENTER_LEFT" styleClass="stats-header">
+        <ImageView fitWidth="36" fitHeight="36" preserveRatio="true">
+            <Image url="@../icons/statistics.png"/>
+        </ImageView>
+        <VBox spacing="4">
+            <Label text="Mood Statistics" styleClass="stats-title"/>
+            <Label text="Overview of your emotional journey" styleClass="stats-subtitle"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="totalEntriesLabel" text="Total: 0 entries" styleClass="stats-total"/>
+    </HBox>
+
+    <!-- Summary Cards Row -->
+    <HBox spacing="16" alignment="CENTER">
+        <!-- Happy Count -->
+        <VBox fx:id="happyCard" styleClass="stat-card, stat-card-happy" HBox.hgrow="ALWAYS">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <ImageView fitWidth="32" fitHeight="32" preserveRatio="true">
+                    <Image url="@../emojis/happy.png"/>
+                </ImageView>
+                <VBox>
+                    <Label text="Happy" styleClass="stat-card-title"/>
+                    <Label fx:id="happyCountLabel" text="0" styleClass="stat-card-value"/>
+                </VBox>
+            </HBox>
+            <Label fx:id="happyPercentLabel" text="0%" styleClass="stat-card-percent"/>
+            <Label fx:id="happyAvgIntensityLabel" text="Avg Intensity: 0" styleClass="stat-card-intensity"/>
+        </VBox>
+
+        <!-- Calm Count -->
+        <VBox fx:id="calmCard" styleClass="stat-card, stat-card-calm" HBox.hgrow="ALWAYS">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <ImageView fitWidth="32" fitHeight="32" preserveRatio="true">
+                    <Image url="@../emojis/calm.png"/>
+                </ImageView>
+                <VBox>
+                    <Label text="Calm" styleClass="stat-card-title"/>
+                    <Label fx:id="calmCountLabel" text="0" styleClass="stat-card-value"/>
+                </VBox>
+            </HBox>
+            <Label fx:id="calmPercentLabel" text="0%" styleClass="stat-card-percent"/>
+            <Label fx:id="calmAvgIntensityLabel" text="Avg Intensity: 0" styleClass="stat-card-intensity"/>
+        </VBox>
+
+        <!-- Neutral Count -->
+        <VBox fx:id="neutralCard" styleClass="stat-card, stat-card-neutral" HBox.hgrow="ALWAYS">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <ImageView fitWidth="32" fitHeight="32" preserveRatio="true">
+                    <Image url="@../emojis/neutral.png"/>
+                </ImageView>
+                <VBox>
+                    <Label text="Neutral" styleClass="stat-card-title"/>
+                    <Label fx:id="neutralCountLabel" text="0" styleClass="stat-card-value"/>
+                </VBox>
+            </HBox>
+            <Label fx:id="neutralPercentLabel" text="0%" styleClass="stat-card-percent"/>
+            <Label fx:id="neutralAvgIntensityLabel" text="Avg Intensity: 0" styleClass="stat-card-intensity"/>
+        </VBox>
+
+        <!-- Sad Count -->
+        <VBox fx:id="sadCard" styleClass="stat-card, stat-card-sad" HBox.hgrow="ALWAYS">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <ImageView fitWidth="32" fitHeight="32" preserveRatio="true">
+                    <Image url="@../emojis/sad.png"/>
+                </ImageView>
+                <VBox>
+                    <Label text="Sad" styleClass="stat-card-title"/>
+                    <Label fx:id="sadCountLabel" text="0" styleClass="stat-card-value"/>
+                </VBox>
+            </HBox>
+            <Label fx:id="sadPercentLabel" text="0%" styleClass="stat-card-percent"/>
+            <Label fx:id="sadAvgIntensityLabel" text="Avg Intensity: 0" styleClass="stat-card-intensity"/>
+        </VBox>
+
+        <!-- Anxious Count -->
+        <VBox fx:id="anxiousCard" styleClass="stat-card, stat-card-anxious" HBox.hgrow="ALWAYS">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <ImageView fitWidth="32" fitHeight="32" preserveRatio="true">
+                    <Image url="@../emojis/anxious.png"/>
+                </ImageView>
+                <VBox>
+                    <Label text="Anxious" styleClass="stat-card-title"/>
+                    <Label fx:id="anxiousCountLabel" text="0" styleClass="stat-card-value"/>
+                </VBox>
+            </HBox>
+            <Label fx:id="anxiousPercentLabel" text="0%" styleClass="stat-card-percent"/>
+            <Label fx:id="anxiousAvgIntensityLabel" text="Avg Intensity: 0" styleClass="stat-card-intensity"/>
+        </VBox>
+    </HBox>
+
+    <!-- Charts Row -->
+    <HBox spacing="20" VBox.vgrow="ALWAYS">
+        <!-- Pie Chart -->
+        <VBox styleClass="chart-container" HBox.hgrow="ALWAYS">
+            <Label text="Mood Distribution" styleClass="chart-title"/>
+            <PieChart fx:id="moodPieChart" legendVisible="true" labelsVisible="false" VBox.vgrow="ALWAYS"/>
+        </VBox>
+
+        <!-- Bar Chart -->
+        <VBox styleClass="chart-container" HBox.hgrow="ALWAYS">
+            <Label text="Average Intensity by Mood" styleClass="chart-title"/>
+            <BarChart fx:id="intensityBarChart" VBox.vgrow="ALWAYS">
+                <xAxis><CategoryAxis label="Mood"/></xAxis>
+                <yAxis><NumberAxis label="Intensity" lowerBound="0" upperBound="10" tickUnit="1"/></yAxis>
+            </BarChart>
+        </VBox>
+    </HBox>
+
+    <!-- Footer with insights -->
+    <HBox spacing="16" styleClass="stats-footer" alignment="CENTER">
+        <Label fx:id="insightLabel" text="Your most common mood is: -" styleClass="insight-text"/>
+    </HBox>
+</VBox>

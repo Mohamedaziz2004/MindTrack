@@ -1,5 +1,0 @@
-Error: API returned: 401 - 
-
-Stack trace:
-test.UltraSimpleTest.callCohereAPI(UltraSimpleTest.java:72)
-test.UltraSimpleTest.main(UltraSimpleTest.java:20)

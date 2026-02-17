@@ -3,7 +3,7 @@ package servives;
 import entities.JournalEmotionnel;
 import utils.myDatabase;
 import java.sql.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +19,7 @@ public class JournalService implements CrudService<JournalEmotionnel> {
         String sql = "INSERT INTO journalemotionnel (NotePersonnelle, dateCreation, idU) VALUES (?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, journal.getNotePersonnelle());
-            ps.setDate(2, Date.valueOf(journal.getDateCreation()));
+            ps.setTimestamp(2, Timestamp.valueOf(journal.getDateCreation()));
             ps.setInt(3, journal.getIdU());
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -71,7 +71,7 @@ public class JournalService implements CrudService<JournalEmotionnel> {
         String sql = "UPDATE journalemotionnel SET NotePersonnelle = ?, dateCreation = ?, idU = ? WHERE idJ = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, journal.getNotePersonnelle());
-            ps.setDate(2, Date.valueOf(journal.getDateCreation()));
+            ps.setTimestamp(2, Timestamp.valueOf(journal.getDateCreation()));
             ps.setInt(3, journal.getIdU());
             ps.setInt(4, journal.getIdJournal());
             ps.executeUpdate();
@@ -102,7 +102,8 @@ public class JournalService implements CrudService<JournalEmotionnel> {
                 Object[] row = new Object[4];
                 row[0] = rs.getInt("idJ");
                 row[1] = rs.getString("NotePersonnelle");
-                row[2] = rs.getDate("dateCreation").toLocalDate();
+                Timestamp ts = rs.getTimestamp("dateCreation");
+                row[2] = ts != null ? ts.toLocalDateTime() : LocalDateTime.now();
                 row[3] = rs.getInt("idU");
                 list.add(row);
             }
@@ -116,8 +117,9 @@ public class JournalService implements CrudService<JournalEmotionnel> {
     private JournalEmotionnel mapRow(ResultSet rs) throws SQLException {
         int idJournal = rs.getInt("idJ");
         String note = rs.getString("NotePersonnelle");
-        LocalDate date = rs.getDate("dateCreation").toLocalDate();
+        Timestamp ts = rs.getTimestamp("dateCreation");
+        LocalDateTime dateTime = ts != null ? ts.toLocalDateTime() : LocalDateTime.now();
         int idU = rs.getInt("idU");
-        return new JournalEmotionnel(idJournal, note, date, idU);
+        return new JournalEmotionnel(idJournal, note, dateTime, idU);
     }
 }

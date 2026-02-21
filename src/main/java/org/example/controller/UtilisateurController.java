@@ -87,11 +87,11 @@ public class UtilisateurController {
     public int ensureDefaultUserExists() {
         if (getUserCount() == 0) {
             return ajouterUtilisateur(
-                "Default",
-                "User",
-                "user@mindtrack.com",
-                "password123",
-                25
+                    "Default",
+                    "User",
+                    "user@mindtrack.com",
+                    "password123",
+                    25
             );
         }
         return getFirstUserId();

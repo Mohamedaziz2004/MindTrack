@@ -34,7 +34,7 @@ public class RegisterController {
     @FXML
     public void handleRegister() {
 
-        // 1️⃣ Sanitize inputs
+
         String nom = nomField.getText() != null ? nomField.getText().trim() : "";
         String prenom = prenomField.getText() != null ? prenomField.getText().trim() : "";
         String email = emailField.getText() != null ? emailField.getText().trim() : "";
@@ -44,13 +44,13 @@ public class RegisterController {
         // Reset message color
         messageLabel.setStyle("-fx-text-fill: red;");
 
-        // 2️⃣ Empty check
+
         if (nom.isEmpty() || prenom.isEmpty() || email.isEmpty() || password.isEmpty() || ageText.isEmpty()) {
             messageLabel.setText("All fields are required.");
             return;
         }
 
-        // 3️⃣ Name validation (letters only optional)
+
         if (!nom.matches("^[A-Za-zÀ-ÿ\\- ]{2,}$")) {
             messageLabel.setText("Invalid last name.");
             return;
@@ -61,19 +61,19 @@ public class RegisterController {
             return;
         }
 
-        // 4️⃣ Email format validation
+
         if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             messageLabel.setText("Invalid email format.");
             return;
         }
 
-        // 5️⃣ Password validation
+
         if (password.length() < 4) {
             messageLabel.setText("Password must be at least 4 characters.");
             return;
         }
 
-        // 6️⃣ Age validation
+
         int age;
         try {
             age = Integer.parseInt(ageText);
@@ -90,23 +90,19 @@ public class RegisterController {
 
         try {
 
-            // 7️⃣ OPTIONAL: Check if email already exists BEFORE insert
             if (userService.emailExists(email)) {
                 messageLabel.setText("Email already exists.");
                 return;
             }
 
-            // 8️⃣ Create user object
             Utilisateur user = new Utilisateur(nom, prenom, email, password, age);
 
-            // 9️⃣ Insert into DB
             userService.ajouter(user);
 
-            // 🔟 Success message
             messageLabel.setStyle("-fx-text-fill: green;");
             messageLabel.setText("Account created successfully!");
 
-            // 1️⃣1️⃣ Clear fields after success
+
             nomField.clear();
             prenomField.clear();
             emailField.clear();
@@ -117,6 +113,8 @@ public class RegisterController {
             messageLabel.setText("Database error. Try again.");
             e.printStackTrace();
         }
+
+
     }
 
 }

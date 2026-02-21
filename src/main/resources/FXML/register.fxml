@@ -8,9 +8,9 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.layout.HBox?>
 <AnchorPane prefHeight="500" prefWidth="900" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.RegisterController">
 
     <children>
@@ -21,18 +21,18 @@
             <children>
 
                 <!-- LOGO + APP NAME -->
-                <HBox spacing="8" alignment="CENTER_LEFT">
+                <HBox alignment="CENTER_LEFT" spacing="8">
                     <children>
                         <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
                             <image>
-                                <Image url="@../logo.png"/>
+                                <!-- 🔁 CHANGE THIS PATH LATER -->
+                                <Image url="@../logo.png" />
                             </image>
                         </ImageView>
 
-                        <Label text="Mind Track" styleClass="app-title"/>
+                        <Label styleClass="app-title" text="Mind Track" />
                     </children>
                 </HBox>
-
                 <Label styleClass="title" text="Create Your Mind Track Account" />
                 <Label styleClass="subtitle" text="Start your journey to mental clarity and peace.ensure" wrapText="true" />
 

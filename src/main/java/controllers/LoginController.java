@@ -65,21 +65,21 @@ public class LoginController {
 
         try {
 
-            // 6️⃣ Attempt login via service
+
             Utilisateur user = userService.login(email, password);
 
             if (user != null) {
 
-                // 7️⃣ Store session
+
                 UserSession.setCurrentUser(user);
 
-                // 8️⃣ Success message
+
                 messageLabel.setStyle("-fx-text-fill: green;");
                 messageLabel.setText("Welcome " + user.getPrenomU());
 
                 System.out.println("Logged in user: " + user.getEmailU());
 
-                // 9️⃣ Open profile page
+
                 openProfile();
 
             } else {

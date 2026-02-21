@@ -30,6 +30,9 @@ public class UtilisateurService implements IService<Utilisateur> {
         ps.setInt(5, u.getAgeU());
 
         ps.executeUpdate();
+
+
+
     }
 
     // DELETE

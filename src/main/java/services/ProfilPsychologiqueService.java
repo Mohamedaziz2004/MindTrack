@@ -92,7 +92,7 @@ public class ProfilPsychologiqueService implements IService<ProfilPsychologique>
         return profils;
     }
 
-    // Optional helper: find profile by user id
+
     public ProfilPsychologique findByUserId(int idU) throws SQLException {
         String sql = "SELECT * FROM profilpsychologique WHERE idU = ?";
         PreparedStatement ps = connection.prepareStatement(sql);

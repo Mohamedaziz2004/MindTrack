@@ -4,6 +4,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <BorderPane prefWidth="900" prefHeight="600"
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml"
@@ -13,7 +15,20 @@
     <left>
         <VBox spacing="15" styleClass="sidebar" prefWidth="180">
             <children>
-                <Label text="Mind Track" styleClass="sidebar-title"/>
+
+                <!-- LOGO + APP NAME -->
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <children>
+                        <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
+                            <image>
+                                <!-- 🔁 CHANGE THIS PATH LATER -->
+                                <Image url="@../logo.png" />
+                            </image>
+                        </ImageView>
+
+                        <Label styleClass="app-title" text="Mind Track" />
+                    </children>
+                </HBox>
 
                 <Button text="Journal" styleClass="sidebar-button"/>
                 <Button text="Goals" styleClass="sidebar-button"/>

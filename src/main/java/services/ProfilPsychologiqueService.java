@@ -110,4 +110,13 @@ public class ProfilPsychologiqueService implements IService<ProfilPsychologique>
         }
         return null;
     }
+
+    public void createDefaultProfile(int idU) throws SQLException {
+
+        String sql = "INSERT INTO profilpsychologique (NiveauStress, NiveauMotivation, Description, idU) VALUES (1, 1, NUll, ?)";
+
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setInt(1, idU);
+        ps.executeUpdate();
+    }
 }

@@ -30,9 +30,10 @@ public class ProfileController {
     private ProfilPsychologique profile;
 
     @FXML
-    public void initialize() {
-
+    public void initialize() throws SQLException {
         currentUser = UserSession.getCurrentUser();
+        profile = profileService.findByUserId(currentUser.getIdU());
+
 
         if (currentUser == null) {
             System.out.println("ERROR: No user in session");

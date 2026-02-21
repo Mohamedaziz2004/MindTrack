@@ -1,10 +1,12 @@
 package controllers;
 
+import entities.ProfilPsychologique;
 import entities.Utilisateur;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import services.ProfilPsychologiqueService;
 import services.UtilisateurService;
 
 import javafx.fxml.FXMLLoader;
@@ -67,6 +69,13 @@ public class LoginController {
 
 
             Utilisateur user = userService.login(email, password);
+            ProfilPsychologiqueService profilService = new ProfilPsychologiqueService();
+
+            ProfilPsychologique profil = profilService.findByUserId(user.getIdU());
+
+            if (profil == null) {
+                profilService.createDefaultProfile(user.getIdU());
+            }
 
             if (user != null) {
 
@@ -93,6 +102,8 @@ public class LoginController {
             messageLabel.setText("Navigation error.");
             e.printStackTrace();
         }
+
+
     }
 
 

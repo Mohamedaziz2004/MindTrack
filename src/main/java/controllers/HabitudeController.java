@@ -16,14 +16,15 @@ import utils.Session;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 public class HabitudeController {
 
     private final HabitudeService habService = new HabitudeService();
     private final SuiviHabitudeService suiviService = new SuiviHabitudeService();
+
+    // ===== TOP SORT =====
+    @FXML private ComboBox<String> cbSort;
 
     // ===== FORM =====
     @FXML private TextField tfNom;
@@ -34,10 +35,21 @@ public class HabitudeController {
     @FXML private FlowPane cardsContainer;
 
     private final ObservableList<Habitude> habitudes = FXCollections.observableArrayList();
-    private Habitude selected; // habit sélectionnée via card
+    private Habitude selected;
 
     @FXML
     public void initialize() {
+        if (cbSort != null) {
+            cbSort.setItems(FXCollections.observableArrayList(
+                    "Newest",
+                    "Streak (High → Low)",
+                    "Streak (Low → High)",
+                    "Name (A → Z)"
+            ));
+            cbSort.getSelectionModel().select("Streak (High → Low)");
+            cbSort.setOnAction(e -> renderCards());
+        }
+
         loadHabitudes();
     }
 
@@ -140,7 +152,27 @@ public class HabitudeController {
             return;
         }
 
-        for (Habitude h : habitudes) {
+        // Copier liste pour trier
+        List<Habitude> list = new ArrayList<>(habitudes);
+
+        String sort = (cbSort == null || cbSort.getValue() == null) ? "Newest" : cbSort.getValue();
+
+        switch (sort) {
+            case "Streak (High → Low)" ->
+                    list.sort((a, b) -> Integer.compare(getStreakSafe(b), getStreakSafe(a)));
+
+            case "Streak (Low → High)" ->
+                    list.sort(Comparator.comparingInt(this::getStreakSafe));
+
+            case "Name" ->
+                    list.sort(Comparator.comparing(h -> h.getNom().toLowerCase()));
+
+            default -> {
+                // "Newest" -> ton service retourne déjà DESC par idHabitude
+            }
+        }
+
+        for (Habitude h : list) {
             cardsContainer.getChildren().add(buildHabitCard(h));
         }
     }
@@ -182,15 +214,14 @@ public class HabitudeController {
         desc.getStyleClass().add("habit-desc");
         desc.setWrapText(true);
 
-        // ✅ Days row + dots
+        // Progress (days + dots)
         VBox progressBox = new VBox(6);
 
-        // 7 derniers jours glissants
         final LocalDate today = LocalDate.now();
         final int n = 7;
         final LocalDate start = today.minusDays(n - 1);
 
-        // Days letters (L M M J V S D)
+        // Days letters
         HBox daysRow = new HBox(12);
         daysRow.setAlignment(Pos.CENTER_LEFT);
 
@@ -206,12 +237,13 @@ public class HabitudeController {
             daysRow.getChildren().add(d);
         }
 
-        // États 7 jours (oldest -> today)
-        List<Boolean> last7;
+        // États (oldest -> today)
+        final List<Boolean> last7;
         try {
             last7 = suiviService.getEtatDerniersJours(h.getIdHabitude(), n);
         } catch (SQLException ex) {
-            last7 = Collections.nCopies(n, false);
+            showError("Suivi", ex.getMessage());
+            return card;
         }
 
         // Dots cliquables
@@ -219,21 +251,19 @@ public class HabitudeController {
         dots.setAlignment(Pos.CENTER_LEFT);
 
         for (int i = 0; i < n; i++) {
-            final int idx = i;                 // ✅ FIX: final
-            final LocalDate dayFinal = start.plusDays(i); // ✅ FIX: final
+            final int idx = i;
+            final LocalDate dayFinal = start.plusDays(i);
 
             boolean done = last7.get(idx);
 
             Button dot = new Button(done ? "✓" : "○");
             dot.getStyleClass().add(done ? "dot-done-btn" : "dot-miss-btn");
             dot.setFocusTraversable(false);
-
             Tooltip.install(dot, new Tooltip(dayFinal.toString()));
 
-            List<Boolean> finalLast = last7;
             dot.setOnAction(ev -> {
                 try {
-                    boolean newEtat = ! finalLast.get(idx);
+                    boolean newEtat = !last7.get(idx);
                     suiviService.marquerCommeFaite(h.getIdHabitude(), dayFinal, newEtat);
                     loadHabitudes(); // refresh complet (couleurs + streak)
                 } catch (SQLException e) {
@@ -249,12 +279,8 @@ public class HabitudeController {
 
         progressBox.getChildren().addAll(daysRow, dots);
 
-        // Streak
-        int streak = 0;
-        try {
-            streak = suiviService.getStreak7Jours(h.getIdHabitude());
-        } catch (SQLException ignored) {}
-
+        // ✅ Streak correct: consécutif jusqu'à today
+        int streak = getStreakSafe(h);
         Label streakLabel = new Label(streak + " day streak");
         streakLabel.getStyleClass().add("habit-streak");
 
@@ -269,12 +295,21 @@ public class HabitudeController {
         return card;
     }
 
+    // ✅ streak safe (sans crash)
+    private int getStreakSafe(Habitude h) {
+        try {
+            return suiviService.getStreak7Jours(h.getIdHabitude());
+        } catch (SQLException e) {
+            return 0;
+        }
+    }
+
     private void selectHabit(Habitude h) {
         selected = h;
         tfNom.setText(h.getNom());
         tfFrequence.setText(h.getFrequence());
         tfObjectif.setText(h.getObjectif());
-        renderCards(); // refresh highlight
+        renderCards();
     }
 
     private void clearForm() {

@@ -55,10 +55,21 @@
                     </VBox>
                 </GridPane>
 
-                <HBox spacing="10">
-                    <Button text="＋ Add Habit" onAction="#ajouterHabitude" styleClass="btn-primary" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-                    <Button text="Edit Selected" onAction="#modifierHabitude" styleClass="btn-secondary"/>
-                    <Button text="Delete Selected" onAction="#supprimerHabitude" styleClass="btn-danger"/>
+                <!-- Buttons row -->
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Button text="＋ Add Habit"
+                            onAction="#ajouterHabitude"
+                            styleClass="btn-primary"
+                            maxWidth="Infinity"
+                            HBox.hgrow="ALWAYS"/>
+
+                    <Button text="Edit Selected"
+                            onAction="#modifierHabitude"
+                            styleClass="btn-secondary"/>
+
+                    <Button text="Delete Selected"
+                            onAction="#supprimerHabitude"
+                            styleClass="btn-danger"/>
                 </HBox>
 
                 <Label text="Tip: click a habit card to select it, then edit/delete." styleClass="hint"/>
@@ -68,7 +79,12 @@
             <VBox spacing="10">
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label text="Your Habits" styleClass="section-title"/>
+
                     <Pane HBox.hgrow="ALWAYS"/>
+
+                    <Label text="Sort:" styleClass="hint"/>
+                    <ComboBox fx:id="cbSort" prefWidth="200"/>
+
                     <Button text="Refresh" onAction="#loadHabitudes" styleClass="btn-outline btn-sm"/>
                 </HBox>
 
@@ -79,7 +95,10 @@
                           styleClass="cards-grid"/>
             </VBox>
 
-            <Label text="© 2026 Mind Track. All rights reserved." styleClass="footer"/>
+            <VBox alignment="CENTER">
+                <Label text="© 2026 Mind Track. All rights reserved." styleClass="footer" />
+            </VBox>
+
         </VBox>
     </content>
 </ScrollPane>

@@ -201,5 +201,5 @@ public class SuiviHabitudeService implements IService<SuiviHabitude> {
             out.add(map.getOrDefault(day, false));
         }
         return out;
-    }
-}
+    }}
+

@@ -6,352 +6,338 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.SVGPath?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.mindtrack.mindtrackfxx.controller.EmotionalJournalController"
-            stylesheets="@../styles/styles.css"
-            styleClass="root">
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.mindtrack.mindtrackfxx.controller.EmotionalJournalController"
+           stylesheets="@../styles/styles.css"
+           styleClass="root">
 
-    <!-- SIDEBAR -->
-    <left>
-        <VBox prefWidth="240" styleClass="sidebar">
-            <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+    <!-- Window Controls (top-right, floating) -->
+    <HBox spacing="12" alignment="CENTER_RIGHT" StackPane.alignment="TOP_RIGHT" styleClass="window-controls">
+        <Button fx:id="minimizeBtn" styleClass="window-btn minimize-btn" focusTraversable="false">
+            <Label text="_" style="-fx-font-size: 18; -fx-text-fill: black; -fx-font-weight: bold;"/>
+        </Button>
+        <Button fx:id="maximizeBtn" styleClass="window-btn maximize-btn" focusTraversable="false">
+            <Label text="" style="-fx-font-size: 16; -fx-text-fill: black; -fx-font-weight: bold;"/>
+        </Button>
+        <Button fx:id="closeBtn" styleClass="window-btn close-btn" focusTraversable="false">
+            <Label text="X" style="-fx-font-size: 16; -fx-text-fill: black; -fx-font-weight: bold;"/>
+        </Button>
+    </HBox>
 
-            <!-- App Logo & Name in Sidebar -->
-            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="sidebar-header">
-                <padding><Insets top="8" right="8" bottom="20" left="8"/></padding>
-                <ImageView fitWidth="32" fitHeight="32" preserveRatio="true">
-                    <Image url="@../images/logo.png"/>
-                </ImageView>
-                <Label text="Mind Track" styleClass="sidebar-brand"/>
-            </HBox>
+    <!-- Main App Content -->
+    <BorderPane>
+        <!-- SIDEBAR -->
+        <left>
+            <VBox prefWidth="240" styleClass="sidebar">
+                <padding><Insets top="20" right="12" bottom="12" left="12"/></padding>
 
-            <!-- Main Navigation with custom icons -->
-            <Button styleClass="nav-button, active" maxWidth="Infinity" alignment="CENTER_LEFT">
-                <graphic>
-                    <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                        <Image url="@../icons/journal.png"/>
+                <!-- App Logo & Name in Sidebar -->
+                <HBox spacing="12" alignment="CENTER_LEFT" styleClass="sidebar-header">
+                    <padding><Insets top="8" right="8" bottom="48" left="8"/></padding> <!-- Increased bottom padding for more space -->
+                    <ImageView fitWidth="32" fitHeight="32" preserveRatio="true">
+                        <Image url="@../images/logo.png"/>
                     </ImageView>
-                </graphic>
-                <text>Journal</text>
-            </Button>
-            <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
-                <graphic>
-                    <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                        <Image url="@../icons/goal.png"/>
-                    </ImageView>
-                </graphic>
-                <text>Goals</text>
-            </Button>
-            <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
-                <graphic>
-                    <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                        <Image url="@../icons/exercice.png"/>
-                    </ImageView>
-                </graphic>
-                <text>Exercises</text>
-            </Button>
-            <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
-                <graphic>
-                    <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                        <Image url="@../icons/habits.png"/>
-                    </ImageView>
-                </graphic>
-                <text>Habits</text>
-            </Button>
-            <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
-                <graphic>
-                    <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                        <Image url="@../icons/profile.png"/>
-                    </ImageView>
-                </graphic>
-                <text>Profile</text>
-            </Button>
-            <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
-                <graphic>
-                    <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                        <Image url="@../icons/admin.png"/>
-                    </ImageView>
-                </graphic>
-                <text>Admin</text>
-            </Button>
+                    <Label text="Mind Track" styleClass="sidebar-brand"/>
+                </HBox>
 
-            <Region VBox.vgrow="ALWAYS"/>
-
-            <!-- Settings Section -->
-            <Separator styleClass="sidebar-separator"/>
-            <VBox spacing="4">
-                <padding><Insets top="12"/></padding>
+                <!-- Main Navigation with custom icons -->
+                <Button styleClass="nav-button, active" maxWidth="Infinity" alignment="CENTER_LEFT">
+                    <graphic>
+                        <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
+                            <Image url="@../icons/journal.png"/>
+                        </ImageView>
+                    </graphic>
+                    <text>Journal</text>
+                </Button>
                 <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
                     <graphic>
                         <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                            <Image url="@../icons/settings.png"/>
+                            <Image url="@../icons/goal.png"/>
                         </ImageView>
                     </graphic>
-                    <text>Settings</text>
+                    <text>Goals</text>
                 </Button>
-                <Button styleClass="nav-button, danger" maxWidth="Infinity" alignment="CENTER_LEFT">
+                <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
                     <graphic>
                         <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                            <Image url="@../icons/logout.png"/>
+                            <Image url="@../icons/exercice.png"/>
                         </ImageView>
                     </graphic>
-                    <text>Log Out</text>
+                    <text>Exercises</text>
                 </Button>
+                <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
+                    <graphic>
+                        <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
+                            <Image url="@../icons/habits.png"/>
+                        </ImageView>
+                    </graphic>
+                    <text>Habits</text>
+                </Button>
+                <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
+                    <graphic>
+                        <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
+                            <Image url="@../icons/profile.png"/>
+                        </ImageView>
+                    </graphic>
+                    <text>Profile</text>
+                </Button>
+                <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
+                    <graphic>
+                        <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
+                            <Image url="@../icons/admin.png"/>
+                        </ImageView>
+                    </graphic>
+                    <text>Admin</text>
+                </Button>
+
+                <Region VBox.vgrow="ALWAYS"/>
+
+                <!-- Settings Section -->
+                <Separator styleClass="sidebar-separator"/>
+                <VBox spacing="4">
+                    <padding><Insets top="12"/></padding>
+                    <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
+                        <graphic>
+                            <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
+                                <Image url="@../icons/settings.png"/>
+                            </ImageView>
+                        </graphic>
+                        <text>Settings</text>
+                    </Button>
+                    <Button styleClass="nav-button, danger" maxWidth="Infinity" alignment="CENTER_LEFT">
+                        <graphic>
+                            <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
+                                <Image url="@../icons/logout.png"/>
+                            </ImageView>
+                        </graphic>
+                        <text>Log Out</text>
+                    </Button>
+                </VBox>
             </VBox>
-        </VBox>
-    </left>
+        </left>
 
-    <!-- TOP BAR -->
-    <top>
-        <HBox styleClass="topbar" alignment="CENTER_LEFT">
-            <padding><Insets top="14" right="32" bottom="14" left="28"/></padding>
+        <!-- MAIN CONTENT -->
+        <center>
+            <ScrollPane fitToWidth="true" styleClass="content-scroll" hbarPolicy="NEVER">
+                <VBox styleClass="content">
+                    <padding><Insets top="32" right="40" bottom="32" left="40"/></padding>
 
-            <!-- Logo and Brand -->
-            <HBox spacing="12" alignment="CENTER_LEFT">
-                <ImageView fitWidth="40" fitHeight="40" preserveRatio="true" styleClass="logo-image">
-                    <Image url="@../images/logo.png"/>
-                </ImageView>
-                <Label text="Mind Track" styleClass="brand"/>
-            </HBox>
+                    <!-- Page Title with icon -->
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <ImageView fitWidth="32" fitHeight="32" preserveRatio="true">
+                            <Image url="@../icons/journal.png"/>
+                        </ImageView>
+                        <Label text="Emotional Journal" styleClass="page-title"/>
+                    </HBox>
 
-            <Region HBox.hgrow="ALWAYS"/>
+                    <!-- TWO COLUMN LAYOUT FOR JOURNAL AND MOOD -->
+                    <HBox spacing="24">
 
-            <!-- User Avatar with initials -->
-            <StackPane styleClass="avatar-container">
-                <Circle radius="22" styleClass="avatar-circle"/>
-                <Label text="U" styleClass="avatar-text"/>
-            </StackPane>
-        </HBox>
-    </top>
+                        <!-- SECTION 1: JOURNAL ENTRY -->
+                        <VBox spacing="20" styleClass="section" HBox.hgrow="ALWAYS">
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
+                                    <Image url="@../icons/edit.png"/>
+                                </ImageView>
+                                <Label text="New Journal Entry" styleClass="section-title"/>
+                            </HBox>
 
-    <!-- MAIN CONTENT -->
-    <center>
-        <ScrollPane fitToWidth="true" styleClass="content-scroll" hbarPolicy="NEVER">
-            <VBox styleClass="content">
-                <padding><Insets top="32" right="40" bottom="32" left="40"/></padding>
+                            <!-- Date/Time Display -->
+                            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="datetime-box">
+                                <Label text="📅" style="-fx-font-size: 18px;"/>
+                                <Label fx:id="currentDateTimeLabel" text="February 16, 2026 - 10:30 PM" styleClass="datetime-label"/>
+                            </HBox>
 
-                <!-- Page Title with icon -->
-                <HBox spacing="12" alignment="CENTER_LEFT">
-                    <ImageView fitWidth="32" fitHeight="32" preserveRatio="true">
-                        <Image url="@../icons/journal.png"/>
-                    </ImageView>
-                    <Label text="Emotional Journal" styleClass="page-title"/>
-                </HBox>
+                            <!-- Text Area -->
+                            <TextArea fx:id="entryTextArea"
+                                      promptText="What's on your mind today? Write down your thoughts and feelings here..."
+                                      prefRowCount="6"
+                                      wrapText="true"
+                                      styleClass="entry-textarea"/>
 
-                <!-- TWO COLUMN LAYOUT FOR JOURNAL AND MOOD -->
-                <HBox spacing="24">
+                            <!-- Save Journal and AI Analyse Buttons -->
+                            <HBox spacing="12">
+                                <Button fx:id="saveEntryButton" onAction="#onSaveEntry" styleClass="btn, btn-primary">
+                                    <graphic>
+                                        <HBox spacing="8" alignment="CENTER">
+                                            <SVGPath fill="#333333" stroke="#333333" strokeWidth="1.5" content="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM17 21v-8H7v8M7 3v5h8" scaleX="0.6" scaleY="0.6"/>
+                                            <Label text="Save Journal" styleClass="btn-label" style="-fx-text-fill: #333333;"/>
+                                        </HBox>
+                                    </graphic>
+                                </Button>
+                                <Button fx:id="analyseButton" onAction="#onAnalyseEntry" styleClass="btn, btn-ai">
+                                    <graphic>
+                                        <HBox spacing="8" alignment="CENTER">
+                                            <SVGPath fill="#333333" stroke="#333333" strokeWidth="1.5" content="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M11 8v6 M8 11h6" scaleX="0.6" scaleY="0.6"/>
+                                            <Label text="AI Analyze" styleClass="btn-label" style="-fx-text-fill: #333333;"/>
+                                        </HBox>
+                                    </graphic>
+                                </Button>
+                            </HBox>
+                        </VBox>
 
-                    <!-- SECTION 1: JOURNAL ENTRY -->
-                    <VBox spacing="20" styleClass="section" HBox.hgrow="ALWAYS">
+                        <!-- SECTION 2: MOOD/HUMEUR -->
+                        <VBox spacing="20" styleClass="section" prefWidth="380">
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
+                                    <Image url="@../emojis/happy.png"/>
+                                </ImageView>
+                                <Label text="How are you feeling?" styleClass="section-title"/>
+                            </HBox>
+
+                            <!-- Mood Selection with Custom Emojis -->
+                            <VBox spacing="12">
+                                <Label text="Select your mood:" styleClass="label-muted"/>
+
+                                <fx:define>
+                                    <ToggleGroup fx:id="moodGroup"/>
+                                </fx:define>
+
+                                <VBox spacing="8" styleClass="mood-selection">
+                                    <RadioButton fx:id="moodHappy" toggleGroup="$moodGroup" styleClass="mood-radio, mood-happy">
+                                        <graphic>
+                                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                                <ImageView fitWidth="28" fitHeight="28" preserveRatio="true">
+                                                    <Image url="@../emojis/happy.png"/>
+                                                </ImageView>
+                                                <Label text="Happy" styleClass="mood-label-large"/>
+                                            </HBox>
+                                        </graphic>
+                                    </RadioButton>
+                                    <RadioButton fx:id="moodCalm" toggleGroup="$moodGroup" styleClass="mood-radio, mood-calm">
+                                        <graphic>
+                                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                                <ImageView fitWidth="28" fitHeight="28" preserveRatio="true">
+                                                    <Image url="@../emojis/calm.png"/>
+                                                </ImageView>
+                                                <Label text="Calm" styleClass="mood-label-large"/>
+                                            </HBox>
+                                        </graphic>
+                                    </RadioButton>
+                                    <RadioButton fx:id="moodNeutral" toggleGroup="$moodGroup" styleClass="mood-radio, mood-neutral">
+                                        <graphic>
+                                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                                <ImageView fitWidth="28" fitHeight="28" preserveRatio="true">
+                                                    <Image url="@../emojis/neutral.png"/>
+                                                </ImageView>
+                                                <Label text="Neutral" styleClass="mood-label-large"/>
+                                            </HBox>
+                                        </graphic>
+                                    </RadioButton>
+                                    <RadioButton fx:id="moodSad" toggleGroup="$moodGroup" styleClass="mood-radio, mood-sad">
+                                        <graphic>
+                                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                                <ImageView fitWidth="28" fitHeight="28" preserveRatio="true">
+                                                    <Image url="@../emojis/sad.png"/>
+                                                </ImageView>
+                                                <Label text="Sad" styleClass="mood-label-large"/>
+                                            </HBox>
+                                        </graphic>
+                                    </RadioButton>
+                                    <RadioButton fx:id="moodAnxious" toggleGroup="$moodGroup" styleClass="mood-radio, mood-anxious">
+                                        <graphic>
+                                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                                <ImageView fitWidth="28" fitHeight="28" preserveRatio="true">
+                                                    <Image url="@../emojis/anxious.png"/>
+                                                </ImageView>
+                                                <Label text="Anxious" styleClass="mood-label-large"/>
+                                            </HBox>
+                                        </graphic>
+                                    </RadioButton>
+                                </VBox>
+                            </VBox>
+
+                            <!-- Intensity Slider -->
+                            <VBox spacing="10">
+                                <HBox spacing="8" alignment="CENTER_LEFT">
+                                    <Label text="Intensity:" styleClass="label-muted"/>
+                                    <Label fx:id="intensityValueLabel" text="5" styleClass="intensity-value"/>
+                                </HBox>
+                                <HBox spacing="12" alignment="CENTER">
+                                    <Label text="1" styleClass="intensity-min"/>
+                                    <Slider fx:id="intensitySlider" min="1" max="10" value="5"
+                                            showTickLabels="true" showTickMarks="true"
+                                            majorTickUnit="1" minorTickCount="0" snapToTicks="true"
+                                            blockIncrement="1" styleClass="intensity-slider"
+                                            HBox.hgrow="ALWAYS"/>
+                                    <Label text="10" styleClass="intensity-max"/>
+                                </HBox>
+                            </VBox>
+
+                            <!-- Save Mood and Statistics Buttons -->
+                            <HBox spacing="12">
+                                <Button fx:id="saveMoodButton" onAction="#onSaveMood" styleClass="btn, btn-mood">
+                                    <graphic>
+                                        <HBox spacing="8" alignment="CENTER">
+                                            <SVGPath fill="#333333" stroke="#333333" strokeWidth="1.5" content="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM17 21v-8H7v8M7 3v5h8" scaleX="0.6" scaleY="0.6"/>
+                                            <Label text="Save Mood" styleClass="btn-label" style="-fx-text-fill: #333333;"/>
+                                        </HBox>
+                                    </graphic>
+                                </Button>
+                                <Button fx:id="statisticsButton" onAction="#onShowStatistics" styleClass="btn, btn-stats">
+                                    <graphic>
+                                        <HBox spacing="8" alignment="CENTER">
+                                            <SVGPath fill="#333333" stroke="#333333" strokeWidth="1.5" content="M18 20V10M12 20V4M6 20v-6" scaleX="0.6" scaleY="0.6"/>
+                                            <Label text="Statistics" styleClass="btn-label-dark" style="-fx-text-fill: #333333;"/>
+                                        </HBox>
+                                    </graphic>
+                                </Button>
+                            </HBox>
+                        </VBox>
+                    </HBox>
+
+                    <!-- RECENT JOURNAL ENTRIES SECTION -->
+                    <VBox spacing="20">
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                                <Image url="@../icons/edit.png"/>
+                                <Image url="@../icons/journal.png"/>
                             </ImageView>
-                            <Label text="New Journal Entry" styleClass="section-title"/>
-                        </HBox>
-
-                        <!-- Date/Time Display -->
-                        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="datetime-box">
-                            <Label text="📅" style="-fx-font-size: 18px;"/>
-                            <Label fx:id="currentDateTimeLabel" text="February 16, 2026 - 10:30 PM" styleClass="datetime-label"/>
-                        </HBox>
-
-                        <!-- Text Area -->
-                        <TextArea fx:id="entryTextArea"
-                                  promptText="What's on your mind today? Write down your thoughts and feelings here..."
-                                  prefRowCount="6"
-                                  wrapText="true"
-                                  styleClass="entry-textarea"/>
-
-                        <!-- Save Journal and AI Analyse Buttons -->
-                        <HBox spacing="12">
-                            <Button fx:id="saveEntryButton" onAction="#onSaveEntry" styleClass="btn, btn-primary">
+                            <Label text="Recent Journal Entries" styleClass="section-title"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="showMoreJournalsBtn" onAction="#onShowMoreJournals" styleClass="btn, btn-show-more">
                                 <graphic>
-                                    <HBox spacing="8" alignment="CENTER">
-                                        <ImageView fitWidth="18" fitHeight="18" preserveRatio="true">
-                                            <Image url="@../icons/save.png"/>
+                                    <HBox spacing="6" alignment="CENTER">
+                                        <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                                            <Image url="@../icons/show-more.png"/>
                                         </ImageView>
-                                        <Label text="Save Journal" styleClass="btn-label"/>
-                                    </HBox>
-                                </graphic>
-                            </Button>
-                            <Button fx:id="analyseButton" onAction="#onAnalyseEntry" styleClass="btn, btn-ai">
-                                <graphic>
-                                    <HBox spacing="8" alignment="CENTER">
-                                        <ImageView fitWidth="18" fitHeight="18" preserveRatio="true">
-                                            <Image url="@../icons/analysing.png"/>
-                                        </ImageView>
-                                        <Label text="AI Analyse" styleClass="btn-label"/>
+                                        <Label text="Show More" styleClass="show-more-label"/>
                                     </HBox>
                                 </graphic>
                             </Button>
                         </HBox>
+                        <FlowPane fx:id="entriesContainer" hgap="20" vgap="20" prefWrapLength="900"/>
                     </VBox>
 
-                    <!-- SECTION 2: MOOD/HUMEUR -->
-                    <VBox spacing="20" styleClass="section" prefWidth="380">
+                    <!-- RECENT MOOD ENTRIES SECTION -->
+                    <VBox spacing="20">
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
                                 <Image url="@../emojis/happy.png"/>
                             </ImageView>
-                            <Label text="How are you feeling?" styleClass="section-title"/>
-                        </HBox>
-
-                        <!-- Mood Selection with Custom Emojis -->
-                        <VBox spacing="12">
-                            <Label text="Select your mood:" styleClass="label-muted"/>
-
-                            <fx:define>
-                                <ToggleGroup fx:id="moodGroup"/>
-                            </fx:define>
-
-                            <VBox spacing="8" styleClass="mood-selection">
-                                <RadioButton fx:id="moodHappy" toggleGroup="$moodGroup" styleClass="mood-radio, mood-happy">
-                                    <graphic>
-                                        <HBox spacing="10" alignment="CENTER_LEFT">
-                                            <ImageView fitWidth="28" fitHeight="28" preserveRatio="true">
-                                                <Image url="@../emojis/happy.png"/>
-                                            </ImageView>
-                                            <Label text="Happy" styleClass="mood-label-large"/>
-                                        </HBox>
-                                    </graphic>
-                                </RadioButton>
-                                <RadioButton fx:id="moodCalm" toggleGroup="$moodGroup" styleClass="mood-radio, mood-calm">
-                                    <graphic>
-                                        <HBox spacing="10" alignment="CENTER_LEFT">
-                                            <ImageView fitWidth="28" fitHeight="28" preserveRatio="true">
-                                                <Image url="@../emojis/calm.png"/>
-                                            </ImageView>
-                                            <Label text="Calm" styleClass="mood-label-large"/>
-                                        </HBox>
-                                    </graphic>
-                                </RadioButton>
-                                <RadioButton fx:id="moodNeutral" toggleGroup="$moodGroup" styleClass="mood-radio, mood-neutral">
-                                    <graphic>
-                                        <HBox spacing="10" alignment="CENTER_LEFT">
-                                            <ImageView fitWidth="28" fitHeight="28" preserveRatio="true">
-                                                <Image url="@../emojis/neutral.png"/>
-                                            </ImageView>
-                                            <Label text="Neutral" styleClass="mood-label-large"/>
-                                        </HBox>
-                                    </graphic>
-                                </RadioButton>
-                                <RadioButton fx:id="moodSad" toggleGroup="$moodGroup" styleClass="mood-radio, mood-sad">
-                                    <graphic>
-                                        <HBox spacing="10" alignment="CENTER_LEFT">
-                                            <ImageView fitWidth="28" fitHeight="28" preserveRatio="true">
-                                                <Image url="@../emojis/sad.png"/>
-                                            </ImageView>
-                                            <Label text="Sad" styleClass="mood-label-large"/>
-                                        </HBox>
-                                    </graphic>
-                                </RadioButton>
-                                <RadioButton fx:id="moodAnxious" toggleGroup="$moodGroup" styleClass="mood-radio, mood-anxious">
-                                    <graphic>
-                                        <HBox spacing="10" alignment="CENTER_LEFT">
-                                            <ImageView fitWidth="28" fitHeight="28" preserveRatio="true">
-                                                <Image url="@../emojis/anxious.png"/>
-                                            </ImageView>
-                                            <Label text="Anxious" styleClass="mood-label-large"/>
-                                        </HBox>
-                                    </graphic>
-                                </RadioButton>
-                            </VBox>
-                        </VBox>
-
-                        <!-- Intensity Slider -->
-                        <VBox spacing="10">
-                            <HBox spacing="8" alignment="CENTER_LEFT">
-                                <Label text="Intensity:" styleClass="label-muted"/>
-                                <Label fx:id="intensityValueLabel" text="5" styleClass="intensity-value"/>
-                            </HBox>
-                            <HBox spacing="12" alignment="CENTER">
-                                <Label text="1" styleClass="intensity-min"/>
-                                <Slider fx:id="intensitySlider" min="1" max="10" value="5"
-                                        showTickLabels="true" showTickMarks="true"
-                                        majorTickUnit="1" minorTickCount="0" snapToTicks="true"
-                                        blockIncrement="1" styleClass="intensity-slider"
-                                        HBox.hgrow="ALWAYS"/>
-                                <Label text="10" styleClass="intensity-max"/>
-                            </HBox>
-                        </VBox>
-
-                        <!-- Save Mood and Statistics Buttons -->
-                        <HBox spacing="12">
-                            <Button fx:id="saveMoodButton" onAction="#onSaveMood" styleClass="btn, btn-mood">
+                            <Label text="Recent Mood Entries" styleClass="section-title"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="showMoreMoodsBtn" onAction="#onShowMoreMoods" styleClass="btn, btn-show-more">
                                 <graphic>
-                                    <HBox spacing="8" alignment="CENTER">
-                                        <ImageView fitWidth="18" fitHeight="18" preserveRatio="true">
-                                            <Image url="@../icons/save.png"/>
+                                    <HBox spacing="6" alignment="CENTER">
+                                        <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                                            <Image url="@../icons/show-more.png"/>
                                         </ImageView>
-                                        <Label text="Save Mood" styleClass="btn-label"/>
-                                    </HBox>
-                                </graphic>
-                            </Button>
-                            <Button fx:id="statisticsButton" onAction="#onShowStatistics" styleClass="btn, btn-stats">
-                                <graphic>
-                                    <HBox spacing="8" alignment="CENTER">
-                                        <ImageView fitWidth="18" fitHeight="18" preserveRatio="true">
-                                            <Image url="@../icons/statistics.png"/>
-                                        </ImageView>
-                                        <Label text="Statistics" styleClass="btn-label-dark"/>
+                                        <Label text="Show More" styleClass="show-more-label"/>
                                     </HBox>
                                 </graphic>
                             </Button>
                         </HBox>
+                        <FlowPane fx:id="moodEntriesContainer" hgap="20" vgap="20" prefWrapLength="900"/>
                     </VBox>
-                </HBox>
 
-                <!-- RECENT JOURNAL ENTRIES SECTION -->
-                <VBox spacing="20">
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                            <Image url="@../icons/journal.png"/>
-                        </ImageView>
-                        <Label text="Recent Journal Entries" styleClass="section-title"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Button fx:id="showMoreJournalsBtn" onAction="#onShowMoreJournals" styleClass="btn, btn-show-more">
-                            <graphic>
-                                <HBox spacing="6" alignment="CENTER">
-                                    <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
-                                        <Image url="@../icons/show-more.png"/>
-                                    </ImageView>
-                                    <Label text="Show More" styleClass="show-more-label"/>
-                                </HBox>
-                            </graphic>
-                        </Button>
+                    <!-- Footer -->
+                    <HBox alignment="CENTER" styleClass="footer">
+                        <Label text="© 2026 Mind Track. All rights reserved." styleClass="small-muted"/>
                     </HBox>
-                    <FlowPane fx:id="entriesContainer" hgap="20" vgap="20" prefWrapLength="900"/>
                 </VBox>
-
-                <!-- RECENT MOOD ENTRIES SECTION -->
-                <VBox spacing="20">
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                            <Image url="@../emojis/happy.png"/>
-                        </ImageView>
-                        <Label text="Recent Mood Entries" styleClass="section-title"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Button fx:id="showMoreMoodsBtn" onAction="#onShowMoreMoods" styleClass="btn, btn-show-more">
-                            <graphic>
-                                <HBox spacing="6" alignment="CENTER">
-                                    <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
-                                        <Image url="@../icons/show-more.png"/>
-                                    </ImageView>
-                                    <Label text="Show More" styleClass="show-more-label"/>
-                                </HBox>
-                            </graphic>
-                        </Button>
-                    </HBox>
-                    <FlowPane fx:id="moodEntriesContainer" hgap="20" vgap="20" prefWrapLength="900"/>
-                </VBox>
-
-                <!-- Footer -->
-                <HBox alignment="CENTER" styleClass="footer">
-                    <Label text="© 2026 Mind Track. All rights reserved." styleClass="small-muted"/>
-                </HBox>
-            </VBox>
-        </ScrollPane>
-    </center>
-</BorderPane>
+            </ScrollPane>
+        </center>
+    </BorderPane>
+</StackPane>

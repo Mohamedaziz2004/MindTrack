@@ -9,6 +9,8 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -48,18 +50,19 @@ public final class DialogUtils {
         stage.setTitle(title);
 
         VBox root = new VBox(16);
-        root.getStyleClass().addAll("notification-root", "notification-" + type);
+        root.getStyleClass().add("notification-" + type);
         root.setPadding(new Insets(32));
         root.setAlignment(Pos.CENTER);
 
+        // Icon emoji
         Label iconLabel = new Label(icon);
         iconLabel.setStyle("-fx-font-size: 48px;");
 
         Label titleLabel = new Label(title);
-        titleLabel.getStyleClass().add("notification-title");
+        titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: 600; -fx-text-fill: #0f172a;");
 
         Label messageLabel = new Label(message);
-        messageLabel.getStyleClass().add("notification-message");
+        messageLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #64748b;");
         messageLabel.setWrapText(true);
         messageLabel.setAlignment(Pos.CENTER);
         messageLabel.setMaxWidth(300);
@@ -92,13 +95,13 @@ public final class DialogUtils {
         VBox root = new VBox(20);
         root.setAlignment(Pos.CENTER);
         root.setPadding(new Insets(40));
-        root.getStyleClass().add("notification-root");
+        root.getStyleClass().add("loading-root");
 
         Label iconLabel = new Label("🔍");
         iconLabel.setStyle("-fx-font-size: 48px;");
 
         Label textLabel = new Label(message);
-        textLabel.getStyleClass().add("notification-title");
+        textLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: 500; -fx-text-fill: #64748b;");
 
         ProgressIndicator progress = new ProgressIndicator();
         progress.setPrefSize(50, 50);
@@ -125,23 +128,24 @@ public final class DialogUtils {
         stage.setTitle("Confirm");
 
         VBox root = new VBox(20);
-        root.getStyleClass().add("confirm-dialog-root");
+        root.getStyleClass().add("confirm-root");
         root.setPadding(new Insets(32));
         root.setAlignment(Pos.CENTER);
 
+        // Warning emoji
         Label warningIcon = new Label("⚠️");
         warningIcon.setStyle("-fx-font-size: 48px;");
 
         Label titleLabel = new Label(title);
-        titleLabel.getStyleClass().add("confirm-dialog-title");
+        titleLabel.getStyleClass().add("confirm-title");
 
         Label messageLabel = new Label(message);
-        messageLabel.getStyleClass().add("confirm-dialog-message");
+        messageLabel.getStyleClass().add("confirm-message");
         messageLabel.setWrapText(true);
         messageLabel.setAlignment(Pos.CENTER);
 
         Label warning = new Label(warningText);
-        warning.getStyleClass().add("confirm-dialog-warning");
+        warning.setStyle("-fx-text-fill: #dc2626; -fx-font-size: 12px;");
 
         HBox buttons = new HBox(16);
         buttons.setAlignment(Pos.CENTER);

@@ -63,6 +63,11 @@ public class JournalEmotionnel {
         this.idU = idU;
     }
 
+    // Alias for compatibility with getIdJ()
+    public int getIdJ() {
+        return getIdJournal();
+    }
+
     @Override
     public String toString() {
         return "JournalEmotionnel{" +

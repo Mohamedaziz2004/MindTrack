@@ -33,6 +33,7 @@ public class HelloApplication extends Application {
 
         stage.setTitle("Mind Track");
         stage.setScene(scene);
+        stage.initStyle(javafx.stage.StageStyle.UNDECORATED); // Remove the default OS window bar
 
         // Add startup fade-in animation
         root.setOpacity(0);

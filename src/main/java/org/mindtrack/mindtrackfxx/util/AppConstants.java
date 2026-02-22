@@ -36,36 +36,8 @@ public final class AppConstants {
     public static final int PREVIEW_TEXT_LENGTH = 100;
 
     // ========================================
-    // ANIMATION DURATIONS (in milliseconds)
-    // ========================================
-
-    public static final int FADE_DURATION = 300;
-    public static final int SLIDE_DURATION = 400;
-    public static final int SCALE_DURATION = 300;
-    public static final int CARD_ENTRANCE_DELAY = 80;
-
-    // ========================================
     // DEFAULT VALUES
     // ========================================
 
     public static final int DEFAULT_USER_ID = 1;
-    public static final int DEFAULT_INTENSITY = 5;
-    public static final String DEFAULT_MOOD = "Neutral";
-
-    // ========================================
-    // MOOD TYPES
-    // ========================================
-
-    public static final String[] MOOD_TYPES = {
-        "Happy", "Calm", "Neutral", "Sad", "Anxious"
-    };
-
-    // ========================================
-    // RESOURCE PATHS
-    // ========================================
-
-    public static final String STYLES_PATH = "/org/mindtrack/mindtrackfxx/styles/styles.css";
-    public static final String ICONS_PATH = "/org/mindtrack/mindtrackfxx/icons/";
-    public static final String EMOJIS_PATH = "/org/mindtrack/mindtrackfxx/emojis/";
-    public static final String VIEWS_PATH = "/org/mindtrack/mindtrackfxx/view/";
 }

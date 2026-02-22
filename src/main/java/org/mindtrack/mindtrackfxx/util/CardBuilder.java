@@ -7,13 +7,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.SVGPath;
 
 import static org.mindtrack.mindtrackfxx.util.AppConstants.*;
 
-/**
- * Factory class for creating UI cards (Journal and Mood cards).
- * Centralizes card creation logic for consistency and maintainability.
- */
+
 public final class CardBuilder {
 
     private CardBuilder() {
@@ -79,17 +78,35 @@ public final class CardBuilder {
         HBox actions = new HBox(10);
         actions.setAlignment(Pos.CENTER_LEFT);
 
-        Button readMoreBtn = createActionButton("Read More", "read-more.png", "btn-light");
+        // Read More button with SVG icon
+        Button readMoreBtn = createActionButtonWithSVG("Read More", IconFactory.readMoreIcon(), "btn-light");
         readMoreBtn.setOnAction(e -> onReadMore.run());
 
-        Button editBtn = createActionButton("Edit", "edit.png", "btn-light");
+        // Edit button with SVG icon
+        Button editBtn = createActionButtonWithSVG("Edit", IconFactory.editIcon(), "btn-light");
         editBtn.setOnAction(e -> onEdit.run());
 
-        Button deleteBtn = createActionButton("Delete", "delete.png", "btn-danger");
+        // Delete button with SVG icon
+        Button deleteBtn = createActionButtonWithSVG("Delete", IconFactory.deleteIcon(), "btn-danger");
         deleteBtn.setOnAction(e -> onDelete.run());
 
         actions.getChildren().addAll(readMoreBtn, editBtn, deleteBtn);
         return actions;
+    }
+
+    // ========================================
+    // JOURNAL BUTTONS (Save Journal, AI Analyze)
+    // ========================================
+    public static Button buildSaveJournalButton(Runnable onSave) {
+        Button btn = createActionButtonWithSVG("Save Journal", IconFactory.saveIcon(), "btn-gray");
+        btn.setOnAction(e -> onSave.run());
+        return btn;
+    }
+
+    public static Button buildAIAnalyzeButton(Runnable onAnalyze) {
+        Button btn = createActionButtonWithSVG("AI Analyze", IconFactory.analyseIcon(), "btn-gray");
+        btn.setOnAction(e -> onAnalyze.run());
+        return btn;
     }
 
     // ========================================
@@ -123,6 +140,7 @@ public final class CardBuilder {
         HBox header = new HBox(10);
         header.setAlignment(Pos.CENTER_LEFT);
 
+        // Load emoji image for the mood
         ImageView emojiIcon = DialogUtils.loadEmoji(EmotionUtils.getMoodEmojiFile(mood.getTypeHumeur()), 36);
         if (emojiIcon != null) {
             header.getChildren().add(emojiIcon);
@@ -140,6 +158,7 @@ public final class CardBuilder {
 
         return header;
     }
+
 
     private static VBox createIntensityDisplay(int intensity) {
         VBox box = new VBox(6);
@@ -169,10 +188,14 @@ public final class CardBuilder {
         HBox actions = new HBox(8);
         actions.setAlignment(Pos.CENTER);
 
-        Button editBtn = createActionButton("Edit", "edit.png", "btn-light", true);
+        // Edit button with SVG icon
+        Button editBtn = createActionButtonWithSVG("Edit", IconFactory.editIcon(), "btn-light");
+        editBtn.getStyleClass().add("btn-small");
         editBtn.setOnAction(e -> onEdit.run());
 
-        Button deleteBtn = createActionButton("Delete", "delete.png", "btn-danger", true);
+        // Delete button with SVG icon
+        Button deleteBtn = createActionButtonWithSVG("Delete", IconFactory.deleteIcon(), "btn-danger");
+        deleteBtn.getStyleClass().add("btn-small");
         deleteBtn.setOnAction(e -> onDelete.run());
 
         actions.getChildren().addAll(editBtn, deleteBtn);
@@ -183,22 +206,15 @@ public final class CardBuilder {
     // HELPER METHODS
     // ========================================
 
-    private static Button createActionButton(String text, String iconName, String styleClass) {
-        return createActionButton(text, iconName, styleClass, false);
-    }
-
-    private static Button createActionButton(String text, String iconName, String styleClass, boolean small) {
+    private static Button createActionButtonWithSVG(String text, SVGPath svgIcon, String styleClass) {
         Button btn = new Button(text);
         btn.getStyleClass().addAll("btn", styleClass);
-        if (small) {
-            btn.getStyleClass().add("btn-small");
-        }
-
-        ImageView icon = DialogUtils.loadIcon(iconName, small ? 14 : 16);
-        if (icon != null) {
-            btn.setGraphic(icon);
-        }
-
+        svgIcon.setFill(Color.TRANSPARENT); // transparent fill
+        svgIcon.setStroke(Color.web("#333333")); // match theme color
+        svgIcon.setStrokeWidth(1.5);
+        svgIcon.setScaleX(0.7);
+        svgIcon.setScaleY(0.7);
+        btn.setGraphic(svgIcon);
         return btn;
     }
 
@@ -206,5 +222,25 @@ public final class CardBuilder {
         if (text == null) return "";
         if (text.length() <= maxLength) return text;
         return text.substring(0, maxLength) + "...";
+    }
+
+    // Add Save Mood and Stats button builders for consistent icon usage
+    public static Button buildSaveMoodButton(Runnable onSaveMood) {
+        Button btn = createActionButtonWithSVG("Save Mood", IconFactory.saveIcon(), "btn-gray");
+        btn.setOnAction(e -> onSaveMood.run());
+        return btn;
+    }
+
+    public static Button buildStatsButton(Runnable onStats) {
+        Button btn = createActionButtonWithSVG("Stats", IconFactory.statsIcon(), "btn-gray");
+        btn.setOnAction(e -> onStats.run());
+        return btn;
+    }
+
+    // Add Read More button builder for consistent icon usage
+    public static Button buildReadMoreButton(Runnable onReadMore) {
+        Button btn = createActionButtonWithSVG("Read More", IconFactory.readMoreIcon(), "btn-light");
+        btn.setOnAction(e -> onReadMore.run());
+        return btn;
     }
 }

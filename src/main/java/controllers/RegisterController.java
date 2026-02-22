@@ -30,6 +30,8 @@ public class RegisterController {
     private Label messageLabel;
 
     private UtilisateurService userService = new UtilisateurService();
+    private String role;
+
 
     @FXML
     public void handleRegister() {
@@ -95,7 +97,8 @@ public class RegisterController {
                 return;
             }
 
-            Utilisateur user = new Utilisateur(nom, prenom, email, password, age);
+            
+            Utilisateur user = new Utilisateur(nom, prenom, email, password, age, role);
 
             userService.ajouter(user);
 

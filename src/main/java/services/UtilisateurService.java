@@ -20,7 +20,7 @@ public class UtilisateurService implements IService<Utilisateur> {
     // CREATE
     @Override
     public void ajouter(Utilisateur u) throws SQLException {
-        String sql = "INSERT INTO utilisateur (nomU, prenomU, emailU, mdpsU, ageU) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO utilisateur (nomU, prenomU, emailU, mdpsU, ageU, roleU) VALUES (?, ?, ?, ?, ?,default)";
 
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setString(1, u.getNomU());
@@ -78,6 +78,7 @@ public class UtilisateurService implements IService<Utilisateur> {
             u.setEmailU(rs.getString("emailU"));
             u.setMdpsU(rs.getString("mdpsU"));
             u.setAgeU(rs.getInt("ageU"));
+            u.setRole(rs.getString("roleU"));
 
             utilisateurs.add(u);
         }
@@ -100,7 +101,8 @@ public class UtilisateurService implements IService<Utilisateur> {
                     rs.getString("prenomU"),
                     rs.getString("emailU"),
                     rs.getString("mdpsU"),
-                    rs.getInt("ageU")
+                    rs.getInt("ageU"),
+                    rs.getString("roleU")
             );
         }
         return null;

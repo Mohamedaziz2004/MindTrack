@@ -9,28 +9,31 @@ public class Utilisateur {
     private String emailU;
     private String mdpsU;
     private int ageU;
+    private String role;
 
     // 🔹 Constructeur vide (OBLIGATOIRE pour JDBC)
     public Utilisateur() {
     }
 
     // 🔹 Constructeur sans id (pour insertion)
-    public Utilisateur(String nomU, String prenomU, String emailU, String mdpsU, int ageU) {
+    public Utilisateur(String nomU, String prenomU, String emailU, String mdpsU, int ageU , String role) {
         this.nomU = nomU;
         this.prenomU = prenomU;
         this.emailU = emailU;
         this.mdpsU = mdpsU;
         this.ageU = ageU;
+        this.role = role;
     }
 
     // 🔹 Constructeur complet
-    public Utilisateur(int idU, String nomU, String prenomU, String emailU, String mdpsU, int ageU) {
+    public Utilisateur(int idU, String nomU, String prenomU, String emailU, String mdpsU, int ageU , String role) {
         this.idU = idU;
         this.nomU = nomU;
         this.prenomU = prenomU;
         this.emailU = emailU;
         this.mdpsU = mdpsU;
         this.ageU = ageU;
+        this.role = role;
     }
 
     // Getters & Setters
@@ -80,6 +83,13 @@ public class Utilisateur {
 
     public void setAgeU(int ageU) {
         this.ageU = ageU;
+    }
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }
 

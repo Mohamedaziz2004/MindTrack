@@ -74,7 +74,8 @@ public class ProfilPsychologiqueService implements IService<ProfilPsychologique>
                     rs.getString("prenomU"),
                     rs.getString("emailU"),
                     rs.getString("mdpsU"),
-                    rs.getInt("ageU")
+                    rs.getInt("ageU"),
+                    rs.getString("role")
             );
 
             // Create Profile object
@@ -113,7 +114,7 @@ public class ProfilPsychologiqueService implements IService<ProfilPsychologique>
 
     public void createDefaultProfile(int idU) throws SQLException {
 
-        String sql = "INSERT INTO profilpsychologique (NiveauStress, NiveauMotivation, Description, idU) VALUES (1, 1, NUll, ?)";
+        String sql = "INSERT INTO profilpsychologique (NiveauStress, NiveauMotivation, Description, idU) VALUES (1, 1,NULL, ?)";
 
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setInt(1, idU);

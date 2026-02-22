@@ -37,7 +37,7 @@ public class StatsController {
         if (h == null) { info("Stats", "Choisis une habitude."); return; }
 
         try {
-            int streak = suiviService.getStreakActuel(h.getIdHabitude());
+            int streak = suiviService.getStreak7Jours(h.getIdHabitude());
             double s = suiviService.getTauxReussiteSemaine(h.getIdHabitude());
             double m = suiviService.getTauxReussiteMois(h.getIdHabitude());
 

@@ -9,11 +9,13 @@ public class AppM extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/hab.fxml"));
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"));
         Scene scene = new Scene(loader.load());
 
-        // ✅ Charger CSS
-        scene.getStylesheets().add(getClass().getResource("/css/hab.css").toExternalForm());
+        scene.getStylesheets().add(
+                getClass().getResource("/css/hab.css").toExternalForm()
+        );
 
         stage.setTitle("MindTrack");
         stage.setScene(scene);

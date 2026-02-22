@@ -1,32 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml/1"
+            fx:id="root"
             fx:controller="controllers.MainController"
-            prefWidth="1000" prefHeight="650">
+            prefWidth="1200" prefHeight="720"
+            stylesheets="@/css/hab.css"
+            styleClass="app-root">
 
     <left>
-        <VBox spacing="10" padding="15" style="-fx-background-color:#20242a;">
-            <Label text="MindTrack" style="-fx-text-fill:white; -fx-font-size:18px; -fx-font-weight:bold;"/>
-            <Separator />
+        <!-- ✅ IMPORTANT: supprimer padding="15" -->
+        <VBox spacing="10"
+              prefWidth="240" minWidth="240">
 
-            <Button text="Habitudes (CRUD)" onAction="#goHabitudes" maxWidth="Infinity"/>
-            <Button text="Suivi / Historique" onAction="#goSuivi" maxWidth="Infinity"/>
-            <Button text="Stats (Streak + %)" onAction="#goStats" maxWidth="Infinity"/>
-            <Button text="Rappels" onAction="#goRappels" maxWidth="Infinity"/>
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="brand">
+                <ImageView fx:id="logoImage" fitWidth="28" fitHeight="28" preserveRatio="true"/>
+                <Label text="Mind Track" styleClass="brand-title"/>
+            </HBox>
+
+            <VBox spacing="6" styleClass="nav">
+                <Button text="Journal"    maxWidth="Infinity" styleClass="nav-btn"/>
+                <Button text="Goals"      maxWidth="Infinity" styleClass="nav-btn"/>
+                <Button text="Exercises"  maxWidth="Infinity" styleClass="nav-btn"/>
+                <Button text="Habits"     onAction="#goHabitudes" maxWidth="Infinity" styleClass="nav-btn nav-btn-active"/>
+                <Button text="Profile"    maxWidth="Infinity" styleClass="nav-btn"/>
+                <Button text="Statistics" onAction="#goStats" maxWidth="Infinity" styleClass="nav-btn"/>
+                <Button text="Admin"      maxWidth="Infinity" styleClass="nav-btn"/>
+            </VBox>
 
             <Pane VBox.vgrow="ALWAYS"/>
-            <Button text="Quitter" onAction="#quitter" maxWidth="Infinity"/>
+
+            <VBox spacing="8" styleClass="nav">
+                <Button text="Settings" maxWidth="Infinity" styleClass="nav-btn"/>
+                <Button text="Log Out"  onAction="#quitter" maxWidth="Infinity" styleClass="nav-btn nav-btn-danger"/>
+            </VBox>
+
+            <!-- ✅ padding correct -->
+            <padding>
+                <Insets top="16" right="16" bottom="16" left="16"/>
+            </padding>
         </VBox>
     </left>
 
     <center>
-        <AnchorPane>
-            <Label text="Chargement..." layoutX="20" layoutY="20" style="-fx-font-size:16px;"/>
-        </AnchorPane>
+        <BorderPane styleClass="content-root">
+            <top>
+                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="topbar">
+                    <Label text="Mind Track" styleClass="topbar-title"/>
+                    <Pane HBox.hgrow="ALWAYS"/>
+                    <Button text="🔔" styleClass="icon-btn"/>
+                    <Button text="👤" styleClass="icon-btn"/>
+                    <padding>
+                        <Insets top="12" right="16" bottom="12" left="16"/>
+                    </padding>
+                </HBox>
+            </top>
+
+            <center>
+                <StackPane>
+                    <padding>
+                        <Insets top="16" right="16" bottom="16" left="16"/>
+                    </padding>
+                    <Label text="Chargement..." styleClass="subtitle"/>
+                </StackPane>
+            </center>
+        </BorderPane>
     </center>
 
 </BorderPane>

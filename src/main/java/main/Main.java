@@ -117,7 +117,7 @@ public class Main {
                         System.out.print("idHabitude : ");
                         int idHab = readInt(sc);
 
-                        int streak = shs.getStreakActuel(idHab);
+                        int streak = shs.getStreak7Jours(idHab);
                         double tauxWeek = shs.getTauxReussiteSemaine(idHab);
                         double tauxMonth = shs.getTauxReussiteMois(idHab);
 

@@ -1,113 +1,59 @@
 package controllers;
 
 import entities.Habitude;
-import entities.RappelHabitude;
-import entities.SuiviHabitude;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.*;
 import services.HabitudeService;
-import services.RappelHabitudeService;
 import services.SuiviHabitudeService;
 import utils.Session;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
+import java.time.format.TextStyle;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 public class HabitudeController {
 
     private final HabitudeService habService = new HabitudeService();
     private final SuiviHabitudeService suiviService = new SuiviHabitudeService();
-    private final RappelHabitudeService rappelService = new RappelHabitudeService();
 
-    // ===== Habitudes CRUD
-    @FXML private TableView<Habitude> tvHabitudes;
-    @FXML private TableColumn<Habitude, String> colNom;
-    @FXML private TableColumn<Habitude, String> colFrequence;
-    @FXML private TableColumn<Habitude, String> colObjectif;
-    @FXML private TextField tfNom, tfFrequence, tfObjectif;
+    // ===== FORM =====
+    @FXML private TextField tfNom;
+    @FXML private TextField tfFrequence;
+    @FXML private TextArea tfObjectif;
+
+    // ===== CARDS GRID =====
+    @FXML private FlowPane cardsContainer;
 
     private final ObservableList<Habitude> habitudes = FXCollections.observableArrayList();
-
-    // ===== Suivi / Historique
-    @FXML private DatePicker dpDate;
-    @FXML private CheckBox chkEtat;
-    @FXML private TableView<SuiviHabitude> tvHistorique;
-    @FXML private TableColumn<SuiviHabitude, String> colDate;
-    @FXML private TableColumn<SuiviHabitude, String> colEtat;
-
-    private final ObservableList<SuiviHabitude> historique = FXCollections.observableArrayList();
-
-    // ===== Stats
-    @FXML private Label lbStreak, lbSemaine, lbMois;
-
-    // ===== Rappels
-    @FXML private Spinner<Integer> spH, spM;
-    @FXML private CheckBox chkActifRappel;
-    @FXML private TextField tfMsg;
-    @FXML private CheckBox jLun, jMar, jMer, jJeu, jVen, jSam, jDim;
-
-    @FXML private TableView<RappelHabitude> tvRappels;
-    @FXML private TableColumn<RappelHabitude, String> colHeureR;
-    @FXML private TableColumn<RappelHabitude, String> colJoursR;
-    @FXML private TableColumn<RappelHabitude, String> colMsgR;
-    @FXML private TableColumn<RappelHabitude, Boolean> colActifR;
-
-    private final ObservableList<RappelHabitude> rappels = FXCollections.observableArrayList();
+    private Habitude selected; // habit sélectionnée via card
 
     @FXML
     public void initialize() {
-
-        // Habitudes table
-        colNom.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getNom()));
-        colFrequence.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getFrequence()));
-        colObjectif.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getObjectif()));
-        tvHabitudes.setItems(habitudes);
-
-        tvHabitudes.getSelectionModel().selectedItemProperty().addListener((obs, old, h) -> {
-            if (h != null) {
-                tfNom.setText(h.getNom());
-                tfFrequence.setText(h.getFrequence());
-                tfObjectif.setText(h.getObjectif());
-                dpDate.setValue(LocalDate.now());
-            }
-        });
-
-        // Historique table
-        colDate.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(String.valueOf(c.getValue().getDate())));
-        colEtat.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().isEtat() ? "Faite" : "Non faite"));
-        tvHistorique.setItems(historique);
-
-        dpDate.setValue(LocalDate.now());
-
-        // Rappels table + spinners
-        spH.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23, LocalTime.now().getHour()));
-        spM.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, LocalTime.now().getMinute()));
-
-        colHeureR.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(String.valueOf(c.getValue().getHeureRappel())));
-        colJoursR.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getJours()));
-        colMsgR.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getMessage()));
-        colActifR.setCellValueFactory(c -> new javafx.beans.property.SimpleBooleanProperty(c.getValue().isActif()).asObject());
-        tvRappels.setItems(rappels);
-
         loadHabitudes();
-        chargerRappelsActifs();
     }
 
-    // ========= 1) CRUD Habitudes =========
+    // ================= LOAD =================
 
     @FXML
     public void loadHabitudes() {
         try {
             habitudes.setAll(habService.afficherParUser(Session.getIdU()));
+            renderCards();
         } catch (SQLException e) {
-            erreur("Chargement habitudes", e.getMessage());
+            showError("Chargement", e.getMessage());
         }
     }
+
+    // ================= CRUD =================
 
     @FXML
     public void ajouterHabitude() {
@@ -116,224 +62,247 @@ public class HabitudeController {
         String obj = tfObjectif.getText().trim();
 
         if (nom.isEmpty() || freq.isEmpty()) {
-            info("Validation", "Nom et fréquence obligatoires.");
+            showInfo("Validation", "Nom et fréquence obligatoires.");
             return;
         }
 
         try {
             habService.ajouter(new Habitude(nom, freq, obj, Session.getIdU()));
-            clearHabFields();
+            clearForm();
             loadHabitudes();
         } catch (SQLException e) {
-            erreur("Ajout habitude", e.getMessage());
+            showError("Ajout", e.getMessage());
         }
     }
 
     @FXML
     public void modifierHabitude() {
-        Habitude h = getHabitudeSelectionnee();
-        if (h == null) return;
+        if (selected == null) {
+            showInfo("Sélection", "Clique sur une card d’habitude d’abord.");
+            return;
+        }
 
         String nom = tfNom.getText().trim();
         String freq = tfFrequence.getText().trim();
         String obj = tfObjectif.getText().trim();
 
         if (nom.isEmpty() || freq.isEmpty()) {
-            info("Validation", "Nom et fréquence obligatoires.");
+            showInfo("Validation", "Nom et fréquence obligatoires.");
             return;
         }
 
-        h.setNom(nom);
-        h.setFrequence(freq);
-        h.setObjectif(obj);
-        h.setIdU(Session.getIdU());
+        selected.setNom(nom);
+        selected.setFrequence(freq);
+        selected.setObjectif(obj);
+        selected.setIdU(Session.getIdU());
 
         try {
-            habService.modifier(h);
-            clearHabFields();
+            habService.modifier(selected);
+            clearForm();
             loadHabitudes();
         } catch (SQLException e) {
-            erreur("Modifier habitude", e.getMessage());
+            showError("Modification", e.getMessage());
         }
     }
 
     @FXML
     public void supprimerHabitude() {
-        Habitude h = getHabitudeSelectionnee();
-        if (h == null) return;
+        if (selected == null) {
+            showInfo("Sélection", "Clique sur une card d’habitude d’abord.");
+            return;
+        }
 
-        if (!confirm("Suppression", "Supprimer: " + h.getNom() + " ?")) return;
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Suppression");
+        confirm.setHeaderText(null);
+        confirm.setContentText("Supprimer l’habitude : " + selected.getNom() + " ?");
+
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
 
         try {
-            habService.supprimer(h.getIdHabitude());
-            clearHabFields();
+            habService.supprimer(selected.getIdHabitude());
+            clearForm();
             loadHabitudes();
-            historique.clear();
-            lbStreak.setText("-");
-            lbSemaine.setText("-");
-            lbMois.setText("-");
-            chargerRappelsActifs();
         } catch (SQLException e) {
-            erreur("Supprimer habitude", e.getMessage());
+            showError("Suppression", e.getMessage());
         }
     }
 
-    private void clearHabFields() {
+    // ================= UI: CARDS =================
+
+    private void renderCards() {
+        cardsContainer.getChildren().clear();
+
+        if (habitudes.isEmpty()) {
+            Label empty = new Label("No habits yet. Add your first habit above.");
+            empty.getStyleClass().add("hint");
+            cardsContainer.getChildren().add(empty);
+            return;
+        }
+
+        for (Habitude h : habitudes) {
+            cardsContainer.getChildren().add(buildHabitCard(h));
+        }
+    }
+
+    private VBox buildHabitCard(Habitude h) {
+        VBox card = new VBox(10);
+        card.getStyleClass().add("habit-card");
+        card.setPadding(new Insets(14));
+        card.setPrefWidth(330);
+
+        // Header row: title + icons
+        Label title = new Label(h.getNom());
+        title.getStyleClass().add("habit-title");
+
+        Button btnEdit = new Button("✎");
+        btnEdit.getStyleClass().addAll("icon-btn-sm", "icon-edit");
+
+        Button btnDelete = new Button("🗑");
+        btnDelete.getStyleClass().addAll("icon-btn-sm", "icon-delete");
+
+        btnEdit.setOnAction(e -> {
+            selectHabit(h);
+            tfNom.requestFocus();
+        });
+
+        btnDelete.setOnAction(e -> {
+            selectHabit(h);
+            supprimerHabitude();
+        });
+
+        Pane spacer = new Pane();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox header = new HBox(8, title, spacer, btnEdit, btnDelete);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        // Description
+        Label desc = new Label(safe(h.getObjectif()));
+        desc.getStyleClass().add("habit-desc");
+        desc.setWrapText(true);
+
+        // ✅ Days row + dots
+        VBox progressBox = new VBox(6);
+
+        // 7 derniers jours glissants
+        final LocalDate today = LocalDate.now();
+        final int n = 7;
+        final LocalDate start = today.minusDays(n - 1);
+
+        // Days letters (L M M J V S D)
+        HBox daysRow = new HBox(12);
+        daysRow.setAlignment(Pos.CENTER_LEFT);
+
+        for (int i = 0; i < n; i++) {
+            LocalDate day = start.plusDays(i);
+            String letter = day.getDayOfWeek()
+                    .getDisplayName(TextStyle.SHORT, Locale.FRENCH)
+                    .substring(0, 1)
+                    .toUpperCase();
+
+            Label d = new Label(letter);
+            d.getStyleClass().add("day-letter");
+            daysRow.getChildren().add(d);
+        }
+
+        // États 7 jours (oldest -> today)
+        List<Boolean> last7;
+        try {
+            last7 = suiviService.getEtatDerniersJours(h.getIdHabitude(), n);
+        } catch (SQLException ex) {
+            last7 = Collections.nCopies(n, false);
+        }
+
+        // Dots cliquables
+        HBox dots = new HBox(6);
+        dots.setAlignment(Pos.CENTER_LEFT);
+
+        for (int i = 0; i < n; i++) {
+            final int idx = i;                 // ✅ FIX: final
+            final LocalDate dayFinal = start.plusDays(i); // ✅ FIX: final
+
+            boolean done = last7.get(idx);
+
+            Button dot = new Button(done ? "✓" : "○");
+            dot.getStyleClass().add(done ? "dot-done-btn" : "dot-miss-btn");
+            dot.setFocusTraversable(false);
+
+            Tooltip.install(dot, new Tooltip(dayFinal.toString()));
+
+            List<Boolean> finalLast = last7;
+            dot.setOnAction(ev -> {
+                try {
+                    boolean newEtat = ! finalLast.get(idx);
+                    suiviService.marquerCommeFaite(h.getIdHabitude(), dayFinal, newEtat);
+                    loadHabitudes(); // refresh complet (couleurs + streak)
+                } catch (SQLException e) {
+                    showError("Suivi", e.getMessage());
+                }
+            });
+
+            // éviter que cliquer sur dot sélectionne la card
+            dot.addEventFilter(MouseEvent.MOUSE_CLICKED, MouseEvent::consume);
+
+            dots.getChildren().add(dot);
+        }
+
+        progressBox.getChildren().addAll(daysRow, dots);
+
+        // Streak
+        int streak = 0;
+        try {
+            streak = suiviService.getStreak7Jours(h.getIdHabitude());
+        } catch (SQLException ignored) {}
+
+        Label streakLabel = new Label(streak + " day streak");
+        streakLabel.getStyleClass().add("habit-streak");
+
+        // Click card = select
+        card.setOnMouseClicked(e -> selectHabit(h));
+
+        if (selected != null && selected.getIdHabitude() == h.getIdHabitude()) {
+            card.getStyleClass().add("habit-card-selected");
+        }
+
+        card.getChildren().addAll(header, desc, progressBox, streakLabel);
+        return card;
+    }
+
+    private void selectHabit(Habitude h) {
+        selected = h;
+        tfNom.setText(h.getNom());
+        tfFrequence.setText(h.getFrequence());
+        tfObjectif.setText(h.getObjectif());
+        renderCards(); // refresh highlight
+    }
+
+    private void clearForm() {
         tfNom.clear();
         tfFrequence.clear();
         tfObjectif.clear();
-        tvHabitudes.getSelectionModel().clearSelection();
+        selected = null;
     }
 
-    private Habitude getHabitudeSelectionnee() {
-        Habitude h = tvHabitudes.getSelectionModel().getSelectedItem();
-        if (h == null) info("Sélection", "Sélectionne une habitude dans le tableau.");
-        return h;
+    private String safe(String s) {
+        return (s == null || s.isBlank()) ? "No description." : s;
     }
 
-    // ========= 2) Suivi =========
+    // ================= Alerts =================
 
-    @FXML
-    public void marquerAujourdHui() {
-        Habitude h = getHabitudeSelectionnee();
-        if (h == null) return;
-
-        LocalDate d = (dpDate.getValue() == null) ? LocalDate.now() : dpDate.getValue();
-        boolean etat = chkEtat.isSelected();
-
-        try {
-            suiviService.marquerCommeFaite(h.getIdHabitude(), d, etat);
-            info("Suivi", "Enregistré : " + (etat ? "Faite" : "Non faite") + " (" + d + ")");
-            chargerHistorique();
-        } catch (SQLException e) {
-            erreur("Suivi", e.getMessage());
-        }
-    }
-
-    @FXML
-    public void chargerHistorique() {
-        Habitude h = getHabitudeSelectionnee();
-        if (h == null) return;
-
-        try {
-            historique.setAll(suiviService.historiqueParHabitude(h.getIdHabitude()));
-        } catch (SQLException e) {
-            erreur("Historique", e.getMessage());
-        }
-    }
-
-    // ========= 3) Stats =========
-
-    @FXML
-    public void calculerStats() {
-        Habitude h = getHabitudeSelectionnee();
-        if (h == null) return;
-
-        try {
-            int streak = suiviService.getStreakActuel(h.getIdHabitude());
-            double semaine = suiviService.getTauxReussiteSemaine(h.getIdHabitude());
-            double mois = suiviService.getTauxReussiteMois(h.getIdHabitude());
-
-            lbStreak.setText(String.valueOf(streak));
-            lbSemaine.setText(String.format("%.1f %%", semaine));
-            lbMois.setText(String.format("%.1f %%", mois));
-        } catch (SQLException e) {
-            erreur("Stats", e.getMessage());
-        }
-    }
-
-    // ========= 4) Rappels =========
-
-    @FXML
-    public void ajouterRappel() {
-        Habitude h = getHabitudeSelectionnee();
-        if (h == null) return;
-
-        String jours = buildJours();
-        if (jours.isEmpty()) { info("Rappel", "Choisis au moins 1 jour."); return; }
-
-        LocalTime heure = LocalTime.of(spH.getValue(), spM.getValue());
-        boolean actif = chkActifRappel.isSelected();
-
-        String msg = tfMsg.getText().trim();
-        if (msg.isEmpty()) msg = "Rappel : " + h.getNom();
-
-        try {
-            rappelService.ajouter(new RappelHabitude(h.getIdHabitude(), heure, jours, actif, msg));
-            tfMsg.clear();
-            chargerRappelsActifs();
-        } catch (SQLException e) {
-            erreur("Ajouter rappel", e.getMessage());
-        }
-    }
-
-    @FXML
-    public void chargerRappelsActifs() {
-        try {
-            rappels.setAll(rappelService.rappelsActifsDuUser(Session.getIdU()));
-        } catch (SQLException e) {
-            erreur("Rappels actifs", e.getMessage());
-        }
-    }
-
-    @FXML
-    public void toggleRappelActif() {
-        RappelHabitude r = tvRappels.getSelectionModel().getSelectedItem();
-        if (r == null) { info("Toggle", "Sélectionne un rappel."); return; }
-
-        try {
-            boolean nouveau = !r.isActif();
-            rappelService.setActif(r.getIdRappel(), nouveau);
-            chargerRappelsActifs();
-        } catch (SQLException e) {
-            erreur("Toggle actif", e.getMessage());
-        }
-    }
-
-    @FXML
-    public void supprimerRappel() {
-        RappelHabitude r = tvRappels.getSelectionModel().getSelectedItem();
-        if (r == null) { info("Suppression", "Sélectionne un rappel."); return; }
-
-        if (!confirm("Suppression", "Supprimer ce rappel ?")) return;
-
-        try {
-            rappelService.supprimer(r.getIdRappel());
-            chargerRappelsActifs();
-        } catch (SQLException e) {
-            erreur("Suppression rappel", e.getMessage());
-        }
-    }
-
-    private String buildJours() {
-        List<String> j = new ArrayList<>();
-        if (jLun.isSelected()) j.add("Lun");
-        if (jMar.isSelected()) j.add("Mar");
-        if (jMer.isSelected()) j.add("Mer");
-        if (jJeu.isSelected()) j.add("Jeu");
-        if (jVen.isSelected()) j.add("Ven");
-        if (jSam.isSelected()) j.add("Sam");
-        if (jDim.isSelected()) j.add("Dim");
-        return String.join(",", j);
-    }
-
-    // ========= helpers =========
-
-    private void info(String t, String m) {
+    private void showInfo(String title, String msg) {
         Alert a = new Alert(Alert.AlertType.INFORMATION);
-        a.setTitle(t); a.setHeaderText(null); a.setContentText(m);
+        a.setTitle(title);
+        a.setHeaderText(null);
+        a.setContentText(msg);
         a.showAndWait();
     }
 
-    private void erreur(String t, String m) {
+    private void showError(String title, String msg) {
         Alert a = new Alert(Alert.AlertType.ERROR);
-        a.setTitle(t); a.setHeaderText("Erreur"); a.setContentText(m);
+        a.setTitle(title);
+        a.setHeaderText("Erreur");
+        a.setContentText(msg);
         a.showAndWait();
-    }
-
-    private boolean confirm(String t, String m) {
-        Alert a = new Alert(Alert.AlertType.CONFIRMATION);
-        a.setTitle(t); a.setHeaderText(null); a.setContentText(m);
-        return a.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
     }
 }

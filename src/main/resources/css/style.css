@@ -1,161 +1,120 @@
-/* ROOT COLORS */
+/* ================= ROOT ================= */
 .root {
-    -fx-font-family: "Segoe UI", "Roboto", sans-serif;
-    -fx-background-color: #f5f7fb;
+    -fx-font-family: "Segoe UI", "Inter", sans-serif;
+    -fx-background-color: #f5f6fa;
 }
 
-/* ===== SIDEBAR ===== */
+/* ================= SIDEBAR ================= */
 .sidebar {
     -fx-background-color: white;
-    -fx-border-color: #e5e7eb;
-    -fx-border-width: 0 1 0 0;
+    -fx-border-color: #e6e6e6;
 }
 
-.sidebar-title {
-    -fx-font-size: 18px;
+.app-title {
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-text-fill: #3b82f6;
 }
 
 .sidebar-button {
     -fx-background-color: transparent;
-    -fx-text-fill: #374151;
+    -fx-text-fill: #444;
     -fx-alignment: CENTER_LEFT;
     -fx-pref-width: 150;
 }
 
 .sidebar-button:hover {
-    -fx-background-color: #f3f4f6;
+    -fx-background-color: #f1f3f9;
 }
 
 .sidebar-button-active {
-    -fx-background-color: #e0edff;
-    -fx-text-fill: #3b82f6;
+    -fx-background-color: #f1f3f9;
     -fx-font-weight: bold;
-    -fx-alignment: CENTER_LEFT;
 }
 
-/* ===== MAIN CONTENT ===== */
+/* ================= MAIN AREA ================= */
+.main-scroll {
+    -fx-background: #f5f6fa;
+    -fx-background-color: #f5f6fa;
+}
+
 .main-content {
     -fx-padding: 25;
 }
 
+/* ================= TITLES ================= */
 .page-title {
-    -fx-font-size: 22px;
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
-    -fx-text-fill: #111827;
-}
-
-/* ===== CARDS ===== */
-.card {
-    -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-padding: 20;
-    -fx-border-color: #e5e7eb;
-    -fx-border-radius: 12;
-}
-
-.info-card {
-    -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-border-color: #e5e7eb;
-    -fx-border-radius: 12;
 }
 
 .section-title {
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #111827;
-}
-
-/* ===== TITLES ===== */
-.app-title {
-    -fx-font-size: 18px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #3b82f6;
-}
-
-.title {
-    -fx-font-size: 16px;
+    -fx-font-size: 15px;
     -fx-font-weight: bold;
 }
 
-.subtitle {
-    -fx-text-fill: #6b7280;
-    -fx-font-size: 12px;
+/* ================= CARD ================= */
+.card {
+    -fx-background-color: white;
+    -fx-padding: 18;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: #e6e6e6;
 }
 
-.info-title {
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-}
-
-.info-text {
-    -fx-text-fill: #6b7280;
-    -fx-font-size: 12px;
-    -fx-text-alignment: center;
-}
-
-/* ===== INPUTS ===== */
+/* ================= INPUTS ================= */
 .input {
     -fx-pref-height: 36;
     -fx-background-radius: 8;
     -fx-border-radius: 8;
-    -fx-border-color: #d1d5db;
-    -fx-padding: 0 10 0 10;
-}
-
-.input:focused {
-    -fx-border-color: #3b82f6;
+    -fx-border-color: #dcdcdc;
 }
 
 .textarea {
     -fx-background-radius: 8;
     -fx-border-radius: 8;
-    -fx-border-color: #d1d5db;
+    -fx-border-color: #dcdcdc;
 }
 
-.textarea:focused {
-    -fx-border-color: #3b82f6;
-}
-
-/* ===== BUTTONS ===== */
+/* ================= BUTTONS ================= */
 .primary-button {
-    -fx-background-color: #3b82f6;
+    -fx-background-color: #4a7cff;
     -fx-text-fill: white;
     -fx-background-radius: 8;
-    -fx-font-weight: bold;
 }
 
 .primary-button:hover {
-    -fx-background-color: #2563eb;
+    -fx-background-color: #3a68e0;
+}
+
+.secondary-button {
+    -fx-background-color: #f1f3f9;
+    -fx-background-radius: 8;
 }
 
 .danger-button {
-    -fx-background-color: #ef4444;
+    -fx-background-color: #ff5c5c;
     -fx-text-fill: white;
     -fx-background-radius: 8;
-    -fx-font-weight: bold;
 }
 
-.danger-button:hover {
-    -fx-background-color: #dc2626;
+.small-button {
+    -fx-background-color: #f1f3f9;
+    -fx-background-radius: 6;
+    -fx-font-size: 11px;
 }
 
-/* ===== LABEL MESSAGE ===== */
+/* ================= LABEL MESSAGE ================= */
 .message-label {
-    -fx-text-fill: #ef4444;
-    -fx-font-size: 12px;
-}
-
-/* ===== SCROLLPANE ===== */
-.main-scroll {
-    -fx-background: transparent;
-    -fx-border-color: transparent;
-}
-
-.field-label {
-    -fx-font-size: 10px;
+    -fx-text-fill: #2e7d32;
     -fx-font-weight: bold;
-    -fx-text-fill: #111827;
+}
+
+/* ================= COMBOBOX ================= */
+.combo-box {
+    -fx-background-radius: 8;
+}
+
+/* ================= CHECKBOX ================= */
+.check-box {
+    -fx-text-fill: #444;
 }

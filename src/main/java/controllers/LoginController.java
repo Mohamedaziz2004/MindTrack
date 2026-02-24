@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
 
+import utils.FaceRecognitionUtil;
 import utils.UserSession;
 
 import java.sql.SQLException;
@@ -69,25 +70,22 @@ public class LoginController {
 
 
             Utilisateur user = userService.login(email, password);
-            ProfilPsychologiqueService profilService = new ProfilPsychologiqueService();
-
-            ProfilPsychologique profil = profilService.findByUserId(user.getIdU());
-
-            if (profil == null) {
-                profilService.createDefaultProfile(user.getIdU());
-            }
 
             if (user != null) {
 
+                ProfilPsychologiqueService profilService = new ProfilPsychologiqueService();
+                ProfilPsychologique profil = profilService.findByUserId(user.getIdU());
+
+                if (profil == null) {
+                    profilService.createDefaultProfile(user.getIdU());
+                }
 
                 UserSession.setCurrentUser(user);
-
 
                 messageLabel.setStyle("-fx-text-fill: green;");
                 messageLabel.setText("Welcome " + user.getPrenomU());
 
                 System.out.println("Logged in user: " + user.getEmailU());
-
 
                 openProfile();
 
@@ -139,6 +137,35 @@ public class LoginController {
         // Close login window
         Stage loginStage = (Stage) emailField.getScene().getWindow();
         loginStage.close();
+    }
+
+    @FXML
+    public void handleFaceLogin() {
+        try {
+            byte[] capturedFace = FaceRecognitionUtil.captureFace();
+            if (capturedFace == null) {
+                messageLabel.setText("No face detected.");
+                return;
+            }
+
+            Utilisateur user = userService.loginWithFace(capturedFace);
+
+            if (user != null) {
+                UserSession.setCurrentUser(user);
+                messageLabel.setStyle("-fx-text-fill: green;");
+                messageLabel.setText("Welcome " + user.getPrenomU());
+                openProfile();
+            } else {
+                messageLabel.setText("Face not recognized.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            messageLabel.setText("Database error.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            messageLabel.setText("Face login failed.");
+        }
     }
 
 

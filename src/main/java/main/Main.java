@@ -7,6 +7,9 @@ import javafx.stage.Stage;
 
 import java.util.Objects;
 
+import org.opencv.core.Core;
+import utils.FaceRecognitionUtil;
+
 public class    Main extends Application {
 
     @Override
@@ -25,6 +28,15 @@ public class    Main extends Application {
     }
 
     public static void main(String[] args) {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         launch(args);
+
+        byte[] face = FaceRecognitionUtil.captureFace();
+        if (face != null) {
+            System.out.println("Face captured: " + face.length + " bytes");
+        } else {
+            System.out.println("No face captured.");
+        }
+
     }
 }

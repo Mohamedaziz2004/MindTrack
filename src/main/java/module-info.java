@@ -9,6 +9,7 @@ module com.example.mindtrack {
 
     // MySQL connector
     requires mysql.connector.j;
+    requires opencv;
 
     // Allow JavaFX to access controllers via reflection
     opens controllers to javafx.fxml;

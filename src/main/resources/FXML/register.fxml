@@ -45,6 +45,11 @@
 
                 <TextField fx:id="ageField" promptText="Age" styleClass="input" />
 
+                <Button text="Capture Face"
+                        fx:id="captureFaceBtn"
+                        onAction="#handleCaptureFace"
+                        styleClass="primary-button"/>
+
                 <Button maxWidth="Infinity" onAction="#handleRegister" styleClass="primary-button" text="Create Account" />
 
                 <Label fx:id="messageLabel" styleClass="message-label" wrapText="true" />
@@ -61,6 +66,10 @@
         <VBox alignment="CENTER" layoutX="460" layoutY="80" prefHeight="300" prefWidth="300" spacing="10" styleClass="info-card">
 
             <children>
+                <ImageView fx:id="cameraView"
+                           fitWidth="400"
+                           fitHeight="300"
+                           preserveRatio="true"/>
             <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../register_img.jpg" />

@@ -59,7 +59,7 @@ public class ProfilPsychologiqueService implements IService<ProfilPsychologique>
     public List<ProfilPsychologique> read() throws SQLException {
         List<ProfilPsychologique> profils = new ArrayList<>();
 
-        String sql = "SELECT p.*, u.nomU, u.prenomU, u.emailU, u.mdpsU, u.ageU " +
+        String sql = "SELECT p.*, u.nomU, u.prenomU, u.emailU, u.mdpsU, u.ageU, u.roleU, u.face_encoding " +
                 "FROM profilpsychologique p " +
                 "JOIN utilisateur u ON p.idU = u.idU";
 
@@ -75,7 +75,8 @@ public class ProfilPsychologiqueService implements IService<ProfilPsychologique>
                     rs.getString("emailU"),
                     rs.getString("mdpsU"),
                     rs.getInt("ageU"),
-                    rs.getString("role")
+                    rs.getString("roleU"),
+                    rs.getBytes("face_encoding")
             );
 
             // Create Profile object

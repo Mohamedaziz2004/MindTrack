@@ -1,46 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
-<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane prefWidth="1100" prefHeight="700"
-            xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="controllers.ProfileController">
+<BorderPane prefHeight="700" prefWidth="1100" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ProfileController">
 
 <!-- SIDEBAR (UNCHANGED) -->
 <left>
-    <VBox spacing="15" styleClass="sidebar" prefWidth="180">
+    <VBox prefWidth="180" spacing="15" styleClass="sidebar">
         <children>
 
             <HBox alignment="CENTER_LEFT" spacing="8">
                 <children>
                     <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
                         <image>
-                            <Image url="@../logo.png"/>
+                            <Image url="@../logo.png" />
                         </image>
                     </ImageView>
-                    <Label styleClass="app-title" text="Mind Track"/>
+                    <Label styleClass="app-title" text="Mind Track" />
                 </children>
             </HBox>
 
-            <Button text="Journal" styleClass="sidebar-button"/>
-            <Button text="Goals" styleClass="sidebar-button"/>
-            <Button text="Exercises" styleClass="sidebar-button"/>
-            <Button text="Habits" styleClass="sidebar-button"/>
-            <Button text="Profile" styleClass="sidebar-button-active"/>
-            <Button text="Statistics" styleClass="sidebar-button"/>
-            <Button text="Admin" styleClass="sidebar-button"/>
-            <Button text="Settings" styleClass="sidebar-button"/>
-            <Button text="Log Out" styleClass="sidebar-button"/>
+            <Button styleClass="sidebar-button" text="Journal" />
+            <Button styleClass="sidebar-button" text="Goals" />
+            <Button styleClass="sidebar-button" text="Exercises" />
+            <Button styleClass="sidebar-button" text="Habits" />
+            <Button styleClass="sidebar-button-active" text="Profile" />
+            <Button styleClass="sidebar-button" text="Statistics" />
+            <Button styleClass="sidebar-button" text="Admin" />
+            <Button styleClass="sidebar-button" text="Settings" />
+            <Button styleClass="sidebar-button" text="Log Out" />
 
         </children>
         <padding>
-            <Insets top="20" left="15"/>
+            <Insets left="15" top="20" />
         </padding>
     </VBox>
 </left>
@@ -53,43 +58,38 @@
             <VBox spacing="20" styleClass="main-content">
 
                 <!-- TITLE -->
-                <Label text="Psychological Profile Manager" styleClass="page-title"/>
+                <Label styleClass="page-title" text="Psychological Profile Manager" />
 
                 <!-- ================= PROFILE CARD ================= -->
                 <VBox spacing="15" styleClass="card">
 
-                    <Label text="Your Profile" styleClass="section-title"/>
+                    <Label styleClass="section-title" text="Your Profile" />
 
                     <!-- EXISTING FIELDS (DO NOT CHANGE IDS) -->
-                    <TextField fx:id="nomField" promptText="Last Name" styleClass="input"/>
-                    <TextField fx:id="prenomField" promptText="First Name" styleClass="input"/>
-                    <TextField fx:id="emailField" promptText="Email" styleClass="input"/>
-                    <TextField fx:id="ageField" promptText="Age" styleClass="input"/>
+                    <TextField fx:id="nomField" promptText="Last Name" styleClass="input" />
+                    <TextField fx:id="prenomField" promptText="First Name" styleClass="input" />
+                    <TextField fx:id="emailField" promptText="Email" styleClass="input" />
+                    <TextField fx:id="ageField" promptText="Age" styleClass="input" />
 
                     <!-- PLACEHOLDER UI (NO fx:id) -->
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <ImageView fitHeight="50" fitWidth="50"/>
-                        <Button text="Upload New Picture" styleClass="secondary-button"/>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                     <ImageView fitHeight="54.0" fitWidth="62.0" pickOnBounds="true" preserveRatio="true" />
+                        <Button styleClass="secondary-button" text="Upload New Picture" />
                     </HBox>
 
-                    <TextArea promptText="About Me"
-                              prefHeight="80"
-                              styleClass="textarea"/>
+                    <TextArea prefHeight="80" promptText="About Me" styleClass="textarea" />
 
                 </VBox>
 
                 <!-- ================= PSYCHOLOGICAL DATA (WORKING) ================= -->
                 <VBox spacing="12" styleClass="card">
 
-                    <Label text="Psychological Data" styleClass="section-title"/>
+                    <Label styleClass="section-title" text="Psychological Data" />
 
                     <!-- EXISTING FIELDS (DO NOT CHANGE IDS) -->
-                    <TextField fx:id="stressField" promptText="Stress Level" styleClass="input"/>
-                    <TextField fx:id="motivationField" promptText="Motivation Level" styleClass="input"/>
-                    <TextArea fx:id="descriptionArea"
-                              promptText="Description"
-                              prefHeight="80"
-                              styleClass="textarea"/>
+                    <TextField fx:id="stressField" promptText="Stress Level" styleClass="input" />
+                    <TextField fx:id="motivationField" promptText="Motivation Level" styleClass="input" />
+                    <TextArea fx:id="descriptionArea" prefHeight="80" promptText="Description" styleClass="textarea" />
 
                 </VBox>
 
@@ -97,27 +97,27 @@
                 <VBox spacing="12" styleClass="card">
 
                     <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="Your Assessments" styleClass="section-title"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Button text="Take New Assessment" styleClass="secondary-button"/>
+                        <Label styleClass="section-title" text="Your Assessments" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button styleClass="secondary-button" text="Take New Assessment" />
                     </HBox>
 
                     <HBox alignment="CENTER_LEFT" spacing="10">
                         <VBox>
-                            <Label text="Mindfulness &amp; Stress Resilience"/>
-                            <Label text="Completed 2023-10-26" style="-fx-text-fill: #777; -fx-font-size: 11;"/>
+                            <Label text="Mindfulness &amp; Stress Resilience" />
+                            <Label style="-fx-text-fill: #777; -fx-font-size: 11;" text="Completed 2023-10-26" />
                         </VBox>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Button text="View Report" styleClass="small-button"/>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button styleClass="small-button" text="View Report" />
                     </HBox>
 
                     <HBox alignment="CENTER_LEFT" spacing="10">
                         <VBox>
-                            <Label text="Emotional Intelligence Profile"/>
-                            <Label text="Pending 2024-01-15" style="-fx-text-fill: #777; -fx-font-size: 11;"/>
+                            <Label text="Emotional Intelligence Profile" />
+                            <Label style="-fx-text-fill: #777; -fx-font-size: 11;" text="Pending 2024-01-15" />
                         </VBox>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Button text="Continue Assessment" styleClass="small-button"/>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button styleClass="small-button" text="Continue Assessment" />
                     </HBox>
 
                 </VBox>
@@ -125,21 +125,21 @@
                 <!-- ================= PREFERENCES (PLACEHOLDER) ================= -->
                 <VBox spacing="12" styleClass="card">
 
-                    <Label text="Application Preferences" styleClass="section-title"/>
+                    <Label styleClass="section-title" text="Application Preferences" />
 
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Mood Tracking Frequency"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <ComboBox/>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Mood Tracking Frequency" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <ComboBox />
                     </HBox>
 
-                    <CheckBox text="Receive daily prompts to write in your journal"/>
-                    <CheckBox text="Get notified about your goal progress and milestones"/>
+                    <CheckBox text="Receive daily prompts to write in your journal" />
+                    <CheckBox text="Get notified about your goal progress and milestones" />
 
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Display Theme"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <ComboBox/>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Display Theme" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <ComboBox />
                     </HBox>
 
                 </VBox>
@@ -147,40 +147,36 @@
                 <!-- ================= ACCOUNT & SECURITY ================= -->
                 <VBox spacing="12" styleClass="card">
 
-                    <Label text="Account &amp; Security" styleClass="section-title"/>
+                    <Label styleClass="section-title" text="Account &amp; Security" />
 
                     <!-- KEEP EXISTING DELETE LOGIC BUTTON -->
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Password"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Button text="Change Password" styleClass="secondary-button"/>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Password" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button styleClass="secondary-button" text="Change Password" />
                     </HBox>
 
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Export Data"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Button text="Export My Data" styleClass="secondary-button"/>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Export Data" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button styleClass="secondary-button" text="Export My Data" />
                     </HBox>
 
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Delete Account"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Button text="Delete Account"
-                                onAction="#handleDelete"
-                                styleClass="danger-button"/>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Delete Account" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button onAction="#handleDelete" styleClass="danger-button" text="Delete Account" />
                     </HBox>
 
                 </VBox>
 
                 <!-- ================= ACTION BUTTONS (WORKING) ================= -->
                 <HBox alignment="CENTER_RIGHT" spacing="10">
-                    <Button text="Discard Changes" styleClass="secondary-button"/>
-                    <Button text="Save Changes"
-                            onAction="#handleUpdate"
-                            styleClass="primary-button"/>
+                    <Button styleClass="secondary-button" text="Discard Changes" />
+                    <Button onAction="#handleUpdate" styleClass="primary-button" text="Save Changes" />
                 </HBox>
 
-                <Label fx:id="messageLabel" styleClass="message-label"/>
+                <Label fx:id="messageLabel" styleClass="message-label" />
 
             </VBox>
 

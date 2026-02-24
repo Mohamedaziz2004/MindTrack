@@ -5,9 +5,20 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import org.opencv.core.Mat;
 import services.UtilisateurService;
+import utils.FaceRecognitionUtil;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
+
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RegisterController {
 
@@ -28,6 +39,8 @@ public class RegisterController {
 
     @FXML
     private Label messageLabel;
+    @FXML
+    private byte[] capturedFace;
 
     private UtilisateurService userService = new UtilisateurService();
     private String role;
@@ -98,7 +111,7 @@ public class RegisterController {
             }
 
             
-            Utilisateur user = new Utilisateur(nom, prenom, email, password, age, role);
+            Utilisateur user = new Utilisateur(nom, prenom, email, password, age, role, capturedFace);
 
             userService.ajouter(user);
 
@@ -118,6 +131,31 @@ public class RegisterController {
         }
 
 
+    }
+
+    @FXML
+    private void handleCaptureFace() {
+
+        // Step 1: capture face image
+        byte[] faceImage = FaceRecognitionUtil.captureFace();
+
+        if (faceImage != null) {
+
+            // Step 2: convert to Mat
+            Mat faceMat = FaceRecognitionUtil.byteArrayToMat(faceImage);
+
+            // Step 3: extract LBP features
+            byte[] lbpFeatures = FaceRecognitionUtil.extractLBPFeatures(faceMat);
+
+            // Step 4: store LBP vector (NOT image)
+            capturedFace = lbpFeatures;
+
+            messageLabel.setStyle("-fx-text-fill: green;");
+            messageLabel.setText("Face captured successfully!");
+        } else {
+            messageLabel.setStyle("-fx-text-fill: red;");
+            messageLabel.setText("Face capture failed. Try again.");
+        }
     }
 
 }

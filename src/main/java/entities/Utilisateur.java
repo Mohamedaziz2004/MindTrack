@@ -10,23 +10,27 @@ public class Utilisateur {
     private String mdpsU;
     private int ageU;
     private String role;
+    private byte[] faceEncoding;
 
     // 🔹 Constructeur vide (OBLIGATOIRE pour JDBC)
     public Utilisateur() {
     }
 
     // 🔹 Constructeur sans id (pour insertion)
-    public Utilisateur(String nomU, String prenomU, String emailU, String mdpsU, int ageU , String role) {
+    public Utilisateur(String nomU, String prenomU, String emailU, String mdpsU, int ageU , String role, byte[] faceEncoding) {
+         this.faceEncoding = faceEncoding;
         this.nomU = nomU;
         this.prenomU = prenomU;
         this.emailU = emailU;
         this.mdpsU = mdpsU;
         this.ageU = ageU;
         this.role = role;
+        this.faceEncoding = faceEncoding;
     }
 
     // 🔹 Constructeur complet
-    public Utilisateur(int idU, String nomU, String prenomU, String emailU, String mdpsU, int ageU , String role) {
+    public Utilisateur(int idU, String nomU, String prenomU, String emailU, String mdpsU, int ageU , String role, byte[] faceEncoding) {
+         this.faceEncoding = faceEncoding;
         this.idU = idU;
         this.nomU = nomU;
         this.prenomU = prenomU;
@@ -34,6 +38,7 @@ public class Utilisateur {
         this.mdpsU = mdpsU;
         this.ageU = ageU;
         this.role = role;
+        this.faceEncoding = faceEncoding;
     }
 
     // Getters & Setters
@@ -90,6 +95,14 @@ public class Utilisateur {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public byte[] getFaceEncoding() {
+        return faceEncoding;
+    }
+
+    public void setFaceEncoding(byte[] faceEncoding) {
+        this.faceEncoding = faceEncoding;
     }
 }
 

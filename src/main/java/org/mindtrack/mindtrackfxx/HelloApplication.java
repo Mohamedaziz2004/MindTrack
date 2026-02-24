@@ -26,7 +26,7 @@ public class HelloApplication extends Application {
         Scene scene = new Scene(root, 1100, 750);
 
         // Load stylesheet
-        URL cssUrl = getClass().getResource("/org/mindtrack/mindtrackfxx/styles/styles.css");
+        URL cssUrl = getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css");
         if (cssUrl != null) {
             scene.getStylesheets().add(cssUrl.toExternalForm());
         }

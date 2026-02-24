@@ -49,13 +49,12 @@
    ======================================== */
 /* === GLASSMORPHISM SIDEBAR === */
 .sidebar {
-    -fx-background-color: rgba(255,255,255,0.35); /* lighter glass effect */
-    -fx-background-radius: 24px;
-    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.18), 32, 0.18, 0, 0);
-    -fx-border-color: rgba(255,255,255,0.12);
-    -fx-border-width: 1.5px;
-    /* Add spacing between logo and icons */
-    -fx-padding: 24 0 0 0;
+    -fx-background-color: rgba(255,255,255,0.18);
+    -fx-background-radius: 24;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 24, 0.2, 0, 0);
+    -fx-border-color: rgba(255,255,255,0.22);
+    -fx-border-width: 1.5;
+    -fx-padding: 32 0 0 0;
 }
 
 /* Remove sidebar green line */
@@ -67,34 +66,68 @@
     -fx-min-width: 0;
 }
 
-/* Remove icon backgrounds */
-.sidebar .nav-button .image-view, .sidebar .nav-button .graphic {
-    -fx-background-color: transparent !important;
-    background: none !important;
-    -fx-effect: none !important;
-}
-
 /* === SIDEBAR ICON BUTTONS === */
 /* Sidebar Navigation Button - Icon only */
+.sidebar-btn {
+    -fx-background-color: transparent;
+    -fx-effect: none;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 12 0 12 0;
+}
+
+.sidebar-btn:hover {
+    -fx-background-color: rgba(255,255,255,0.22);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 8, 0.2, 0, 0);
+}
+
 .nav-button {
     -fx-background-color: transparent;
     -fx-effect: none;
     -fx-border-color: transparent;
     -fx-border-width: 0;
+    -fx-padding: 10 12;
+    -fx-alignment: center-left;
+    -fx-graphic-text-gap: 10;
 }
 
 .nav-button:hover {
-    -fx-background-color: transparent;
-    -fx-effect: none;
-    -fx-border-color: transparent;
-    -fx-border-width: 0;
+    -fx-background-color: rgba(255,255,255,0.22);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 8, 0.2, 0, 0);
+}
+
+.nav-button .svg-icon,
+.nav-button .nav-icon {
+    -fx-fill: transparent;
+    -fx-stroke: #6B7280;
+    -fx-stroke-linecap: round;
+    -fx-stroke-linejoin: round;
+    -fx-stroke-width: 1.25;
 }
 
 .nav-button.active {
-    -fx-background-color: transparent;
-    -fx-effect: none;
-    -fx-border-color: transparent;
-    -fx-border-width: 0;
+    -fx-background-color: #f3f4f6;
+    -fx-background-radius: 10;
+}
+
+.nav-button.active .svg-icon,
+.nav-button.active .nav-icon {
+    -fx-fill: transparent;
+    -fx-stroke: #3b82f6;
+}
+
+.nav-button.danger {
+    -fx-text-fill: #ef4444;
+}
+
+.nav-button.danger .svg-icon,
+.nav-button.danger .nav-icon {
+    -fx-fill: transparent;
+    -fx-stroke: #ef4444;
+}
+
+.nav-button.active {
+    /* handled in the active styles above */
 }
 
 .nav-button .graphic {

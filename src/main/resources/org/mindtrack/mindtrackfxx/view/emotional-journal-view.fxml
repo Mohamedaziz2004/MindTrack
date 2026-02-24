@@ -10,78 +10,59 @@
 
 <HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.mindtrack.mindtrackfxx.controller.EmotionalJournalController"
-      stylesheets="@../styles/styles.css"
+      stylesheets="@../styles/modern-style.css"
       styleClass="root"
       spacing="12">
     <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
 
-    <!-- SIDEBAR - Icon Only Glass Panel -->
-    <VBox styleClass="sidebar" alignment="TOP_CENTER">
-        <!-- Logo Icon -->
-        <VBox alignment="CENTER" styleClass="sidebar-header">
-            <padding><Insets top="8" right="8" bottom="48" left="8"/></padding> <!-- Increased bottom padding for more space -->
-            <ImageView fitWidth="36" fitHeight="36" pickOnBounds="true">
-                <image>
-                    <Image url="@../images/logo.png" />
-                </image>
-            </ImageView>
+    <!-- SIDEBAR -->
+    <VBox fx:id="sidebar" styleClass="sidebar" spacing="0" alignment="TOP_CENTER" prefWidth="200" minWidth="200" maxWidth="200">
+        <padding><Insets top="20" right="12" bottom="20" left="12"/></padding>
+
+        <!-- Navigation buttons — main group -->
+        <VBox fx:id="sidebarButtonsBox" spacing="4" fillWidth="true">
+            <Button fx:id="btnJournal" styleClass="sidebar-btn" onAction="#onSidebarJournal">
+                <graphic><SVGPath fx:id="iconJournal" styleClass="svg-icon" /></graphic>
+            </Button>
+            <Button fx:id="btnGoals" styleClass="sidebar-btn" onAction="#onSidebarGoal">
+                <graphic><SVGPath fx:id="iconGoal" styleClass="svg-icon" /></graphic>
+            </Button>
+            <Button fx:id="btnExercise" styleClass="sidebar-btn" onAction="#onSidebarExercise">
+                <graphic><SVGPath fx:id="iconExercise" styleClass="svg-icon" /></graphic>
+            </Button>
+            <Button fx:id="btnHabits" styleClass="sidebar-btn" onAction="#onSidebarHabits">
+                <graphic><SVGPath fx:id="iconHabits" styleClass="svg-icon" /></graphic>
+            </Button>
+            <Button fx:id="btnProfile" styleClass="sidebar-btn" onAction="#onSidebarProfile">
+                <graphic><SVGPath fx:id="iconProfile" styleClass="svg-icon" /></graphic>
+            </Button>
+            <Button fx:id="btnAdmin" styleClass="sidebar-btn" onAction="#onSidebarAdmin">
+                <graphic><SVGPath fx:id="iconAdmin" styleClass="svg-icon" /></graphic>
+            </Button>
         </VBox>
-        <StackPane styleClass="sidebar-icons-container">
-            <VBox fx:id="sidebarButtonsBox" spacing="12" alignment="CENTER">
-                <Button fx:id="btnJournal" styleClass="sidebar-btn" onAction="#onSidebarJournal">
-                    <graphic>
-                        <SVGPath fx:id="iconJournal" />
-                    </graphic>
-                </Button>
-                <Button fx:id="btnProfile" styleClass="sidebar-btn" onAction="#onSidebarProfile">
-                    <graphic>
-                        <SVGPath fx:id="iconProfile" />
-                    </graphic>
-                </Button>
-                <Button fx:id="btnAdmin" styleClass="sidebar-btn" onAction="#onSidebarAdmin">
-                    <graphic>
-                        <SVGPath fx:id="iconAdmin" />
-                    </graphic>
-                </Button>
-                <Button fx:id="btnGoal" styleClass="sidebar-btn" onAction="#onSidebarGoal">
-                    <graphic>
-                        <SVGPath fx:id="iconGoal" />
-                    </graphic>
-                </Button>
-                <Button fx:id="btnHabits" styleClass="sidebar-btn" onAction="#onSidebarHabits">
-                    <graphic>
-                        <SVGPath fx:id="iconHabits" />
-                    </graphic>
-                </Button>
-                <Button fx:id="btnExercise" styleClass="sidebar-btn" onAction="#onSidebarExercise">
-                    <graphic>
-                        <SVGPath fx:id="iconExercise" />
-                    </graphic>
-                </Button>
-                <!-- Spacer for bottom icons -->
-                <Region VBox.vgrow="ALWAYS" />
-                <Button fx:id="btnSettings" styleClass="sidebar-btn" onAction="#onSidebarSettings">
-                    <graphic>
-                        <SVGPath fx:id="iconSettings" />
-                    </graphic>
-                </Button>
-                <Button fx:id="btnLogout" styleClass="sidebar-btn" onAction="#onSidebarLogout">
-                    <graphic>
-                        <SVGPath fx:id="iconLogout" />
-                    </graphic>
-                </Button>
-            </VBox>
-            <Pane fx:id="sidebarIndicator" styleClass="sidebar-indicator" />
-        </StackPane>
+
+        <!-- Spacer -->
         <Region VBox.vgrow="ALWAYS"/>
-        <!-- Bottom Avatar -->
-        <VBox spacing="6" alignment="CENTER">
+
+        <!-- Bottom group — Settings, Logout, Avatar -->
+        <VBox spacing="4" fillWidth="true">
             <Separator styleClass="sidebar-separator"/>
-            <StackPane styleClass="avatar-container">
-                <Circle radius="18" styleClass="avatar-circle"/>
+            <Button fx:id="btnSettings" styleClass="sidebar-btn" onAction="#onSidebarSettings">
+                <graphic><SVGPath fx:id="iconSettings" styleClass="svg-icon" /></graphic>
+            </Button>
+            <Button fx:id="btnLogout" styleClass="sidebar-btn danger" onAction="#onSidebarLogout">
+                <graphic><SVGPath fx:id="iconLogout" styleClass="svg-icon" /></graphic>
+            </Button>
+            <Separator styleClass="sidebar-separator"/>
+            <StackPane styleClass="avatar-container" alignment="CENTER">
+                <padding><Insets top="8" bottom="4"/></padding>
+                <Circle radius="20" styleClass="avatar-circle"/>
                 <Label text="U" styleClass="avatar-text"/>
             </StackPane>
         </VBox>
+
+        <!-- Hidden indicator pane (used by controller) -->
+        <Pane fx:id="sidebarIndicator" styleClass="sidebar-indicator" managed="false" visible="false"/>
     </VBox>
 
     <!-- MAIN CONTENT AREA -->
@@ -92,21 +73,58 @@
             <HBox spacing="12" alignment="CENTER_RIGHT">
                 <Button fx:id="minimizeBtn" styleClass="window-btn window-minimize" onAction="#onMinimizeWindow" style="-fx-background-color: transparent; -fx-padding: 0;">
                     <graphic>
-                        <SVGPath content="M2 12h20" stroke="black" style="-fx-stroke-width: 2.2; -fx-stroke: black; -fx-scale-x: 0.7; -fx-scale-y: 0.7;"/>
+                        <SVGPath content="M2 12h20" stroke="#1e3a5f" style="-fx-stroke-width: 2; -fx-stroke: #1e3a5f; -fx-scale-x: 0.6; -fx-scale-y: 0.6;"/>
                     </graphic>
                 </Button>
                 <Button fx:id="maximizeBtn" styleClass="window-btn window-maximize" onAction="#onMaximizeWindow" style="-fx-background-color: transparent; -fx-padding: 0;">
                     <graphic>
-                        <SVGPath content="M4 4h16v16h-16z" stroke="black" fill="transparent" style="-fx-stroke-width: 2.2; -fx-stroke: black; -fx-scale-x: 0.7; -fx-scale-y: 0.7;"/>
+                        <SVGPath content="M4 4h16v16h-16z" stroke="#1e3a5f" fill="transparent" style="-fx-stroke-width: 2; -fx-stroke: #1e3a5f; -fx-scale-x: 0.6; -fx-scale-y: 0.6;"/>
                     </graphic>
                 </Button>
                 <Button fx:id="closeBtn" styleClass="window-btn window-close" onAction="#onCloseWindow" style="-fx-background-color: transparent; -fx-padding: 0;">
                     <graphic>
-                        <SVGPath content="M6 6l12 12M6 18L18 6" stroke="black" style="-fx-stroke-width: 2.2; -fx-stroke: black; -fx-scale-x: 0.7; -fx-scale-y: 0.7;"/>
+                        <SVGPath content="M6 6l12 12M6 18L18 6" stroke="#1e3a5f" style="-fx-stroke-width: 2; -fx-stroke: #1e3a5f; -fx-scale-x: 0.6; -fx-scale-y: 0.6;"/>
                     </graphic>
                 </Button>
             </HBox>
         </HBox>
+        <!-- Add new top bar under window controls -->
+        <HBox fx:id="topBar" alignment="CENTER_LEFT" spacing="12" styleClass="top-bar">
+            <ImageView fitWidth="36" fitHeight="36" pickOnBounds="true">
+                <image>
+                    <Image url="@../images/logo.png" />
+                </image>
+            </ImageView>
+            <Region HBox.hgrow="ALWAYS"/>
+            <!-- Search toggle button -->
+            <Button fx:id="searchToggleBtn" onAction="#onToggleSearch" styleClass="search-toggle-btn">
+                <graphic>
+                    <SVGPath fill="transparent" stroke="#9ca3af" strokeWidth="1.8" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z M21 21l-4.35-4.35" scaleX="0.65" scaleY="0.65"/>
+                </graphic>
+            </Button>
+            <StackPane styleClass="avatar-container" style="-fx-padding: 0 0 0 4;">
+                <Circle radius="18" styleClass="avatar-circle" />
+                <ImageView fitWidth="36" fitHeight="36" pickOnBounds="true">
+                    <image>
+                        <Image url="@../images/user-avatar.png" />
+                    </image>
+                </ImageView>
+            </StackPane>
+        </HBox>
+
+        <!-- Search overlay (hidden by default) -->
+        <VBox fx:id="searchOverlay" managed="false" visible="false" styleClass="search-overlay" spacing="0">
+            <HBox styleClass="search-bar-container" spacing="10" alignment="CENTER_LEFT">
+                <SVGPath fill="transparent" stroke="#22d3ee" strokeWidth="1.8" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z M21 21l-4.35-4.35" scaleX="0.6" scaleY="0.6"/>
+                <TextField fx:id="searchField" promptText="Search journals..." styleClass="search-input" HBox.hgrow="ALWAYS"/>
+                <Button fx:id="searchCloseBtn" onAction="#onCloseSearch" styleClass="search-close-btn">
+                    <graphic>
+                        <SVGPath fill="transparent" stroke="#9ca3af" strokeWidth="1.8" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M18 6L6 18M6 6l12 12" scaleX="0.45" scaleY="0.45"/>
+                    </graphic>
+                </Button>
+            </HBox>
+            <VBox fx:id="searchResultsContainer" styleClass="search-results" spacing="0"/>
+        </VBox>
 
         <!-- SCROLLABLE CONTENT -->
         <ScrollPane fitToWidth="true" styleClass="content-scroll" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
@@ -119,7 +137,7 @@
                     <!-- Text Input Section -->
                     <VBox styleClass="section" spacing="10">
                         <HBox spacing="8" alignment="CENTER_LEFT">
-                            <SVGPath fill="#e94560" content="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" scaleX="0.7" scaleY="0.7"/>
+                            <SVGPath fill="transparent" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" scaleX="0.7" scaleY="0.7"/>
                             <Label text="Write your thoughts" styleClass="section-title"/>
                             <Region HBox.hgrow="ALWAYS"/>
                             <Label fx:id="currentDateTimeLabel" text="Feb 18, 2026" styleClass="datetime-label"/>
@@ -135,16 +153,16 @@
                             <Button fx:id="saveEntryButton" onAction="#onSaveEntry" styleClass="btn, btn-primary">
                                 <graphic>
                                     <HBox spacing="6" alignment="CENTER">
-                                        <SVGPath fill="#333333" stroke="#333333" strokeWidth="1.5" content="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM17 21v-8H7v8M7 3v5h8" scaleX="0.6" scaleY="0.6"/>
-                                        <Label text="Save Journal" styleClass="btn-label" style="-fx-text-fill: #333333;"/>
+                                        <SVGPath fill="transparent" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z M17 21v-8H7v8 M7 3v5h8" scaleX="0.6" scaleY="0.6"/>
+                                        <Label text="Save Journal" styleClass="btn-label" style="-fx-text-fill: #ffffff;"/>
                                     </HBox>
                                 </graphic>
                             </Button>
                             <Button fx:id="analyseButton" onAction="#onAnalyseEntry" styleClass="btn, btn-ai">
                                 <graphic>
                                     <HBox spacing="6" alignment="CENTER">
-                                        <SVGPath fill="#333333" stroke="#333333" strokeWidth="1.5" content="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M11 8v6 M8 11h6" scaleX="0.6" scaleY="0.6"/>
-                                        <Label text="AI Analyze" styleClass="btn-label" style="-fx-text-fill: #333333;"/>
+                                        <SVGPath fill="transparent" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z M21 21l-4.35-4.35 M11 8v6 M8 11h6" scaleX="0.6" scaleY="0.6"/>
+                                        <Label text="AI Analyze" styleClass="btn-label" style="-fx-text-fill: #ffffff;"/>
                                     </HBox>
                                 </graphic>
                             </Button>
@@ -152,16 +170,25 @@
                     </VBox>
 
                     <!-- Recent Journals Section -->
-                    <VBox styleClass="section" spacing="10" VBox.vgrow="ALWAYS">
+                    <VBox styleClass="section" spacing="10">
                         <HBox alignment="CENTER_LEFT" spacing="8">
-                            <SVGPath fill="#e94560" content="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" scaleX="0.7" scaleY="0.7"/>
+                            <SVGPath fill="transparent" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8" scaleX="0.7" scaleY="0.7"/>
                             <Label text="Recent Journals" styleClass="section-title"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="sortJournalsBtn" onAction="#onSortJournals" styleClass="btn-sort">
+                                <graphic>
+                                    <HBox spacing="5" alignment="CENTER">
+                                        <SVGPath fill="transparent" stroke="#9ca3af" strokeWidth="1.8" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M3 6h18 M3 12h12 M3 18h6 M19 15l-3 3-3-3 M16 18V9" scaleX="0.55" scaleY="0.55"/>
+                                        <Label fx:id="sortJournalLabel" text="Newest" styleClass="sort-label"/>
+                                    </HBox>
+                                </graphic>
+                            </Button>
                         </HBox>
-                        <FlowPane fx:id="entriesContainer" hgap="8" vgap="8" VBox.vgrow="ALWAYS"/>
+                        <FlowPane fx:id="entriesContainer" hgap="10" vgap="10" minHeight="0" prefHeight="-1"/>
                         <Button fx:id="showMoreJournalsBtn" onAction="#onShowMoreJournals" styleClass="btn, btn-show-more">
                             <graphic>
                                 <HBox spacing="6" alignment="CENTER">
-                                    <SVGPath fill="#6b7280" content="M19 9l-7 7-7-7" scaleX="0.5" scaleY="0.5"/>
+                                    <SVGPath fill="transparent" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M6 9l6 6 6-6" scaleX="0.5" scaleY="0.5"/>
                                     <Label text="Show more" styleClass="show-more-label"/>
                                 </HBox>
                             </graphic>
@@ -170,12 +197,12 @@
                 </VBox>
 
                 <!-- RIGHT COLUMN - Mood Tracker & Recent Moods -->
-                <VBox spacing="12" prefWidth="280" minWidth="260">
+                <VBox spacing="12" prefWidth="280" minWidth="260" maxWidth="320">
 
                     <!-- Mood Selection Section -->
                     <VBox styleClass="section" spacing="10">
                         <HBox spacing="8" alignment="CENTER_LEFT">
-                            <SVGPath fill="#e94560" content="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" scaleX="0.7" scaleY="0.7"/>
+                            <SVGPath fill="transparent" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M8 14s1.5 2 4 2 4-2 4-2 M9 9h.01 M15 9h.01" scaleX="0.7" scaleY="0.7"/>
                             <Label text="How are you feeling?" styleClass="section-title"/>
                         </HBox>
 
@@ -257,16 +284,16 @@
                             <Button fx:id="saveMoodButton" onAction="#onSaveMood" styleClass="btn, btn-mood" HBox.hgrow="ALWAYS">
                                 <graphic>
                                     <HBox spacing="6" alignment="CENTER">
-                                        <SVGPath fill="#333333" stroke="#333333" strokeWidth="1.5" content="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM17 21v-8H7v8M7 3v5h8" scaleX="0.6" scaleY="0.6"/>
-                                        <Label text="Save Mood" styleClass="btn-label" style="-fx-text-fill: #333333;"/>
+                                        <SVGPath fill="transparent" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z M17 21v-8H7v8 M7 3v5h8" scaleX="0.6" scaleY="0.6"/>
+                                        <Label text="Save Mood" styleClass="btn-label" style="-fx-text-fill: #ffffff;"/>
                                     </HBox>
                                 </graphic>
                             </Button>
                             <Button fx:id="statisticsButton" onAction="#onShowStatistics" styleClass="btn, btn-stats">
                                 <graphic>
                                     <HBox spacing="6" alignment="CENTER">
-                                        <SVGPath fill="#333333" stroke="#333333" strokeWidth="1.5" content="M18 20V10M12 20V4M6 20v-6" scaleX="0.6" scaleY="0.6"/>
-                                        <Label text="Stats" styleClass="btn-label-dark" style="-fx-text-fill: #333333;"/>
+                                        <SVGPath fill="transparent" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M12 20V10 M18 20V4 M6 20v-4" scaleX="0.6" scaleY="0.6"/>
+                                        <Label text="Stats" styleClass="btn-label-dark" style="-fx-text-fill: #ffffff;"/>
                                     </HBox>
                                 </graphic>
                             </Button>
@@ -274,16 +301,25 @@
                     </VBox>
 
                     <!-- Recent Moods Section -->
-                    <VBox styleClass="section" spacing="10" VBox.vgrow="ALWAYS">
+                    <VBox styleClass="section" spacing="10">
                         <HBox alignment="CENTER_LEFT" spacing="8">
-                            <SVGPath fill="#e94560" content="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" scaleX="0.7" scaleY="0.7"/>
+                            <SVGPath fill="transparent" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" scaleX="0.7" scaleY="0.7"/>
                             <Label text="Recent Moods" styleClass="section-title"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="sortMoodsBtn" onAction="#onSortMoods" styleClass="btn-sort">
+                                <graphic>
+                                    <HBox spacing="5" alignment="CENTER">
+                                        <SVGPath fill="transparent" stroke="#9ca3af" strokeWidth="1.8" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M3 6h18 M3 12h12 M3 18h6 M19 15l-3 3-3-3 M16 18V9" scaleX="0.55" scaleY="0.55"/>
+                                        <Label fx:id="sortMoodLabel" text="Newest" styleClass="sort-label"/>
+                                    </HBox>
+                                </graphic>
+                            </Button>
                         </HBox>
-                        <FlowPane fx:id="moodEntriesContainer" hgap="8" vgap="8" VBox.vgrow="ALWAYS"/>
+                        <FlowPane fx:id="moodEntriesContainer" hgap="10" vgap="10" minHeight="0" prefHeight="-1"/>
                         <Button fx:id="showMoreMoodsBtn" onAction="#onShowMoreMoods" styleClass="btn, btn-show-more">
                             <graphic>
                                 <HBox spacing="6" alignment="CENTER">
-                                    <SVGPath fill="#6b7280" content="M19 9l-7 7-7-7" scaleX="0.5" scaleY="0.5"/>
+                                    <SVGPath fill="transparent" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M6 9l6 6 6-6" scaleX="0.5" scaleY="0.5"/>
                                     <Label text="Show more" styleClass="show-more-label"/>
                                 </HBox>
                             </graphic>

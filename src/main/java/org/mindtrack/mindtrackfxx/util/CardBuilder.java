@@ -30,68 +30,75 @@ public final class CardBuilder {
                                          Runnable onReadMore,
                                          Runnable onEdit,
                                          Runnable onDelete) {
-        VBox card = new VBox(12);
+        VBox card = new VBox(10);
         card.getStyleClass().add("card");
-        card.setPrefWidth(300);
-        card.setMaxWidth(300);
+        card.setPrefWidth(360);
+        card.setMinWidth(330);
+        card.setMaxWidth(400);
         card.setMinHeight(180);
+        card.setMaxHeight(220);
 
-        // Title section
-        VBox titleBox = createJournalTitleBox(entry);
+        // Date — formatted nicely
+        String formattedDate = "";
+        if (entry.getDateCreation() != null) {
+            formattedDate = entry.getDateCreation().format(
+                java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy  •  HH:mm")
+            );
+        }
+        Label date = new Label(formattedDate);
+        date.getStyleClass().add("card-date");
 
-        // Note preview
-        Label noteLabel = new Label(truncateText(entry.getNotePersonnelle(), PREVIEW_TEXT_LENGTH));
+        // Note preview — truncated to ~140 chars
+        String noteText = entry.getNotePersonnelle();
+        if (noteText != null && noteText.length() > 140) {
+            noteText = noteText.substring(0, 140) + "...";
+        }
+        Label noteLabel = new Label(noteText);
         noteLabel.getStyleClass().add("card-note");
         noteLabel.setWrapText(true);
-        noteLabel.setMaxHeight(60);
-        VBox.setVgrow(noteLabel, Priority.ALWAYS);
+        noteLabel.setMaxHeight(80);
+        javafx.scene.layout.VBox.setVgrow(noteLabel, Priority.ALWAYS);
 
-        // Spacer
+        // Spacer to push actions to bottom
         Region spacer = new Region();
-        VBox.setVgrow(spacer, Priority.ALWAYS);
+        javafx.scene.layout.VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        // Action buttons
-        HBox actions = createJournalActions(onReadMore, onEdit, onDelete);
+        // Actions — icon-only buttons
+        Button readMoreBtn = new Button();
+        readMoreBtn.getStyleClass().add("btn-edit");
+        readMoreBtn.setGraphic(styleCardActionIcon(IconFactory.getIcon("Read More")));
+        readMoreBtn.setOnAction(e -> onReadMore.run());
 
-        card.getChildren().addAll(titleBox, noteLabel, spacer, actions);
+        Button editBtn = new Button();
+        editBtn.getStyleClass().add("btn-edit");
+        editBtn.setGraphic(styleCardActionIcon(IconFactory.getIcon("Edit")));
+        editBtn.setOnAction(e -> onEdit.run());
+
+        Button deleteBtn = new Button();
+        deleteBtn.getStyleClass().add("btn-edit");
+        deleteBtn.setGraphic(styleCardActionIcon(IconFactory.getIcon("Delete")));
+        deleteBtn.setOnAction(e -> onDelete.run());
+
+        HBox actions = new HBox(8, readMoreBtn, editBtn, deleteBtn);
+        actions.getStyleClass().add("card-actions");
+        actions.setAlignment(Pos.CENTER_LEFT);
+
+        card.getChildren().addAll(date, noteLabel, spacer, actions);
         return card;
     }
 
-    private static VBox createJournalTitleBox(JournalEmotionnel entry) {
-        VBox titleBox = new VBox(4);
-
-        Label title = new Label("Entry on " + entry.getDateCreation().format(CARD_DATE_FORMATTER));
-        title.getStyleClass().add("card-title");
-        title.setWrapText(true);
-
-        Label timeLabel = new Label("🕐 " + entry.getDateCreation().format(CARD_TIME_FORMATTER));
-        timeLabel.getStyleClass().add("card-time");
-
-        Label dateLabel = new Label("Recorded on " + entry.getDateCreation().format(CARD_DATE_FORMATTER));
-        dateLabel.getStyleClass().add("small-muted");
-
-        titleBox.getChildren().addAll(title, timeLabel, dateLabel);
-        return titleBox;
+    private static String toBadgeClass(String mood) {
+        if (mood == null || mood.isBlank()) {
+            return "badge-neutral";
+        }
+        return "badge-" + mood.trim().toLowerCase().replace(" ", "-");
     }
 
-    private static HBox createJournalActions(Runnable onReadMore, Runnable onEdit, Runnable onDelete) {
-        HBox actions = new HBox(10);
-        actions.setAlignment(Pos.CENTER_LEFT);
-
-        // Read More button with SVG icon
-        Button readMoreBtn = createActionButtonWithSVG("Read More", IconFactory.readMoreIcon(), "btn-light");
-        readMoreBtn.setOnAction(e -> onReadMore.run());
-
-        // Edit button with SVG icon
-        Button editBtn = createActionButtonWithSVG("Edit", IconFactory.editIcon(), "btn-light");
-        editBtn.setOnAction(e -> onEdit.run());
-
-        // Delete button with SVG icon
-        Button deleteBtn = createActionButtonWithSVG("Delete", IconFactory.deleteIcon(), "btn-danger");
-        deleteBtn.setOnAction(e -> onDelete.run());
-
-        actions.getChildren().addAll(readMoreBtn, editBtn, deleteBtn);
-        return actions;
+    // Helper to get mood for a journal entry
+    private static String getJournalMood(JournalEmotionnel entry) {
+        // TODO: Replace with actual logic to fetch mood for journal
+        // For now, return "Neutral" or fetch from DB/service if available
+        return "Neutral";
     }
 
     // ========================================
@@ -119,9 +126,10 @@ public final class CardBuilder {
     public static VBox buildMoodCard(humeur mood, Runnable onEdit, Runnable onDelete) {
         VBox card = new VBox(12);
         card.getStyleClass().addAll("card", "mood-card");
-        card.setPrefWidth(220);
+        card.setPrefWidth(200);
         card.setMaxWidth(220);
-        card.setMinHeight(200);
+        card.setMinHeight(160);
+        card.setMaxHeight(190);
 
         // Header with emoji and mood type
         HBox moodHeader = createMoodHeader(mood);
@@ -189,12 +197,12 @@ public final class CardBuilder {
         actions.setAlignment(Pos.CENTER);
 
         // Edit button with SVG icon
-        Button editBtn = createActionButtonWithSVG("Edit", IconFactory.editIcon(), "btn-light");
+        Button editBtn = createActionButtonWithSVG("", IconFactory.editIcon(), "btn-light");
         editBtn.getStyleClass().add("btn-small");
         editBtn.setOnAction(e -> onEdit.run());
 
         // Delete button with SVG icon
-        Button deleteBtn = createActionButtonWithSVG("Delete", IconFactory.deleteIcon(), "btn-danger");
+        Button deleteBtn = createActionButtonWithSVG("", IconFactory.deleteIcon(), "btn-danger");
         deleteBtn.getStyleClass().add("btn-small");
         deleteBtn.setOnAction(e -> onDelete.run());
 
@@ -209,13 +217,25 @@ public final class CardBuilder {
     private static Button createActionButtonWithSVG(String text, SVGPath svgIcon, String styleClass) {
         Button btn = new Button(text);
         btn.getStyleClass().addAll("btn", styleClass);
-        svgIcon.setFill(Color.TRANSPARENT); // transparent fill
-        svgIcon.setStroke(Color.web("#333333")); // match theme color
-        svgIcon.setStrokeWidth(1.5);
-        svgIcon.setScaleX(0.7);
-        svgIcon.setScaleY(0.7);
+        styleFeather(svgIcon);
         btn.setGraphic(svgIcon);
         return btn;
+    }
+
+    private static SVGPath styleCardActionIcon(SVGPath svgIcon) {
+        styleFeather(svgIcon);
+        return svgIcon;
+    }
+
+    /** Apply Feather-style: no fill, light stroke for dark theme */
+    private static void styleFeather(SVGPath icon) {
+        icon.setFill(Color.TRANSPARENT);
+        icon.setStroke(Color.web("#9ca3af"));
+        icon.setStrokeWidth(1.8);
+        icon.setStrokeLineCap(javafx.scene.shape.StrokeLineCap.ROUND);
+        icon.setStrokeLineJoin(javafx.scene.shape.StrokeLineJoin.ROUND);
+        icon.setScaleX(0.6);
+        icon.setScaleY(0.6);
     }
 
     private static String truncateText(String text, int maxLength) {
@@ -241,6 +261,22 @@ public final class CardBuilder {
     public static Button buildReadMoreButton(Runnable onReadMore) {
         Button btn = createActionButtonWithSVG("Read More", IconFactory.readMoreIcon(), "btn-light");
         btn.setOnAction(e -> onReadMore.run());
+        return btn;
+    }
+
+    public static Button createSidebarItem(String text, String iconName) {
+        return createSidebarItem(text, iconName, false);
+    }
+
+    public static Button createSidebarItem(String text, String iconName, boolean selected) {
+        Button btn = new Button(text);
+        SVGPath icon = IconFactory.getIcon(iconName);
+        icon.getStyleClass().add("nav-icon");
+        btn.setGraphic(icon);
+        btn.getStyleClass().addAll("nav-button");
+        if (selected) {
+            btn.getStyleClass().add("active");
+        }
         return btn;
     }
 }

@@ -9,7 +9,7 @@
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.mindtrack.mindtrackfxx.controller.StatisticsController"
-      stylesheets="@../styles/styles.css"
+      stylesheets="@../styles/modern-style.css"
       styleClass="stats-root" spacing="24" prefWidth="800" prefHeight="600">
 
     <padding><Insets top="32" right="32" bottom="32" left="32"/></padding>

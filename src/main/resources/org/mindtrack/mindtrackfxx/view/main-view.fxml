@@ -10,7 +10,7 @@
 
 <StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="org.mindtrack.mindtrackfxx.controller.EmotionalJournalController"
-           stylesheets="@../styles/styles.css"
+           stylesheets="@../styles/modern-style.css"
            styleClass="root">
 
     <!-- Window Controls (top-right, floating) -->
@@ -43,52 +43,25 @@
                 </HBox>
 
                 <!-- Main Navigation with custom icons -->
-                <Button styleClass="nav-button, active" maxWidth="Infinity" alignment="CENTER_LEFT">
-                    <graphic>
-                        <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                            <Image url="@../icons/journal.png"/>
-                        </ImageView>
-                    </graphic>
+                <Button fx:id="btnJournal" styleClass="sidebar-btn, selected" maxWidth="Infinity" alignment="CENTER_LEFT">
                     <text>Journal</text>
                 </Button>
-                <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
-                    <graphic>
-                        <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                            <Image url="@../icons/goal.png"/>
-                        </ImageView>
-                    </graphic>
+                <Button fx:id="btnGoal" styleClass="sidebar-btn" maxWidth="Infinity" alignment="CENTER_LEFT">
                     <text>Goals</text>
                 </Button>
-                <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
-                    <graphic>
-                        <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                            <Image url="@../icons/exercice.png"/>
-                        </ImageView>
-                    </graphic>
+                <Button fx:id="btnExercise" styleClass="sidebar-btn" maxWidth="Infinity" alignment="CENTER_LEFT">
                     <text>Exercises</text>
                 </Button>
-                <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
-                    <graphic>
-                        <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                            <Image url="@../icons/habits.png"/>
-                        </ImageView>
-                    </graphic>
+                <Button fx:id="btnHabits" styleClass="sidebar-btn" maxWidth="Infinity" alignment="CENTER_LEFT">
                     <text>Habits</text>
                 </Button>
-                <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
-                    <graphic>
-                        <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                            <Image url="@../icons/profile.png"/>
-                        </ImageView>
-                    </graphic>
+                <Button fx:id="btnProfile" styleClass="sidebar-btn" maxWidth="Infinity" alignment="CENTER_LEFT">
                     <text>Profile</text>
                 </Button>
-                <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
-                    <graphic>
-                        <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                            <Image url="@../icons/admin.png"/>
-                        </ImageView>
-                    </graphic>
+                <Button fx:id="btnStatistics" styleClass="sidebar-btn" maxWidth="Infinity" alignment="CENTER_LEFT">
+                    <text>Statistics</text>
+                </Button>
+                <Button fx:id="btnAdmin" styleClass="sidebar-btn" maxWidth="Infinity" alignment="CENTER_LEFT">
                     <text>Admin</text>
                 </Button>
 
@@ -98,20 +71,10 @@
                 <Separator styleClass="sidebar-separator"/>
                 <VBox spacing="4">
                     <padding><Insets top="12"/></padding>
-                    <Button styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
-                        <graphic>
-                            <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                                <Image url="@../icons/settings.png"/>
-                            </ImageView>
-                        </graphic>
+                    <Button fx:id="btnSettings" styleClass="sidebar-btn" maxWidth="Infinity" alignment="CENTER_LEFT">
                         <text>Settings</text>
                     </Button>
-                    <Button styleClass="nav-button, danger" maxWidth="Infinity" alignment="CENTER_LEFT">
-                        <graphic>
-                            <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
-                                <Image url="@../icons/logout.png"/>
-                            </ImageView>
-                        </graphic>
+                    <Button fx:id="btnLogout" styleClass="sidebar-btn, danger" maxWidth="Infinity" alignment="CENTER_LEFT">
                         <text>Log Out</text>
                     </Button>
                 </VBox>
@@ -162,7 +125,7 @@
                                 <Button fx:id="saveEntryButton" onAction="#onSaveEntry" styleClass="btn, btn-primary">
                                     <graphic>
                                         <HBox spacing="8" alignment="CENTER">
-                                            <SVGPath fill="#333333" stroke="#333333" strokeWidth="1.5" content="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM17 21v-8H7v8M7 3v5h8" scaleX="0.6" scaleY="0.6"/>
+                                            <SVGPath fill="transparent" stroke="#4B5563" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z M17 21v-8H7v8 M7 3v5h8" scaleX="0.6" scaleY="0.6"/>
                                             <Label text="Save Journal" styleClass="btn-label" style="-fx-text-fill: #333333;"/>
                                         </HBox>
                                     </graphic>
@@ -170,7 +133,7 @@
                                 <Button fx:id="analyseButton" onAction="#onAnalyseEntry" styleClass="btn, btn-ai">
                                     <graphic>
                                         <HBox spacing="8" alignment="CENTER">
-                                            <SVGPath fill="#333333" stroke="#333333" strokeWidth="1.5" content="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M11 8v6 M8 11h6" scaleX="0.6" scaleY="0.6"/>
+                                            <SVGPath fill="transparent" stroke="#4B5563" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z M21 21l-4.35-4.35 M11 8v6 M8 11h6" scaleX="0.6" scaleY="0.6"/>
                                             <Label text="AI Analyze" styleClass="btn-label" style="-fx-text-fill: #333333;"/>
                                         </HBox>
                                     </graphic>
@@ -271,7 +234,7 @@
                                 <Button fx:id="saveMoodButton" onAction="#onSaveMood" styleClass="btn, btn-mood">
                                     <graphic>
                                         <HBox spacing="8" alignment="CENTER">
-                                            <SVGPath fill="#333333" stroke="#333333" strokeWidth="1.5" content="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM17 21v-8H7v8M7 3v5h8" scaleX="0.6" scaleY="0.6"/>
+                                            <SVGPath fill="transparent" stroke="#4B5563" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z M17 21v-8H7v8 M7 3v5h8" scaleX="0.6" scaleY="0.6"/>
                                             <Label text="Save Mood" styleClass="btn-label" style="-fx-text-fill: #333333;"/>
                                         </HBox>
                                     </graphic>
@@ -279,7 +242,7 @@
                                 <Button fx:id="statisticsButton" onAction="#onShowStatistics" styleClass="btn, btn-stats">
                                     <graphic>
                                         <HBox spacing="8" alignment="CENTER">
-                                            <SVGPath fill="#333333" stroke="#333333" strokeWidth="1.5" content="M18 20V10M12 20V4M6 20v-6" scaleX="0.6" scaleY="0.6"/>
+                                            <SVGPath fill="transparent" stroke="#4B5563" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M12 20V10 M18 20V4 M6 20v-4" scaleX="0.6" scaleY="0.6"/>
                                             <Label text="Statistics" styleClass="btn-label-dark" style="-fx-text-fill: #333333;"/>
                                         </HBox>
                                     </graphic>

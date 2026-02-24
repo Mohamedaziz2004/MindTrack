@@ -61,6 +61,17 @@ public class EmotionalJournalController {
     @FXML private Button showMoreJournalsBtn;
     @FXML private Button showMoreMoodsBtn;
     @FXML private Button analyseButton;
+    @FXML private Button sortJournalsBtn;
+    @FXML private Button sortMoodsBtn;
+    @FXML private Label sortJournalLabel;
+    @FXML private Label sortMoodLabel;
+
+    // Search
+    @FXML private Button searchToggleBtn;
+    @FXML private VBox searchOverlay;
+    @FXML private TextField searchField;
+    @FXML private Button searchCloseBtn;
+    @FXML private VBox searchResultsContainer;
 
     // Sidebar
     @FXML private VBox sidebarButtonsBox;
@@ -119,6 +130,8 @@ public class EmotionalJournalController {
     private boolean showAllJournals = false;
     private boolean showAllMoods = false;
     private JournalEmotionnel editingEntry = null;
+    private boolean journalSortNewest = true;  // true = newest first, false = oldest first
+    private boolean moodSortNewest = true;     // true = newest first, false = oldest first
 
     // Window dragging support
     private double xOffset = 0;
@@ -151,13 +164,11 @@ public class EmotionalJournalController {
         setupSidebarNavigation();
         setupWindowControls();
         setSidebarIcons();
+        setupSearch();
 
         // Set Save Mood button icon using IconFactory
         if (saveMoodButton != null) {
             javafx.scene.shape.SVGPath saveIcon = org.mindtrack.mindtrackfxx.util.IconFactory.saveIcon();
-            saveIcon.setStroke(javafx.scene.paint.Color.web("#333333")); // match theme color
-            saveIcon.setScaleX(0.7);
-            saveIcon.setScaleY(0.7);
             saveMoodButton.setGraphic(saveIcon);
         }
     }
@@ -331,59 +342,47 @@ public class EmotionalJournalController {
     private void showValidationError(String message) {
         Stage errorStage = new Stage();
         errorStage.initModality(Modality.APPLICATION_MODAL);
-        errorStage.setTitle("Validation Error");
+        errorStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
 
         VBox root = new VBox(20);
-        root.getStyleClass().add("notification-error");
         root.setPadding(new Insets(28));
         root.setAlignment(Pos.CENTER);
-        root.setPrefWidth(400);
+        root.setPrefWidth(420);
+        root.setStyle("-fx-background-color: #111827; -fx-border-color: rgba(239,68,68,0.3); -fx-border-width: 0 0 3 0;");
 
-        // Error icon emoji
         Label iconLabel = new Label("⚠️");
-        iconLabel.setStyle("-fx-font-size: 48px;");
+        iconLabel.setStyle("-fx-font-size: 42px;");
 
-        // Title
-        Label titleLabel = new Label("Input Validation Error");
-        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #dc2626;");
+        Label titleLabel = new Label("Validation Error");
+        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #fca5a5;");
 
-        // Message
         Label messageLabel = new Label(message);
         messageLabel.setWrapText(true);
-        messageLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #374151; -fx-text-alignment: center;");
+        messageLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.6); -fx-text-alignment: center;");
 
-        // Character count info
         String currentText = getEntryText();
         Label charCountLabel = new Label(String.format("Current: %d characters | Min: %d | Max: %d",
             currentText.length(), MIN_NOTE_LENGTH, MAX_NOTE_LENGTH));
-        charCountLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #6b7280;");
+        charCountLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.35);");
 
-        // OK Button
         Button okBtn = new Button("Got it");
         okBtn.getStyleClass().addAll("btn", "btn-primary");
         okBtn.setOnAction(e -> errorStage.close());
 
-        root.getChildren().addAll(iconLabel, titleLabel, messageLabel, charCountLabel, okBtn);
+        root.getChildren().addAll(createDialogTopBar(errorStage), iconLabel, titleLabel, messageLabel, charCountLabel, okBtn);
 
         Scene scene = new Scene(root);
-        try {
-            scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/styles.css").toExternalForm());
-        } catch (Exception ex) {
-            // Fallback styling
-            root.setStyle("-fx-background-color: white; -fx-background-radius: 12;");
-        }
+        scene.setFill(javafx.scene.paint.Color.web("#111827"));
+        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
         errorStage.setScene(scene);
         errorStage.setResizable(false);
 
-        // Animate entrance
         root.setOpacity(0);
         root.setScaleX(0.8);
         root.setScaleY(0.8);
-
         errorStage.show();
 
-        // Fade in animation
         Timeline fadeIn = new Timeline(
             new KeyFrame(Duration.ZERO,
                 new KeyValue(root.opacityProperty(), 0),
@@ -396,7 +395,6 @@ public class EmotionalJournalController {
         );
         fadeIn.play();
 
-        // Shake animation for emphasis
         Timeline shake = new Timeline(
             new KeyFrame(Duration.millis(0), new KeyValue(root.translateXProperty(), 0)),
             new KeyFrame(Duration.millis(50), new KeyValue(root.translateXProperty(), -5)),
@@ -450,46 +448,67 @@ public class EmotionalJournalController {
         // Show analysis options window
         Stage optionsStage = new Stage();
         optionsStage.initModality(Modality.APPLICATION_MODAL);
-        optionsStage.setTitle("AI Analysis - Mind Track");
+        optionsStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
 
-        VBox root = new VBox(24);
-        root.getStyleClass().add("analysis-options-root");
-        root.setPadding(new Insets(32));
+        VBox root = new VBox(18);
+        root.setStyle("-fx-background-color: #111827; -fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 0 0 3 0;");
+        root.setPadding(new Insets(24));
+
+        // ── Drag bar + Close X ──
+        HBox topBar = new HBox();
+        topBar.setAlignment(Pos.CENTER_RIGHT);
+        Region dragRegion2 = new Region();
+        HBox.setHgrow(dragRegion2, Priority.ALWAYS);
+        final double[] dragOff = new double[2];
+        topBar.setOnMousePressed(ev -> { dragOff[0] = ev.getScreenX() - optionsStage.getX(); dragOff[1] = ev.getScreenY() - optionsStage.getY(); });
+        topBar.setOnMouseDragged(ev -> { optionsStage.setX(ev.getScreenX() - dragOff[0]); optionsStage.setY(ev.getScreenY() - dragOff[1]); });
+
+        Button closeXBtn = new Button();
+        closeXBtn.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4;");
+        SVGPath closeXIcon = new SVGPath();
+        closeXIcon.setContent("M18 6L6 18M6 6l12 12");
+        closeXIcon.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        closeXIcon.setStroke(javafx.scene.paint.Color.web("#22d3ee"));
+        closeXIcon.setStrokeWidth(1.8);
+        closeXIcon.setScaleX(0.55);
+        closeXIcon.setScaleY(0.55);
+        closeXBtn.setGraphic(closeXIcon);
+        closeXBtn.setOnAction(ev -> optionsStage.close());
+        topBar.getChildren().addAll(dragRegion2, closeXBtn);
 
         // Header
-        HBox header = new HBox(16);
+        HBox header = new HBox(14);
         header.setAlignment(Pos.CENTER_LEFT);
 
         try {
             ImageView aiIcon = new ImageView(new Image(getClass().getResourceAsStream("/org/mindtrack/mindtrackfxx/icons/analysing.png")));
-            aiIcon.setFitWidth(40);
-            aiIcon.setFitHeight(40);
+            aiIcon.setFitWidth(36);
+            aiIcon.setFitHeight(36);
             header.getChildren().add(aiIcon);
         } catch (Exception ex) { /* fallback */ }
 
-        VBox titleBox = new VBox(4);
+        VBox titleBox = new VBox(2);
         Label title = new Label("AI Journal Analysis");
-        title.getStyleClass().add("analysis-title");
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #f9fafb;");
         Label subtitle = new Label("Choose how you want to analyse");
-        subtitle.getStyleClass().add("analysis-subtitle");
+        subtitle.setStyle("-fx-text-fill: rgba(255,255,255,0.4); -fx-font-size: 12px;");
         titleBox.getChildren().addAll(title, subtitle);
         header.getChildren().add(titleBox);
 
         // Option 1: Analyse by ID
         VBox option1 = new VBox(12);
-        option1.getStyleClass().add("analysis-option-card");
-        option1.setPadding(new Insets(20));
+        option1.setStyle("-fx-background-color: #0d1117; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: rgba(6,182,212,0.08); -fx-border-radius: 14; -fx-border-width: 1;");
 
         HBox option1Header = new HBox(10);
         option1Header.setAlignment(Pos.CENTER_LEFT);
         Label option1Icon = new Label("🔢");
-        option1Icon.setStyle("-fx-font-size: 24px;");
+        option1Icon.setStyle("-fx-font-size: 22px;");
         Label option1Title = new Label("Analyse by Journal ID");
-        option1Title.getStyleClass().add("analysis-option-title");
+        option1Title.setStyle("-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #e5e7eb;");
         option1Header.getChildren().addAll(option1Icon, option1Title);
 
         Label option1Desc = new Label("Enter the ID of an existing journal entry to analyse");
-        option1Desc.getStyleClass().add("analysis-option-desc");
+        option1Desc.setStyle("-fx-text-fill: rgba(255,255,255,0.4); -fx-font-size: 12px;");
 
         HBox idInputRow = new HBox(12);
         idInputRow.setAlignment(Pos.CENTER_LEFT);
@@ -527,30 +546,31 @@ public class EmotionalJournalController {
         HBox divider = new HBox(16);
         divider.setAlignment(Pos.CENTER);
         Region line1 = new Region();
-        line1.getStyleClass().add("divider-line");
+        line1.setStyle("-fx-border-color: rgba(255,255,255,0.08); -fx-border-width: 0 0 1 0;");
+        line1.setPrefHeight(1);
         HBox.setHgrow(line1, Priority.ALWAYS);
         Label orLabel = new Label("OR");
-        orLabel.getStyleClass().add("divider-text");
+        orLabel.setStyle("-fx-text-fill: rgba(255,255,255,0.3); -fx-font-size: 11px; -fx-font-weight: 700;");
         Region line2 = new Region();
-        line2.getStyleClass().add("divider-line");
+        line2.setStyle("-fx-border-color: rgba(255,255,255,0.08); -fx-border-width: 0 0 1 0;");
+        line2.setPrefHeight(1);
         HBox.setHgrow(line2, Priority.ALWAYS);
         divider.getChildren().addAll(line1, orLabel, line2);
 
         // Option 2: Analyse custom text
         VBox option2 = new VBox(12);
-        option2.getStyleClass().add("analysis-option-card");
-        option2.setPadding(new Insets(20));
+        option2.setStyle("-fx-background-color: #0d1117; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: rgba(6,182,212,0.08); -fx-border-radius: 14; -fx-border-width: 1;");
 
         HBox option2Header = new HBox(10);
         option2Header.setAlignment(Pos.CENTER_LEFT);
         Label option2Icon = new Label("✏️");
-        option2Icon.setStyle("-fx-font-size: 24px;");
+        option2Icon.setStyle("-fx-font-size: 22px;");
         Label option2Title = new Label("Analyse Custom Text");
-        option2Title.getStyleClass().add("analysis-option-title");
+        option2Title.setStyle("-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #e5e7eb;");
         option2Header.getChildren().addAll(option2Icon, option2Title);
 
         Label option2Desc = new Label("Write or paste text to analyse without saving it");
-        option2Desc.getStyleClass().add("analysis-option-desc");
+        option2Desc.setStyle("-fx-text-fill: rgba(255,255,255,0.4); -fx-font-size: 12px;");
 
         TextArea customTextArea = new TextArea();
         customTextArea.setPromptText("Write your thoughts here to analyse...");
@@ -580,15 +600,15 @@ public class EmotionalJournalController {
         cancelBtn.setOnAction(ev -> optionsStage.close());
         footer.getChildren().add(cancelBtn);
 
-        root.getChildren().addAll(header, option1, divider, option2, footer);
+        root.getChildren().addAll(topBar, header, option1, divider, option2, footer);
 
         Scene scene = new Scene(root, 500, 580);
-        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/styles.css").toExternalForm());
+        scene.setFill(javafx.scene.paint.Color.web("#111827"));
+        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
         optionsStage.setScene(scene);
         optionsStage.setResizable(false);
 
-        // Add entrance animations
         animateFadeIn(root, 300);
         animateSlideUp(option1, 400, 30);
         animateSlideUp(option2, 500, 30);
@@ -600,18 +620,18 @@ public class EmotionalJournalController {
         // Show loading indicator
         Stage loadingStage = new Stage();
         loadingStage.initModality(Modality.APPLICATION_MODAL);
-        loadingStage.setTitle("Analysing...");
+        loadingStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
 
         VBox loadingRoot = new VBox(20);
         loadingRoot.setAlignment(Pos.CENTER);
         loadingRoot.setPadding(new Insets(40));
-        loadingRoot.getStyleClass().add("notification-root");
+        loadingRoot.setStyle("-fx-background-color: #111827; -fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 0 0 3 0;");
 
         Label loadingIcon = new Label("🔍");
-        loadingIcon.setStyle("-fx-font-size: 48px;");
+        loadingIcon.setStyle("-fx-font-size: 42px;");
 
         Label loadingText = new Label("Analysing your journal entry...");
-        loadingText.getStyleClass().add("notification-title");
+        loadingText.setStyle("-fx-text-fill: #f9fafb; -fx-font-size: 14px; -fx-font-weight: 600;");
 
         ProgressIndicator progress = new ProgressIndicator();
         progress.setPrefSize(50, 50);
@@ -619,7 +639,8 @@ public class EmotionalJournalController {
         loadingRoot.getChildren().addAll(loadingIcon, loadingText, progress);
 
         Scene loadingScene = new Scene(loadingRoot, 350, 220);
-        loadingScene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/styles.css").toExternalForm());
+        loadingScene.setFill(javafx.scene.paint.Color.web("#111827"));
+        loadingScene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
         loadingStage.setScene(loadingScene);
         loadingStage.setResizable(false);
         loadingStage.show();
@@ -646,42 +667,63 @@ public class EmotionalJournalController {
     private void showAnalysisResult(String result, String journalText) {
         Stage resultStage = new Stage();
         resultStage.initModality(Modality.APPLICATION_MODAL);
-        resultStage.setTitle("AI Analysis Results - Mind Track");
+        resultStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
 
-        VBox root = new VBox(24);
-        root.getStyleClass().add("analysis-root");
-        root.setPadding(new Insets(32));
+        VBox root = new VBox(18);
+        root.setStyle("-fx-background-color: #111827; -fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 0 0 3 0;");
+        root.setPadding(new Insets(24));
 
-        // Header
-        HBox header = new HBox(16);
+        // ── Drag bar + Close X ──
+        HBox topBar = new HBox();
+        topBar.setAlignment(Pos.CENTER_RIGHT);
+        Region dragRegion = new Region();
+        HBox.setHgrow(dragRegion, Priority.ALWAYS);
+        final double[] dragOffset = new double[2];
+        topBar.setOnMousePressed(ev -> { dragOffset[0] = ev.getScreenX() - resultStage.getX(); dragOffset[1] = ev.getScreenY() - resultStage.getY(); });
+        topBar.setOnMouseDragged(ev -> { resultStage.setX(ev.getScreenX() - dragOffset[0]); resultStage.setY(ev.getScreenY() - dragOffset[1]); });
+
+        Button closeX = new Button();
+        closeX.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4;");
+        SVGPath closeIcon = new SVGPath();
+        closeIcon.setContent("M18 6L6 18M6 6l12 12");
+        closeIcon.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        closeIcon.setStroke(javafx.scene.paint.Color.web("#22d3ee"));
+        closeIcon.setStrokeWidth(1.8);
+        closeIcon.setScaleX(0.55);
+        closeIcon.setScaleY(0.55);
+        closeX.setGraphic(closeIcon);
+        closeX.setOnAction(ev -> resultStage.close());
+        topBar.getChildren().addAll(dragRegion, closeX);
+
+        // ── Header ──
+        HBox header = new HBox(14);
         header.setAlignment(Pos.CENTER_LEFT);
 
         try {
             ImageView aiIcon = new ImageView(new Image(getClass().getResourceAsStream("/org/mindtrack/mindtrackfxx/icons/analysing.png")));
-            aiIcon.setFitWidth(40);
-            aiIcon.setFitHeight(40);
+            aiIcon.setFitWidth(36);
+            aiIcon.setFitHeight(36);
             header.getChildren().add(aiIcon);
         } catch (Exception ex) { /* fallback */ }
 
-        VBox titleBox = new VBox(4);
+        VBox titleBox = new VBox(2);
         Label title = new Label("AI Analysis Results");
-        title.getStyleClass().add("analysis-title");
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #f9fafb;");
         Label subtitle = new Label("Emotional analysis of your journal entry");
-        subtitle.getStyleClass().add("analysis-subtitle");
+        subtitle.setStyle("-fx-text-fill: rgba(255,255,255,0.4); -fx-font-size: 12px;");
         titleBox.getChildren().addAll(title, subtitle);
         header.getChildren().add(titleBox);
 
-        // Journal preview card
-        VBox journalCard = new VBox(10);
-        journalCard.getStyleClass().add("analysis-journal-card");
-        journalCard.setPadding(new Insets(16));
+        // ── Journal preview ──
+        VBox journalCard = new VBox(8);
+        journalCard.setStyle("-fx-background-color: #0d1117; -fx-background-radius: 12; -fx-padding: 16; -fx-border-color: #0d1117; -fx-border-radius: 12; -fx-border-width: 1;");
 
         Label journalLabel = new Label("📝 Your Entry:");
-        journalLabel.getStyleClass().add("analysis-section-title");
+        journalLabel.setStyle("-fx-text-fill: rgba(255,255,255,0.4); -fx-font-size: 11px; -fx-font-weight: 700;");
 
         String previewText = journalText.length() > 200 ? journalText.substring(0, 200) + "..." : journalText;
         Label journalPreview = new Label(previewText);
-        journalPreview.getStyleClass().add("analysis-journal-preview");
+        journalPreview.setStyle("-fx-text-fill: rgba(255,255,255,0.6); -fx-font-size: 13px;");
         journalPreview.setWrapText(true);
 
         journalCard.getChildren().addAll(journalLabel, journalPreview);
@@ -717,7 +759,8 @@ public class EmotionalJournalController {
 
         // Results container
         VBox resultsContainer = new VBox(16);
-        resultsContainer.getStyleClass().add("analysis-results-container");
+        resultsContainer.setStyle("-fx-background-color: #111827;");
+        resultsContainer.setPadding(new Insets(4));
 
         // Emotion Card
         if (!emotion.isEmpty()) {
@@ -769,25 +812,33 @@ public class EmotionalJournalController {
 
         ScrollPane scrollPane = new ScrollPane(resultsContainer);
         scrollPane.setFitToWidth(true);
-        scrollPane.getStyleClass().add("analysis-scroll");
+        scrollPane.setStyle("-fx-background-color: #111827; -fx-background: #111827;");
+        // Force viewport dark
+        scrollPane.skinProperty().addListener((obs, oldSkin, newSkin) -> {
+            if (newSkin != null) {
+                javafx.scene.Node viewport = scrollPane.lookup(".viewport");
+                if (viewport != null) viewport.setStyle("-fx-background-color: #111827;");
+            }
+        });
         VBox.setVgrow(scrollPane, Priority.ALWAYS);
 
         // Footer
-        HBox footer = new HBox(16);
+        HBox footer = new HBox();
         footer.setAlignment(Pos.CENTER_RIGHT);
-        footer.setPadding(new Insets(16, 0, 0, 0));
+        footer.setPadding(new Insets(12, 0, 0, 0));
 
         Button closeBtn = new Button("Close");
         closeBtn.getStyleClass().addAll("btn", "btn-primary");
-        closeBtn.setPrefWidth(120);
+        closeBtn.setPrefWidth(110);
         closeBtn.setOnAction(ev -> resultStage.close());
 
         footer.getChildren().add(closeBtn);
 
-        root.getChildren().addAll(header, journalCard, scrollPane, footer);
+        root.getChildren().addAll(topBar, header, journalCard, scrollPane, footer);
 
         Scene scene = new Scene(root, 580, 650);
-        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/styles.css").toExternalForm());
+        scene.setFill(javafx.scene.paint.Color.web("#111827"));
+        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
         resultStage.setScene(scene);
         resultStage.setMinWidth(480);
@@ -807,7 +858,7 @@ public class EmotionalJournalController {
         card.setAlignment(Pos.CENTER_LEFT);
         card.getStyleClass().add("result-card");
         card.setPadding(new Insets(16, 20, 16, 20));
-        card.setStyle("-fx-background-color: " + color + "; -fx-background-radius: 14;");
+        card.setStyle("-fx-background-color: " + color + "; -fx-background-radius: 14; -fx-border-color: rgba(6,182,212,0.08); -fx-border-radius: 14; -fx-border-width: 1;");
 
         // Emoji
         Label emojiLabel = new Label(emoji);
@@ -830,7 +881,7 @@ public class EmotionalJournalController {
         card.setAlignment(Pos.CENTER_LEFT);
         card.getStyleClass().add("result-card");
         card.setPadding(new Insets(16, 20, 16, 20));
-        card.setStyle("-fx-background-color: linear-gradient(to right, #dbeafe, #eff6ff); -fx-background-radius: 14;");
+        card.setStyle("-fx-background-color: #0a1929; -fx-background-radius: 14; -fx-border-color: rgba(6,182,212,0.15); -fx-border-radius: 14; -fx-border-width: 1;");
 
         // Emoji
         Label emojiLabel = new Label("📊");
@@ -932,13 +983,13 @@ public class EmotionalJournalController {
 
     private String getEmotionColor(String emotion) {
         String e = emotion.toLowerCase();
-        if (e.contains("joy") || e.contains("happy")) return "linear-gradient(to right, #dcfce7, #f0fdf4)";
-        if (e.contains("sad")) return "linear-gradient(to right, #e0e7ff, #eef2ff)";
-        if (e.contains("anger") || e.contains("angry")) return "linear-gradient(to right, #fee2e2, #fef2f2)";
-        if (e.contains("fear")) return "linear-gradient(to right, #fef3c7, #fffbeb)";
-        if (e.contains("anxiety") || e.contains("angry")) return "linear-gradient(to right, #fce7f3, #fdf2f8)";
-        if (e.contains("hope") || e.contains("love") || e.contains("excite")) return "linear-gradient(to right, #fce7f3, #fdf2f8)";
-        return "linear-gradient(to right, #f1f5f9, #f8fafc)";
+        if (e.contains("joy") || e.contains("happy")) return "#0d2818";
+        if (e.contains("sad")) return "#0d1333";
+        if (e.contains("anger") || e.contains("angry")) return "#2d0a0a";
+        if (e.contains("fear")) return "#2d2000";
+        if (e.contains("anxiety") || e.contains("anxious")) return "#2d0a1e";
+        if (e.contains("hope") || e.contains("love") || e.contains("excite")) return "#2d0a1e";
+        return "#0d1117";
     }
 
     /**
@@ -953,9 +1004,9 @@ public class EmotionalJournalController {
 
     private String getSentimentColor(String sentiment) {
         String s = sentiment.toLowerCase();
-        if (s.contains("positive")) return "linear-gradient(to right, #dcfce7, #f0fdf4)";
-        if (s.contains("negative")) return "linear-gradient(to right, #fee2e2, #fef2f2)";
-        return "linear-gradient(to right, #f1f5f9, #f8fafc)";
+        if (s.contains("positive")) return "#0d2818";
+        if (s.contains("negative")) return "#2d0a0a";
+        return "#0d1117";
     }
 
     @FXML
@@ -996,6 +1047,15 @@ public class EmotionalJournalController {
         if (entriesContainer != null) {
             entriesContainer.getChildren().clear();
             List<JournalEmotionnel> entries = journalService.readAll();
+
+            // Sort by date
+            entries.sort((a, b) -> {
+                if (a.getDateCreation() == null || b.getDateCreation() == null) return 0;
+                return journalSortNewest
+                    ? b.getDateCreation().compareTo(a.getDateCreation())
+                    : a.getDateCreation().compareTo(b.getDateCreation());
+            });
+
             int journalLimit = showAllJournals ? entries.size() : Math.min(INITIAL_DISPLAY_COUNT, entries.size());
 
             for (int i = 0; i < journalLimit; i++) {
@@ -1024,6 +1084,15 @@ public class EmotionalJournalController {
         if (moodEntriesContainer != null) {
             moodEntriesContainer.getChildren().clear();
             List<humeur> moods = moodService.readAll();
+
+            // Sort by date
+            moods.sort((a, b) -> {
+                if (a.getDate() == null || b.getDate() == null) return 0;
+                return moodSortNewest
+                    ? b.getDate().compareTo(a.getDate())
+                    : a.getDate().compareTo(b.getDate());
+            });
+
             int moodLimit = showAllMoods ? moods.size() : Math.min(INITIAL_DISPLAY_COUNT, moods.size());
 
             for (int i = 0; i < moodLimit; i++) {
@@ -1047,6 +1116,209 @@ public class EmotionalJournalController {
                 }
             }
         }
+    }
+
+    @FXML
+    public void onSortJournals() {
+        journalSortNewest = !journalSortNewest;
+        if (sortJournalLabel != null) {
+            sortJournalLabel.setText(journalSortNewest ? "Newest" : "Oldest");
+        }
+        renderRecentEntries();
+    }
+
+    @FXML
+    public void onSortMoods() {
+        moodSortNewest = !moodSortNewest;
+        if (sortMoodLabel != null) {
+            sortMoodLabel.setText(moodSortNewest ? "Newest" : "Oldest");
+        }
+        renderRecentEntries();
+    }
+
+    // ========================================
+    // SEARCH
+    // ========================================
+
+    private void setupSearch() {
+        if (searchField == null) return;
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> performSearch(newVal));
+    }
+
+    @FXML
+    public void onToggleSearch() {
+        if (searchOverlay == null) return;
+        boolean isVisible = searchOverlay.isVisible();
+        if (isVisible) {
+            // Slide up & hide
+            closeSearchOverlay();
+        } else {
+            // Show with slide-down animation
+            searchOverlay.setVisible(true);
+            searchOverlay.setManaged(true);
+            searchOverlay.setOpacity(0);
+            searchOverlay.setTranslateY(-20);
+
+            javafx.animation.ParallelTransition anim = new javafx.animation.ParallelTransition(
+                createFade(searchOverlay, 0, 1, 200),
+                createSlide(searchOverlay, -20, 0, 200)
+            );
+            anim.play();
+
+            // Focus the text field
+            searchField.requestFocus();
+        }
+    }
+
+    @FXML
+    public void onCloseSearch() {
+        closeSearchOverlay();
+    }
+
+    private void closeSearchOverlay() {
+        if (searchOverlay == null) return;
+        javafx.animation.ParallelTransition anim = new javafx.animation.ParallelTransition(
+            createFade(searchOverlay, 1, 0, 150),
+            createSlide(searchOverlay, 0, -20, 150)
+        );
+        anim.setOnFinished(e -> {
+            searchOverlay.setVisible(false);
+            searchOverlay.setManaged(false);
+            searchField.clear();
+            if (searchResultsContainer != null) searchResultsContainer.getChildren().clear();
+        });
+        anim.play();
+    }
+
+    private javafx.animation.FadeTransition createFade(javafx.scene.Node node, double from, double to, int ms) {
+        javafx.animation.FadeTransition ft = new javafx.animation.FadeTransition(Duration.millis(ms), node);
+        ft.setFromValue(from);
+        ft.setToValue(to);
+        return ft;
+    }
+
+    private javafx.animation.TranslateTransition createSlide(javafx.scene.Node node, double fromY, double toY, int ms) {
+        javafx.animation.TranslateTransition tt = new javafx.animation.TranslateTransition(Duration.millis(ms), node);
+        tt.setFromY(fromY);
+        tt.setToY(toY);
+        tt.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+        return tt;
+    }
+
+    private void performSearch(String query) {
+        if (searchResultsContainer == null) return;
+        searchResultsContainer.getChildren().clear();
+
+        if (query == null || query.trim().isEmpty()) return;
+
+        String q = query.trim().toLowerCase();
+        List<JournalEmotionnel> allEntries = journalService.readAll();
+
+        List<JournalEmotionnel> matches = allEntries.stream()
+            .filter(e -> e.getNotePersonnelle() != null && e.getNotePersonnelle().toLowerCase().contains(q))
+            .sorted((a, b) -> {
+                // Prioritize entries that START with the query
+                boolean aStarts = a.getNotePersonnelle().toLowerCase().startsWith(q);
+                boolean bStarts = b.getNotePersonnelle().toLowerCase().startsWith(q);
+                if (aStarts && !bStarts) return -1;
+                if (!aStarts && bStarts) return 1;
+                // Then by date newest first
+                if (a.getDateCreation() != null && b.getDateCreation() != null)
+                    return b.getDateCreation().compareTo(a.getDateCreation());
+                return 0;
+            })
+            .limit(6)
+            .collect(java.util.stream.Collectors.toList());
+
+        if (matches.isEmpty()) {
+            Label noResult = new Label("No journals found for \"" + query.trim() + "\"");
+            noResult.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 12px; -fx-padding: 16;");
+            noResult.setAlignment(Pos.CENTER);
+            noResult.setMaxWidth(Double.MAX_VALUE);
+            searchResultsContainer.getChildren().add(noResult);
+            return;
+        }
+
+        for (int i = 0; i < matches.size(); i++) {
+            JournalEmotionnel entry = matches.get(i);
+            HBox resultItem = buildSearchResultItem(entry, q);
+            searchResultsContainer.getChildren().add(resultItem);
+
+            // Staggered fade-in
+            resultItem.setOpacity(0);
+            javafx.animation.FadeTransition ft = new javafx.animation.FadeTransition(Duration.millis(120), resultItem);
+            ft.setFromValue(0);
+            ft.setToValue(1);
+            ft.setDelay(Duration.millis(i * 40));
+            ft.play();
+        }
+    }
+
+    private HBox buildSearchResultItem(JournalEmotionnel entry, String query) {
+        HBox item = new HBox(12);
+        item.setAlignment(Pos.CENTER_LEFT);
+        item.getStyleClass().add("search-result-item");
+
+        // Journal icon
+        SVGPath icon = org.mindtrack.mindtrackfxx.util.IconFactory.getIcon("journal");
+        icon.setScaleX(0.55);
+        icon.setScaleY(0.55);
+        icon.setStroke(javafx.scene.paint.Color.web("#22d3ee"));
+
+        // Text content
+        VBox textBox = new VBox(2);
+        textBox.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(textBox, Priority.ALWAYS);
+
+        // Title — highlight matching text
+        String content = entry.getNotePersonnelle();
+        String preview = content.length() > 80 ? content.substring(0, 80) + "..." : content;
+
+        javafx.scene.text.TextFlow titleFlow = buildHighlightedText(preview, query);
+        titleFlow.setMaxWidth(Double.MAX_VALUE);
+
+        // Date
+        String dateStr = entry.getDateCreation() != null
+            ? entry.getDateCreation().format(CARD_DATE_FORMATTER)
+            : "Unknown date";
+        Label dateLabel = new Label(dateStr);
+        dateLabel.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 10px;");
+
+        textBox.getChildren().addAll(titleFlow, dateLabel);
+
+        // Click to show the full entry
+        item.setOnMouseClicked(ev -> {
+            closeSearchOverlay();
+            showFullJournalEntry(entry);
+        });
+
+        item.getChildren().addAll(icon, textBox);
+        return item;
+    }
+
+    private javafx.scene.text.TextFlow buildHighlightedText(String text, String query) {
+        javafx.scene.text.TextFlow flow = new javafx.scene.text.TextFlow();
+        String lower = text.toLowerCase();
+        int idx = 0;
+        while (idx < text.length()) {
+            int matchIdx = lower.indexOf(query, idx);
+            if (matchIdx < 0) {
+                javafx.scene.text.Text rest = new javafx.scene.text.Text(text.substring(idx));
+                rest.setStyle("-fx-fill: #d1d5db; -fx-font-size: 12px;");
+                flow.getChildren().add(rest);
+                break;
+            }
+            if (matchIdx > idx) {
+                javafx.scene.text.Text before = new javafx.scene.text.Text(text.substring(idx, matchIdx));
+                before.setStyle("-fx-fill: #d1d5db; -fx-font-size: 12px;");
+                flow.getChildren().add(before);
+            }
+            javafx.scene.text.Text match = new javafx.scene.text.Text(text.substring(matchIdx, matchIdx + query.length()));
+            match.setStyle("-fx-fill: #22d3ee; -fx-font-weight: 700; -fx-font-size: 12px;");
+            flow.getChildren().add(match);
+            idx = matchIdx + query.length();
+        }
+        return flow;
     }
 
     private void updateShowMoreButton(Button btn, boolean showingAll, int totalCount) {
@@ -1088,18 +1360,25 @@ public class EmotionalJournalController {
             Parent root = loader.load();
 
             Stage statsStage = new Stage();
-            statsStage.setTitle("Mood Statistics - Mind Track");
             statsStage.initModality(Modality.APPLICATION_MODAL);
+            statsStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
 
-            Scene scene = new Scene(root, 900, 700);
-            scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/styles.css").toExternalForm());
+            // Wrap in a container with close button
+            VBox wrapper = new VBox();
+            wrapper.setStyle("-fx-background-color: #111827;");
+            wrapper.getChildren().addAll(createDialogTopBar(statsStage), root);
+            VBox.setVgrow(root, Priority.ALWAYS);
+
+            Scene scene = new Scene(wrapper, 900, 700);
+            scene.setFill(javafx.scene.paint.Color.web("#111827"));
+            scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
             statsStage.setScene(scene);
             statsStage.setMinWidth(800);
             statsStage.setMinHeight(600);
 
             // Add entrance animation
-            animateFadeIn(root, 400);
+            animateFadeIn(wrapper, 400);
 
             statsStage.show();
         } catch (Exception e) {
@@ -1144,83 +1423,72 @@ public class EmotionalJournalController {
     private void showFullJournalEntry(JournalEmotionnel e) {
         try {
             Stage readMoreStage = new Stage();
-            readMoreStage.setTitle("Journal Entry - Mind Track");
             readMoreStage.initModality(Modality.APPLICATION_MODAL);
+            readMoreStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
 
             // Main container
-            VBox root = new VBox(24);
+            VBox root = new VBox(20);
             root.getStyleClass().add("read-more-root");
-            root.setPadding(new Insets(32));
+            root.setPadding(new Insets(28));
+            root.setStyle("-fx-background-color: #111827; -fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 0 0 3 0;");
 
-            // Header with icon and title
-            HBox header = new HBox(16);
+            // ── Top bar with drag + close ──
+            HBox topBar = createDialogTopBar(readMoreStage);
+
+            // ── Header ──
+            HBox header = new HBox(14);
             header.setAlignment(Pos.CENTER_LEFT);
-            header.getStyleClass().add("read-more-header");
 
-            try {
-                ImageView journalIcon = new ImageView(new Image(getClass().getResourceAsStream("/org/mindtrack/mindtrackfxx/icons/journal.png")));
-                journalIcon.setFitWidth(36);
-                journalIcon.setFitHeight(36);
-                header.getChildren().add(journalIcon);
-            } catch (Exception ex) { /* fallback */ }
+            String dateStr = e.getDateCreation() != null ? e.getDateCreation().format(CARD_DATE_FORMATTER) : "";
+            String timeStr = e.getDateCreation() != null ? e.getDateCreation().format(CARD_TIME_FORMATTER) : "";
 
-            VBox titleBox = new VBox(4);
-            Label titleLabel = new Label("Journal Entry");
-            titleLabel.getStyleClass().add("read-more-title");
+            Label dateLabel = new Label(dateStr);
+            dateLabel.setStyle("-fx-text-fill: #22d3ee; -fx-font-size: 14px; -fx-font-weight: 600;");
 
-            Label dateLabel = new Label("📅 " + e.getDateCreation().format(CARD_DATE_FORMATTER));
-            dateLabel.getStyleClass().add("read-more-date");
+            Region hSpacer = new Region();
+            HBox.setHgrow(hSpacer, Priority.ALWAYS);
 
-            titleBox.getChildren().addAll(titleLabel, dateLabel);
-            header.getChildren().add(titleBox);
+            Label timeBadge = new Label(timeStr);
+            timeBadge.setStyle("-fx-background-color: rgba(6,182,212,0.15); -fx-padding: 6 16; -fx-background-radius: 8; -fx-text-fill: #22d3ee; -fx-font-weight: 600; -fx-font-size: 12px;");
 
-            // Time badge
-            Region spacer = new Region();
-            HBox.setHgrow(spacer, Priority.ALWAYS);
-            header.getChildren().add(spacer);
+            header.getChildren().addAll(dateLabel, hSpacer, timeBadge);
 
-            // Time badge - show actual creation time
-            Label timeBadge = new Label("🕐 " + e.getDateCreation().format(CARD_TIME_FORMATTER));
-            timeBadge.getStyleClass().add("read-more-time-badge");
-            header.getChildren().add(timeBadge);
+            // ── Content ──
+            VBox contentCard = new VBox(12);
+            contentCard.setStyle("-fx-background-color: #0f1520; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: rgba(6,182,212,0.1); -fx-border-radius: 14; -fx-border-width: 1;");
 
-            // Content card
-            VBox contentCard = new VBox(16);
-            contentCard.getStyleClass().add("read-more-card");
-            contentCard.setPadding(new Insets(24));
-
-            Label contentTitle = new Label("Entry Content");
-            contentTitle.getStyleClass().add("read-more-content-title");
+            Label contentTitle = new Label("ENTRY");
+            contentTitle.setStyle("-fx-text-fill: rgba(255,255,255,0.35); -fx-font-size: 11px; -fx-font-weight: 700;");
 
             TextArea textArea = new TextArea(e.getNotePersonnelle());
             textArea.setEditable(false);
             textArea.setWrapText(true);
-            textArea.setPrefRowCount(12);
-            textArea.getStyleClass().add("read-more-textarea");
+            textArea.setPrefRowCount(10);
+            textArea.getStyleClass().add("dark-textarea");
             VBox.setVgrow(textArea, Priority.ALWAYS);
 
             contentCard.getChildren().addAll(contentTitle, textArea);
             VBox.setVgrow(contentCard, Priority.ALWAYS);
 
-            // Footer with close button
+            // ── Footer ──
             HBox footer = new HBox();
             footer.setAlignment(Pos.CENTER_RIGHT);
-            footer.getStyleClass().add("read-more-footer");
 
             Button closeBtn = new Button("Close");
-            closeBtn.getStyleClass().addAll("btn", "btn-light");
+            closeBtn.getStyleClass().addAll("btn", "btn-primary");
             closeBtn.setOnAction(ev -> readMoreStage.close());
 
             footer.getChildren().add(closeBtn);
 
-            root.getChildren().addAll(header, contentCard, footer);
+            root.getChildren().addAll(topBar, header, contentCard, footer);
 
-            Scene scene = new Scene(root, 600, 500);
-            scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/styles.css").toExternalForm());
+            Scene scene = new Scene(root, 560, 460);
+            scene.setFill(javafx.scene.paint.Color.web("#111827"));
+            scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
             readMoreStage.setScene(scene);
-            readMoreStage.setMinWidth(500);
-            readMoreStage.setMinHeight(400);
+            readMoreStage.setMinWidth(450);
+            readMoreStage.setMinHeight(360);
 
             // Add entrance animation
             animateFadeIn(root, 300);
@@ -1271,36 +1539,62 @@ public class EmotionalJournalController {
 
     private Button createIconButton(String text, SVGPath icon) {
         Button btn = new Button(text);
-        icon.setStroke(javafx.scene.paint.Color.web("#333333"));
         icon.setFill(javafx.scene.paint.Color.TRANSPARENT);
-        icon.setScaleX(0.7);
-        icon.setScaleY(0.7);
+        icon.setStroke(javafx.scene.paint.Color.web("#9ca3af"));
+        icon.setStrokeWidth(1.8);
+        icon.setStrokeLineCap(javafx.scene.shape.StrokeLineCap.ROUND);
+        icon.setStrokeLineJoin(javafx.scene.shape.StrokeLineJoin.ROUND);
+        icon.setScaleX(0.6);
+        icon.setScaleY(0.6);
         btn.setGraphic(icon);
-        btn.setStyle("-fx-text-fill: #333333;");
         return btn;
+    }
+
+    /** Creates a top bar with a close X button and drag support for undecorated stages. */
+    private HBox createDialogTopBar(Stage stage) {
+        HBox topBar = new HBox();
+        topBar.setAlignment(Pos.CENTER_RIGHT);
+        topBar.setPadding(new Insets(0, 0, 8, 0));
+        Region drag = new Region();
+        HBox.setHgrow(drag, Priority.ALWAYS);
+        final double[] off = new double[2];
+        topBar.setOnMousePressed(ev -> { off[0] = ev.getScreenX() - stage.getX(); off[1] = ev.getScreenY() - stage.getY(); });
+        topBar.setOnMouseDragged(ev -> { stage.setX(ev.getScreenX() - off[0]); stage.setY(ev.getScreenY() - off[1]); });
+        Button closeX = new Button();
+        closeX.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4;");
+        SVGPath xIcon = new SVGPath();
+        xIcon.setContent("M18 6L6 18M6 6l12 12");
+        xIcon.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        xIcon.setStroke(javafx.scene.paint.Color.web("#22d3ee"));
+        xIcon.setStrokeWidth(1.8);
+        xIcon.setScaleX(0.5);
+        xIcon.setScaleY(0.5);
+        closeX.setGraphic(xIcon);
+        closeX.setOnAction(ev -> stage.close());
+        topBar.getChildren().addAll(drag, closeX);
+        return topBar;
     }
 
     private void editMoodEntry(humeur m) {
         // Open edit mood dialog
         Stage editStage = new Stage();
         editStage.initModality(Modality.APPLICATION_MODAL);
-        editStage.setTitle("Edit Mood Entry");
+        editStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
 
-        VBox root = new VBox(20);
-        root.getStyleClass().add("edit-mood-root");
-        root.setPadding(new Insets(32));
+        VBox root = new VBox(18);
+        root.setPadding(new Insets(28));
         root.setAlignment(Pos.CENTER);
+        root.getStyleClass().add("edit-mood-root");
 
         // Header
         VBox header = new VBox(4);
         header.setAlignment(Pos.CENTER);
-        header.getStyleClass().add("edit-mood-header");
 
         Label title = new Label("Edit Mood Entry");
-        title.getStyleClass().add("edit-mood-title");
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #f9fafb;");
 
-        Label dateLabel = new Label("📅 " + m.getDate().format(CARD_DATE_FORMATTER));
-        dateLabel.getStyleClass().add("read-more-date");
+        Label dateLabel = new Label(m.getDate().format(CARD_DATE_FORMATTER));
+        dateLabel.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 12px;");
 
         header.getChildren().addAll(title, dateLabel);
 
@@ -1308,7 +1602,7 @@ public class EmotionalJournalController {
         VBox moodBox = new VBox(12);
         moodBox.setAlignment(Pos.CENTER_LEFT);
         Label moodLabel = new Label("Select Mood:");
-        moodLabel.getStyleClass().add("label-muted");
+        moodLabel.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 13px;");
 
         ToggleGroup editMoodGroup = new ToggleGroup();
         VBox moodOptions = new VBox(8);
@@ -1331,7 +1625,7 @@ public class EmotionalJournalController {
                 graphic.getChildren().add(emojiIcon);
             } catch (Exception ex) { /* fallback */ }
             Label moodText = new Label(moods[i]);
-            moodText.getStyleClass().add("mood-label-large");
+            moodText.setStyle("-fx-font-size: 13px; -fx-font-weight: 500; -fx-text-fill: #e5e7eb;");
             graphic.getChildren().add(moodText);
             rb.setGraphic(graphic);
 
@@ -1347,7 +1641,7 @@ public class EmotionalJournalController {
         VBox intensityBox = new VBox(10);
         intensityBox.setAlignment(Pos.CENTER);
         Label intensityLabel = new Label("Intensity: " + m.getIntensite());
-        intensityLabel.getStyleClass().add("label-muted");
+        intensityLabel.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 13px;");
 
         Slider editSlider = new Slider(1, 10, m.getIntensite());
         editSlider.setShowTickLabels(true);
@@ -1370,9 +1664,9 @@ public class EmotionalJournalController {
         cancelBtn.setOnAction(ev -> editStage.close());
 
         Button saveBtn = createIconButton("Save", org.mindtrack.mindtrackfxx.util.IconFactory.saveIcon());
+        saveBtn.getStyleClass().addAll("btn", "btn-primary");
         saveBtn.setPrefWidth(100);
         saveBtn.setOnAction(ev -> {
-            // Get selected mood by checking which radio is selected
             String selectedMood = "Neutral";
             for (int i = 0; i < moodRadios.length; i++) {
                 if (moodRadios[i].isSelected()) {
@@ -1380,7 +1674,6 @@ public class EmotionalJournalController {
                     break;
                 }
             }
-            // Update mood
             m.setTypeHumeur(selectedMood);
             m.setIntensite((int) editSlider.getValue());
             moodService.update(m);
@@ -1391,74 +1684,63 @@ public class EmotionalJournalController {
 
         buttons.getChildren().addAll(cancelBtn, saveBtn);
 
-        root.getChildren().addAll(header, moodBox, intensityBox, buttons);
+        root.getChildren().addAll(createDialogTopBar(editStage), header, moodBox, intensityBox, buttons);
 
-        Scene scene = new Scene(root, 400, 480);
-        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/styles.css").toExternalForm());
+        Scene scene = new Scene(root, 400, 520);
+        scene.setFill(javafx.scene.paint.Color.web("#111827"));
+        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
         editStage.setScene(scene);
         editStage.setResizable(false);
-
-        // Add entrance animation
-        animateFadeIn(root, 300);
-        animateSlideUp(moodBox, 350, 20);
-        animateSlideUp(intensityBox, 400, 20);
 
         editStage.showAndWait();
     }
 
     private void deleteMoodEntry(humeur m) {
-        // Show styled confirmation dialog
         Stage confirmStage = new Stage();
         confirmStage.initModality(Modality.APPLICATION_MODAL);
-        confirmStage.setTitle("Confirm Delete");
+        confirmStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
 
-        VBox root = new VBox(20);
-        root.getStyleClass().add("confirm-root");
-        root.setPadding(new Insets(32));
+        VBox root = new VBox(18);
+        root.setPadding(new Insets(28));
         root.setAlignment(Pos.CENTER);
+        root.setStyle("-fx-background-color: #111827; -fx-border-color: rgba(239,68,68,0.3); -fx-border-width: 0 0 3 0;");
 
-        // Warning icon emoji
         Label warningIcon = new Label("⚠️");
-        warningIcon.setStyle("-fx-font-size: 48px;");
+        warningIcon.setStyle("-fx-font-size: 42px;");
 
-        // Title
         Label title = new Label("Delete Mood Entry?");
-        title.getStyleClass().add("confirm-title");
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #f9fafb;");
 
-        // Mood info with emoji
         HBox moodInfo = new HBox(10);
         moodInfo.setAlignment(Pos.CENTER);
         try {
             ImageView emojiIcon = new ImageView(new Image(getClass().getResourceAsStream("/org/mindtrack/mindtrackfxx/emojis/" + m.getTypeHumeur().toLowerCase() + ".png")));
-            emojiIcon.setFitWidth(32);
-            emojiIcon.setFitHeight(32);
+            emojiIcon.setFitWidth(28);
+            emojiIcon.setFitHeight(28);
             moodInfo.getChildren().add(emojiIcon);
         } catch (Exception ex) { /* fallback */ }
-        Label moodLabel = new Label(m.getTypeHumeur() + " - Intensity: " + m.getIntensite() + "/10");
-        moodLabel.getStyleClass().add("confirm-message");
+        Label moodLabel = new Label(m.getTypeHumeur() + " — Intensity: " + m.getIntensite() + "/10");
+        moodLabel.setStyle("-fx-text-fill: rgba(255,255,255,0.6); -fx-font-size: 13px;");
         moodInfo.getChildren().add(moodLabel);
 
-        // Message
         Label message = new Label("Recorded on " + m.getDate().format(CARD_DATE_FORMATTER));
-        message.getStyleClass().add("confirm-message");
+        message.setStyle("-fx-text-fill: rgba(255,255,255,0.4); -fx-font-size: 12px;");
 
-        // Warning text
         Label warning = new Label("This action cannot be undone.");
-        warning.setStyle("-fx-text-fill: #dc2626; -fx-font-size: 12px;");
+        warning.setStyle("-fx-text-fill: #fca5a5; -fx-font-size: 11px;");
 
-        // Buttons
-        HBox buttons = new HBox(16);
+        HBox buttons = new HBox(12);
         buttons.setAlignment(Pos.CENTER);
 
         Button cancelBtn = new Button("Cancel");
         cancelBtn.getStyleClass().addAll("btn", "btn-light");
-        cancelBtn.setPrefWidth(120);
+        cancelBtn.setPrefWidth(110);
         cancelBtn.setOnAction(ev -> confirmStage.close());
 
         Button deleteBtn = createIconButton("Delete", org.mindtrack.mindtrackfxx.util.IconFactory.deleteIcon());
         deleteBtn.getStyleClass().addAll("btn", "btn-danger");
-        deleteBtn.setPrefWidth(120);
+        deleteBtn.setPrefWidth(110);
         deleteBtn.setOnAction(ev -> {
             moodService.delete(m.getIdH());
             confirmStage.close();
@@ -1467,64 +1749,55 @@ public class EmotionalJournalController {
         });
 
         buttons.getChildren().addAll(cancelBtn, deleteBtn);
+        root.getChildren().addAll(createDialogTopBar(confirmStage), warningIcon, title, moodInfo, message, warning, buttons);
 
-        root.getChildren().addAll(warningIcon, title, moodInfo, message, warning, buttons);
-
-        Scene scene = new Scene(root, 400, 350);
-        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/styles.css").toExternalForm());
+        Scene scene = new Scene(root, 400, 340);
+        scene.setFill(javafx.scene.paint.Color.web("#111827"));
+        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
         confirmStage.setScene(scene);
         confirmStage.setResizable(false);
-
-        // Add shake animation for warning effect
-        animateScale(root, 300);
 
         confirmStage.showAndWait();
     }
 
     private void deleteJournalEntry(JournalEmotionnel e) {
-        // Show styled confirmation dialog
         Stage confirmStage = new Stage();
         confirmStage.initModality(Modality.APPLICATION_MODAL);
-        confirmStage.setTitle("Confirm Delete");
+        confirmStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
 
-        VBox root = new VBox(20);
-        root.getStyleClass().add("confirm-root");
-        root.setPadding(new Insets(32));
+        VBox root = new VBox(18);
+        root.setPadding(new Insets(28));
         root.setAlignment(Pos.CENTER);
+        root.setStyle("-fx-background-color: #111827; -fx-border-color: rgba(239,68,68,0.3); -fx-border-width: 0 0 3 0;");
 
-        // Warning icon emoji
         Label warningIcon = new Label("⚠️");
-        warningIcon.setStyle("-fx-font-size: 48px;");
+        warningIcon.setStyle("-fx-font-size: 42px;");
 
-        // Title
         Label title = new Label("Delete Journal Entry?");
-        title.getStyleClass().add("confirm-title");
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #f9fafb;");
 
-        // Message
         Label message = new Label("Are you sure you want to delete this entry from\n" +
                 e.getDateCreation().format(CARD_DATE_FORMATTER) + " at " +
                 e.getDateCreation().format(CARD_TIME_FORMATTER) + "?");
-        message.getStyleClass().add("confirm-message");
+        message.setStyle("-fx-text-fill: rgba(255,255,255,0.6); -fx-font-size: 13px; -fx-text-alignment: center;");
         message.setWrapText(true);
         message.setAlignment(Pos.CENTER);
 
-        // Warning text
         Label warning = new Label("This action cannot be undone.");
-        warning.setStyle("-fx-text-fill: #dc2626; -fx-font-size: 12px;");
+        warning.setStyle("-fx-text-fill: #fca5a5; -fx-font-size: 11px;");
 
-        // Buttons
-        HBox buttons = new HBox(16);
+        HBox buttons = new HBox(12);
         buttons.setAlignment(Pos.CENTER);
 
         Button cancelBtn = new Button("Cancel");
         cancelBtn.getStyleClass().addAll("btn", "btn-light");
-        cancelBtn.setPrefWidth(120);
+        cancelBtn.setPrefWidth(110);
         cancelBtn.setOnAction(ev -> confirmStage.close());
 
         Button deleteBtn = createIconButton("Delete", org.mindtrack.mindtrackfxx.util.IconFactory.deleteIcon());
         deleteBtn.getStyleClass().addAll("btn", "btn-danger");
-        deleteBtn.setPrefWidth(120);
+        deleteBtn.setPrefWidth(110);
         deleteBtn.setOnAction(ev -> {
             journalService.delete(e.getIdJ());
             confirmStage.close();
@@ -1533,17 +1806,14 @@ public class EmotionalJournalController {
         });
 
         buttons.getChildren().addAll(cancelBtn, deleteBtn);
+        root.getChildren().addAll(createDialogTopBar(confirmStage), warningIcon, title, message, warning, buttons);
 
-        root.getChildren().addAll(warningIcon, title, message, warning, buttons);
-
-        Scene scene = new Scene(root, 400, 300);
-        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/styles.css").toExternalForm());
+        Scene scene = new Scene(root, 400, 280);
+        scene.setFill(javafx.scene.paint.Color.web("#111827"));
+        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
         confirmStage.setScene(scene);
         confirmStage.setResizable(false);
-
-        // Add animation
-        animateScale(root, 300);
 
         confirmStage.showAndWait();
     }
@@ -1580,45 +1850,42 @@ public class EmotionalJournalController {
     private void showNotification(String title, String message, String icon, String type) {
         Stage notifStage = new Stage();
         notifStage.initModality(Modality.APPLICATION_MODAL);
-        notifStage.setTitle(title);
+        notifStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
 
         VBox root = new VBox(16);
-        root.getStyleClass().add("notification-" + type);
-        root.setPadding(new Insets(32));
+        root.setPadding(new Insets(28));
         root.setAlignment(Pos.CENTER);
 
-        // Icon emoji
+        String borderColor = type.equals("success") ? "rgba(34,197,94,0.3)" : type.equals("error") ? "rgba(239,68,68,0.3)" : "rgba(6,182,212,0.3)";
+        root.setStyle("-fx-background-color: #111827; -fx-border-color: " + borderColor + "; -fx-border-width: 0 0 3 0;");
+
         Label iconLabel = new Label(icon);
-        iconLabel.setStyle("-fx-font-size: 48px;");
+        iconLabel.setStyle("-fx-font-size: 42px;");
 
-        // Title
         Label titleLabel = new Label(title);
-        titleLabel.getStyleClass().add("confirm-title");
+        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #f9fafb;");
 
-        // Message
         Label messageLabel = new Label(message);
-        messageLabel.getStyleClass().add("confirm-message");
+        messageLabel.setStyle("-fx-text-fill: rgba(255,255,255,0.6); -fx-font-size: 13px; -fx-text-alignment: center;");
         messageLabel.setWrapText(true);
         messageLabel.setAlignment(Pos.CENTER);
         messageLabel.setMaxWidth(300);
 
-        // OK Button
         Button okBtn = new Button("OK");
         okBtn.getStyleClass().addAll("btn", type.equals("success") ? "btn-primary" : "btn-light");
         okBtn.setPrefWidth(100);
         okBtn.setOnAction(ev -> notifStage.close());
 
-        root.getChildren().addAll(iconLabel, titleLabel, messageLabel, okBtn);
+        root.getChildren().addAll(createDialogTopBar(notifStage), iconLabel, titleLabel, messageLabel, okBtn);
 
-        Scene scene = new Scene(root, 380, 260);
-        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/styles.css").toExternalForm());
+        Scene scene = new Scene(root, 380, 250);
+        scene.setFill(javafx.scene.paint.Color.web("#111827"));
+        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
         notifStage.setScene(scene);
         notifStage.setResizable(false);
 
-        // Add fade in animation
-        animateFadeIn(root, 300);
-
+        // Show immediately — no fade animation (showAndWait blocks the thread)
         notifStage.showAndWait();
     }
 
@@ -1910,69 +2177,29 @@ public class EmotionalJournalController {
     }
 
     private void setSidebarIcons() {
-        if (iconJournal != null) {
-            SVGPath journalIcon = IconFactory.journalIcon();
-            iconJournal.setContent(journalIcon.getContent());
-            iconJournal.setStroke(journalIcon.getStroke());
-            iconJournal.setFill(journalIcon.getFill());
-            iconJournal.setStrokeWidth(journalIcon.getStrokeWidth());
-            iconJournal.setStrokeLineCap(journalIcon.getStrokeLineCap());
+        applySidebarIcon(btnJournal, "journal", true);
+        applySidebarIcon(btnGoal, "goals", false);
+        applySidebarIcon(btnExercise, "exercise", false);
+        applySidebarIcon(btnHabits, "habits", false);
+        applySidebarIcon(btnProfile, "profile", false);
+        applySidebarIcon(btnStatistics, "statistics", false);
+        applySidebarIcon(btnAdmin, "admin", false);
+        applySidebarIcon(btnSettings, "settings", false);
+        applySidebarIcon(btnLogout, "logout", false);
+    }
+
+    private void applySidebarIcon(Button button, String iconName, boolean selected) {
+        if (button == null) {
+            return;
         }
-        if (iconProfile != null) {
-            SVGPath profileIcon = IconFactory.profileIcon();
-            iconProfile.setContent(profileIcon.getContent());
-            iconProfile.setStroke(profileIcon.getStroke());
-            iconProfile.setFill(profileIcon.getFill());
-            iconProfile.setStrokeWidth(profileIcon.getStrokeWidth());
-            iconProfile.setStrokeLineCap(profileIcon.getStrokeLineCap());
+        SVGPath icon = IconFactory.getIcon(iconName);
+        icon.getStyleClass().add("svg-icon");
+        button.setGraphic(icon);
+        if (!button.getStyleClass().contains("sidebar-btn")) {
+            button.getStyleClass().add("sidebar-btn");
         }
-        if (iconAdmin != null) {
-            SVGPath adminIcon = IconFactory.adminIcon();
-            iconAdmin.setContent(adminIcon.getContent());
-            iconAdmin.setStroke(adminIcon.getStroke());
-            iconAdmin.setFill(adminIcon.getFill());
-            iconAdmin.setStrokeWidth(adminIcon.getStrokeWidth());
-            iconAdmin.setStrokeLineCap(adminIcon.getStrokeLineCap());
-        }
-        if (iconGoal != null) {
-            SVGPath goalIcon = IconFactory.goalIcon();
-            iconGoal.setContent(goalIcon.getContent());
-            iconGoal.setStroke(goalIcon.getStroke());
-            iconGoal.setFill(goalIcon.getFill());
-            iconGoal.setStrokeWidth(goalIcon.getStrokeWidth());
-            iconGoal.setStrokeLineCap(goalIcon.getStrokeLineCap());
-        }
-        if (iconHabits != null) {
-            SVGPath habitsIcon = IconFactory.habitsIcon();
-            iconHabits.setContent(habitsIcon.getContent());
-            iconHabits.setStroke(habitsIcon.getStroke());
-            iconHabits.setFill(habitsIcon.getFill());
-            iconHabits.setStrokeWidth(habitsIcon.getStrokeWidth());
-            iconHabits.setStrokeLineCap(habitsIcon.getStrokeLineCap());
-        }
-        if (iconExercise != null) {
-            SVGPath exerciseIcon = IconFactory.exerciseIcon();
-            iconExercise.setContent(exerciseIcon.getContent());
-            iconExercise.setStroke(exerciseIcon.getStroke());
-            iconExercise.setFill(exerciseIcon.getFill());
-            iconExercise.setStrokeWidth(exerciseIcon.getStrokeWidth());
-            iconExercise.setStrokeLineCap(exerciseIcon.getStrokeLineCap());
-        }
-        if (iconSettings != null) {
-            SVGPath settingsIcon = IconFactory.settingsIcon();
-            iconSettings.setContent(settingsIcon.getContent());
-            iconSettings.setStroke(settingsIcon.getStroke());
-            iconSettings.setFill(settingsIcon.getFill());
-            iconSettings.setStrokeWidth(settingsIcon.getStrokeWidth());
-            iconSettings.setStrokeLineCap(settingsIcon.getStrokeLineCap());
-        }
-        if (iconLogout != null) {
-            SVGPath logoutIcon = IconFactory.logoutIcon();
-            iconLogout.setContent(logoutIcon.getContent());
-            iconLogout.setStroke(logoutIcon.getStroke());
-            iconLogout.setFill(logoutIcon.getFill());
-            iconLogout.setStrokeWidth(logoutIcon.getStrokeWidth());
-            iconLogout.setStrokeLineCap(logoutIcon.getStrokeLineCap());
+        if (selected && !button.getStyleClass().contains("selected")) {
+            button.getStyleClass().add("selected");
         }
     }
 }

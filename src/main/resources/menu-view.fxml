@@ -7,137 +7,94 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.example.view.MenuViewController"
-            prefWidth="1400" prefHeight="900"
+            minWidth="880" minHeight="560" prefWidth="1100" prefHeight="700"
             stylesheets="@styles.css"
             style="-fx-background-color: #f5f7fa;">
 
-    <!-- ===== TOP GRADIENT HEADER ===== -->
-    <top>
-        <VBox spacing="0" style="-fx-background: linear-gradient(to right, #00d2ff 0%, #3a7bd5 100%); -fx-padding: 40;">
-            <VBox alignment="CENTER" spacing="12">
-                <ImageView fitWidth="80" fitHeight="80" preserveRatio="true">
-                    <image>
-                        <Image url="/logo.png"/>
-                    </image>
-                </ImageView>
-                <Label text="MindTrack" 
-                       style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #ffffff; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 8, 0, 0, 2);"/>
-                <Label text="Personal Objectives Management Platform" 
-                       style="-fx-font-size: 14px; -fx-text-fill: rgba(0, 0, 0, 0.9);"/>
+    <!-- ===== PERSISTENT SIDEBAR ===== -->
+    <left>
+        <VBox styleClass="sidebar">
+            <!-- Logo Section -->
+            <VBox styleClass="sidebar-logo-container" alignment="CENTER_LEFT" spacing="10">
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <ImageView fitWidth="26" fitHeight="26" preserveRatio="true">
+                        <image>
+                            <Image url="/logo.png"/>
+                        </image>
+                    </ImageView>
+                    <Label text="MindTrack" style="-fx-font-size: 16px; -fx-font-weight: 900; -fx-text-fill: #4A9EEB;"/>
+                </HBox>
             </VBox>
-        </VBox>
-    </top>
 
-    <!-- ===== CENTER MENU OPTIONS ===== -->
-    <center>
-        <ScrollPane fitToWidth="true" style="-fx-background-color: #f5f7fa;">
-            <VBox alignment="TOP_CENTER" spacing="50" style="-fx-padding: 50 60;">
-                
-                <Label text="Choose Your Path" 
-                       style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;"/>
-                
-                <!-- Main Menu Cards Grid -->
-                <HBox alignment="CENTER" spacing="30" style="-fx-wrap-text: true;">
-                    
-                    <!-- Objectif Card -->
-                    <VBox alignment="CENTER" spacing="18" 
-                          prefWidth="280" prefHeight="260"
-                          onMouseClicked="#openObjectifView"
-                          style="-fx-padding: 30; -fx-background-color: white; -fx-border-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 8); -fx-cursor: hand;">
-                        <Label text="🎯" style="-fx-font-size: 72px;"/>
-                        <Label text="Goals &amp; Objectives" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;"/>
-                        <Label text="Create and manage your personal goals with deadlines and progress tracking" 
-                               style="-fx-font-size: 12px; -fx-text-fill: #555555; -fx-text-alignment: center; -fx-wrap-text: true;"
-                               wrapText="true" alignment="CENTER"/>
-                    </VBox>
-                    
-                    <!-- Jalon Card -->
-                    <VBox alignment="CENTER" spacing="18" 
-                          prefWidth="280" prefHeight="260"
-                          onMouseClicked="#openJalonView"
-                          style="-fx-padding: 30; -fx-background-color: white; -fx-border-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 8); -fx-cursor: hand;">
-                        <Label text="📍" style="-fx-font-size: 72px;"/>
-                        <Label text="Milestones" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;"/>
-                        <Label text="Break down goals into milestones and track your progress every step of the way" 
-                               style="-fx-font-size: 12px; -fx-text-fill: #555555; -fx-text-alignment: center; -fx-wrap-text: true;"
-                               wrapText="true" alignment="CENTER"/>
-                    </VBox>
-                    
-                    <!-- Plan Action Card -->
-                    <VBox alignment="CENTER" spacing="18" 
-                          prefWidth="280" prefHeight="260"
-                          onMouseClicked="#openPlanActionView"
-                          style="-fx-padding: 30; -fx-background-color: white; -fx-border-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 8); -fx-cursor: hand;">
-                        <Label text="⚡" style="-fx-font-size: 72px;"/>
-                        <Label text="Action Plans" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;"/>
-                        <Label text="Define action steps with priority levels to execute your goals effectively" 
-                               style="-fx-font-size: 12px; -fx-text-fill: #555555; -fx-text-alignment: center; -fx-wrap-text: true;"
-                               wrapText="true" alignment="CENTER"/>
-                    </VBox>
-                    
-                    <!-- Planificateur Card -->
-                    <VBox alignment="CENTER" spacing="18" 
-                          prefWidth="280" prefHeight="260"
-                          onMouseClicked="#openPlanificateurView"
-                          style="-fx-padding: 30; -fx-background-color: white; -fx-border-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 8); -fx-cursor: hand;">
-                        <Label text="⚙️" style="-fx-font-size: 72px;"/>
-                        <Label text="Planner Settings" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;"/>
-                        <Label text="Configure intelligent planning settings and optimize your workflow" 
-                               style="-fx-font-size: 12px; -fx-text-fill: #555555; -fx-text-alignment: center; -fx-wrap-text: true;"
-                               wrapText="true" alignment="CENTER"/>
-                    </VBox>
+            <!-- Main Nav -->
+            <VBox spacing="4" VBox.vgrow="ALWAYS">
+                <HBox fx:id="journalNavItem" styleClass="nav-item" alignment="CENTER_LEFT" onMouseClicked="#openDashboardView">
+                    <Label text="📓" styleClass="nav-icon"/>
+                    <Label text="Journal" styleClass="nav-label"/>
                 </HBox>
                 
-                <!-- Statistics Section -->
-                <VBox spacing="20">
-                    <Label text="Your Progress" 
-                           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #386ea3;"/>
-                    
-                    <HBox alignment="CENTER" spacing="40">
-                        <VBox alignment="CENTER" spacing="10">
-                            <Label text="🎯" style="-fx-font-size: 40px;"/>
-                            <Label fx:id="totalGoalsLabel" text="0" 
-                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #667eea;"/>
-                            <Label text="Total Goals" 
-                                   style="-fx-font-size: 12px; -fx-text-fill: #95a5a6; -fx-font-weight: bold;"/>
-                        </VBox>
-                        
-                        <Separator orientation="VERTICAL" prefHeight="80"/>
-                        
-                        <VBox alignment="CENTER" spacing="10">
-                            <Label text="📍" style="-fx-font-size: 40px;"/>
-                            <Label fx:id="totalMilestonesLabel" text="0" 
-                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #764ba2;"/>
-                            <Label text="Milestones" 
-                                   style="-fx-font-size: 12px; -fx-text-fill: #95a5a6; -fx-font-weight: bold;"/>
-                        </VBox>
-                        
-                        <Separator orientation="VERTICAL" prefHeight="80"/>
-                        
-                        <VBox alignment="CENTER" spacing="10">
-                            <Label text="⚡" style="-fx-font-size: 40px;"/>
-                            <Label fx:id="totalActionsLabel" text="0" 
-                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;"/>
-                            <Label text="Action Steps" 
-                                   style="-fx-font-size: 12px; -fx-text-fill: #95a5a6; -fx-font-weight: bold;"/>
-                        </VBox>
-                    </HBox>
-                </VBox>
+                <HBox fx:id="goalsNavItem" styleClass="nav-item, nav-item-active" alignment="CENTER_LEFT" onMouseClicked="#openObjectifView">
+                    <Label text="🎯" styleClass="nav-icon"/>
+                    <Label text="Goals" styleClass="nav-label"/>
+                </HBox>
 
+                <HBox fx:id="exercisesNavItem" styleClass="nav-item" alignment="CENTER_LEFT">
+                    <Label text="💪" styleClass="nav-icon"/>
+                    <Label text="Exercises" styleClass="nav-label"/>
+                </HBox>
+
+                <HBox fx:id="habitsNavItem" styleClass="nav-item" alignment="CENTER_LEFT">
+                    <Label text="🔄" styleClass="nav-icon"/>
+                    <Label text="Habits" styleClass="nav-label"/>
+                </HBox>
+
+                <HBox fx:id="profileNavItem" styleClass="nav-item" alignment="CENTER_LEFT">
+                    <Label text="👤" styleClass="nav-icon"/>
+                    <Label text="Profile" styleClass="nav-label"/>
+                </HBox>
+
+                <HBox fx:id="statsNavItem" styleClass="nav-item" alignment="CENTER_LEFT" onMouseClicked="#openInsightsView">
+                    <Label text="📊" styleClass="nav-icon"/>
+                    <Label text="Statistics" styleClass="nav-label"/>
+                </HBox>
+
+                <HBox fx:id="adminNavItem" styleClass="nav-item" alignment="CENTER_LEFT">
+                    <Label text="🛡️" styleClass="nav-icon"/>
+                    <Label text="Admin" styleClass="nav-label"/>
+                </HBox>
+
+                <HBox fx:id="plannerNavItem" styleClass="nav-item" alignment="CENTER_LEFT" onMouseClicked="#openPlanificateurView">
+                    <Label text="🧠" styleClass="nav-icon"/>
+                    <Label text="Intelligent Planner" styleClass="nav-label"/>
+                </HBox>
             </VBox>
-        </ScrollPane>
+
+            <!-- Footer Nav -->
+            <VBox styleClass="sidebar-footer">
+                <Separator style="-fx-opacity: 0.5;"/>
+                <HBox styleClass="nav-item" alignment="CENTER_LEFT" onMouseClicked="#handleQuit">
+                    <Label text="🚪" styleClass="nav-icon" style="-fx-text-fill: #e53e3e;"/>
+                    <Label text="Log Out" styleClass="nav-label" style="-fx-text-fill: #e53e3e;"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </left>
+
+    <!-- ===== MAIN CONTENT AREA ===== -->
+    <center>
+        <StackPane fx:id="contentArea" style="-fx-background-color: #f8fafc;"/>
     </center>
 
     <!-- ===== BOTTOM FOOTER ===== -->
     <bottom>
-        <HBox alignment="CENTER" spacing="15" style="-fx-background-color: white; -fx-border-color: #e8ecf1; -fx-border-width: 1 0 0 0; -fx-padding: 20;">
-            <Label text="© 2026 MindTrack" style="-fx-text-fill: #7f8c8d; -fx-font-size: 11px; -fx-font-weight: bold;"/>
-            <Label text="•" style="-fx-text-fill: #7f8c8d;"/>
-            <Label text="Personal Objectives Management" style="-fx-text-fill: #7f8c8d; -fx-font-size: 11px;"/>
+        <HBox alignment="CENTER_LEFT" spacing="8" style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-width: 1 0 0 0; -fx-padding: 8 16;">
+            <Label text="© 2026 MindTrack" style="-fx-text-fill: #718096; -fx-font-size: 10px; -fx-font-weight: bold;"/>
+            <Label text="•" style="-fx-text-fill: #a0aec0;"/>
+            <Label text="Personal Objectives Management" style="-fx-text-fill: #718096; -fx-font-size: 10px;"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button text="🚪 Quit" onAction="#handleQuit" 
-                   style="-fx-padding: 8px 16px; -fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: white; -fx-background: linear-gradient(to right, #00d2ff, #3a7bd5); -fx-border-radius: 6; -fx-cursor: hand;"/>
+            <Button text="🚪 Quit" onAction="#handleQuit" styleClass="btn-primary" style="-fx-padding: 6 14; -fx-font-size: 11px; -fx-font-weight: bold;"/>
         </HBox>
     </bottom>
+
 
 </BorderPane>

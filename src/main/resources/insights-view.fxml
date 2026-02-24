@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.view.InsightsViewController"
+            minWidth="880" minHeight="560" prefWidth="1100" prefHeight="700"
+            stylesheets="@styles.css"
+            style="-fx-background-color: #f5f7fa;">
+
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="main-scroll" style="-fx-background-color: transparent;">
+            <VBox spacing="0">
+                <!-- INTEGRATED HEADER -->
+                <VBox styleClass="header-scrollable">
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Button text="← Back to Menu" fx:id="backBtn" onAction="#handleBack" styleClass="nav-back-btn"
+                               style="-fx-padding: 6 12; -fx-font-size: 11px; -fx-text-fill: white; -fx-font-weight: 800; -fx-cursor: hand; -fx-background-color: rgba(0,0,0,0.2); -fx-background-radius: 6;"/>
+                        <VBox spacing="2">
+                            <Label text="📊 Insights &amp; Analytics" style="-fx-font-size: 20px; -fx-font-weight: 900; -fx-text-fill: white;"/>
+                            <Label text="Visualize your progress and optimize your goal execution" style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.9);"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <!-- PAGE CONTENT -->
+                <VBox spacing="16" style="-fx-padding: 14 20;">
+                    
+                    <!-- TOP SUMMARY CARDS -->
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <VBox styleClass="chart-card" minWidth="120" prefWidth="180" spacing="6">
+                            <Label text="COMPLETION RATE" styleClass="insight-stat-label"/>
+                            <Label fx:id="completionRateLabel" text="0%" styleClass="insight-stat-value"/>
+                            <ProgressBar fx:id="overallProgressBar" progress="0.0" maxWidth="Infinity" styleClass="custom-progress"/>
+                        </VBox>
+                        
+                        <VBox styleClass="chart-card" minWidth="120" prefWidth="180" spacing="6">
+                            <Label text="ACTIVE MILESTONES" styleClass="insight-stat-label"/>
+                            <Label fx:id="activeMilestonesLabel" text="0" styleClass="insight-stat-value" style="-fx-text-fill: #805ad5;"/>
+                            <Label text="Next deadline in 3 days" style="-fx-font-size: 10px; -fx-text-fill: #718096;"/>
+                        </VBox>
+
+                        <VBox styleClass="chart-card" minWidth="120" prefWidth="180" spacing="6">
+                            <Label text="ACTION VELOCITY" styleClass="insight-stat-label"/>
+                            <Label fx:id="actionVelocityLabel" text="High" styleClass="insight-stat-value" style="-fx-text-fill: #38a169;"/>
+                            <Label text="Based on your recent priority tasks" style="-fx-font-size: 10px; -fx-text-fill: #718096;"/>
+                        </VBox>
+
+                        <!-- AI PREDICTION CARD -->
+                        <VBox styleClass="chart-card" minWidth="160" prefWidth="220" spacing="6" style="-fx-background-color: #ebf8ff; -fx-border-color: #90cdf4; -fx-border-width: 1; -fx-border-radius: 10;">
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <Label text="🤖" style="-fx-font-size: 14px;"/>
+                                <Label text="AI SUCCESS PROBABILITY" styleClass="insight-stat-label" style="-fx-text-fill: #2b6cb0;"/>
+                            </HBox>
+                            <Label fx:id="aiProbabilityLabel" text="Analyzing..." styleClass="insight-stat-value" style="-fx-text-fill: #2c5282; -fx-font-size: 18px;"/>
+                            <Label fx:id="aiRecommendationLabel" text="Calculating your trajectory..." wrapText="true" style="-fx-font-size: 10px; -fx-text-fill: #2c5282; -fx-font-style: italic;"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- MIDDLE CHARTS ROW -->
+                    <HBox spacing="12" prefHeight="260">
+                        <!-- Goal Status PieChart -->
+                        <VBox styleClass="chart-card" HBox.hgrow="ALWAYS">
+                            <Label text="Goals Distribution" styleClass="chart-title"/>
+                            <PieChart fx:id="goalsPieChart" legendSide="BOTTOM" labelsVisible="true" animated="true"/>
+                        </VBox>
+
+                        <!-- Action Priority BarChart -->
+                        <VBox styleClass="chart-card" HBox.hgrow="ALWAYS">
+                            <Label text="Action Steps by Priority" styleClass="chart-title"/>
+                            <BarChart fx:id="actionsBarChart" animated="true" legendVisible="false">
+                                <xAxis>
+                                    <CategoryAxis label="Priority Level" side="BOTTOM"/>
+                                </xAxis>
+                                <yAxis>
+                                    <NumberAxis label="Count" side="LEFT"/>
+                                </yAxis>
+                            </BarChart>
+                        </VBox>
+                    </HBox>
+
+                    <!-- BOTTOM ROW: TOP GOALS PROGRESS -->
+                    <VBox styleClass="chart-card" spacing="12">
+                        <Label text="Top Active Goals Progression" styleClass="chart-title"/>
+                        <VBox fx:id="topGoalsContainer" spacing="10">
+                            <!-- Dynamically populated progress rows -->
+                            <Label text="No active goals to track" style="-fx-text-fill: #a0aec0; -fx-font-style: italic; -fx-font-size: 12px;"/>
+                        </VBox>
+                    </VBox>
+
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

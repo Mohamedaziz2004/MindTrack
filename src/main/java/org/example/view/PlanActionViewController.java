@@ -1,48 +1,56 @@
 package org.example.view;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import org.example.controller.PlanActionController;
 import org.example.controller.ObjectifController;
 import org.example.model.PlanAction;
 import org.example.model.Objectif;
-
-import java.io.IOException;
+import javafx.stage.Stage;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
 public class PlanActionViewController implements Initializable {
 
-    @FXML private Button backBtn;
-    @FXML private ComboBox<Objectif> objectifComboBox;
-    @FXML private TextArea descriptionTextArea;
-    @FXML private ComboBox<String> priorityComboBox;
-    @FXML private Button createActionBtn;
-    @FXML private VBox actionsContainerVBox;
-    @FXML private Label totalActionsLabel;
-    @FXML private Label highPriorityLabel;
-    @FXML private Label mediumPriorityLabel;
+    @FXML
+    private ComboBox<Objectif> objectifComboBox;
+    @FXML
+    private TextArea descriptionTextArea;
+    @FXML
+    private ComboBox<String> priorityComboBox;
+    @FXML
+    private Button createActionBtn;
+    @FXML
+    private VBox actionsContainerVBox;
+    @FXML
+    private Label totalActionsLabel;
+    @FXML
+    private Label highPriorityLabel;
+    @FXML
+    private Label mediumPriorityLabel;
+    @FXML
+    private TextField searchField;
+    @FXML
+    private ComboBox<String> priorityFilterCombo;
+
+    private List<PlanAction> allActions;
 
     private PlanActionController planActionController;
     private ObjectifController objectifController;
 
+    /**
+     * Initialise le contrôleur et charge les données initiales du plan d'action.
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         planActionController = new PlanActionController();
         objectifController = new ObjectifController();
-
-        // Set back button action
-        backBtn.setOnAction(e -> goBackToMenu());
 
         // Load objectifs in combo box
         loadObjectifs();
@@ -50,16 +58,22 @@ public class PlanActionViewController implements Initializable {
         // Load priority options
         loadPriorities();
 
-        // Set button action
-        createActionBtn.setOnAction(e -> handleCreateAction());
+        // Initialize priority filter
+        priorityFilterCombo.getItems().addAll("All", "Haute", "Moyenne", "Basse");
+        priorityFilterCombo.setValue("All");
+
+        // Listen for changes
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> loadAndDisplayActions());
+        priorityFilterCombo.valueProperty().addListener((obs, oldVal, newVal) -> loadAndDisplayActions());
 
         // Load actions
         loadAndDisplayActions();
-
-        // Update statistics
         updateStatistics();
     }
 
+    /**
+     * Charge les objectifs disponibles pour lier les actions.
+     */
     private void loadObjectifs() {
         List<Objectif> objectifs = objectifController.getAllObjectifs();
         objectifComboBox.getItems().addAll(objectifs);
@@ -69,7 +83,11 @@ public class PlanActionViewController implements Initializable {
         priorityComboBox.getItems().addAll("Haute", "Moyenne", "Basse");
     }
 
-    private void handleCreateAction() {
+    /**
+     * Gère la création d'une nouvelle étape de plan d'action.
+     */
+    @FXML
+    public void handleCreateActionPlan() {
         Objectif selectedObjectif = objectifComboBox.getValue();
         String description = descriptionTextArea.getText().trim();
         String priorityLabel = priorityComboBox.getValue();
@@ -87,7 +105,6 @@ public class PlanActionViewController implements Initializable {
         };
 
         PlanAction planAction = new PlanAction(0, selectedObjectif.getIdObj(), description, priorityCode);
-
         planActionController.ajouterPlanAction(planAction);
 
         // Clear form
@@ -100,83 +117,104 @@ public class PlanActionViewController implements Initializable {
         showAlert("Succès", "Action créée avec succès!");
     }
 
+    /**
+     * Affiche la liste des actions filtrées dans l'interface.
+     */
     private void loadAndDisplayActions() {
-        List<PlanAction> actions = planActionController.getAllPlanActions();
+        allActions = planActionController.getAllPlanActions();
         actionsContainerVBox.getChildren().clear();
 
-        for (PlanAction action : actions) {
+        String searchText = searchField.getText().toLowerCase().trim();
+        String priorityFilter = priorityFilterCombo.getValue();
+
+        List<PlanAction> filteredActions = allActions.stream()
+                .filter(a -> a.getEtape().toLowerCase().contains(searchText))
+                .filter(a -> priorityFilter == null || priorityFilter.equals("All")
+                        || a.getPrioriteLabel().equals(priorityFilter))
+                .toList();
+
+        if (filteredActions.isEmpty()) {
+            Label placeholder = new Label("No matching action steps found.");
+            placeholder.setStyle("-fx-text-fill: #718096; -fx-font-style: italic; -fx-padding: 12; -fx-font-size: 12px;");
+            actionsContainerVBox.getChildren().add(placeholder);
+            return;
+        }
+
+        for (PlanAction action : filteredActions) {
             actionsContainerVBox.getChildren().add(createActionCard(action));
         }
+
+        updateStatistics();
     }
 
+    /**
+     * Exporte les actions en format PDF.
+     */
+    @FXML
+    private void handleExportPDF() {
+        org.example.util.ExportUtil.exportActionsToPDF(allActions, (Stage) actionsContainerVBox.getScene().getWindow());
+    }
+
+    /**
+     * Exporte les actions en format CSV.
+     */
+    @FXML
+    private void handleExportCSV() {
+        org.example.util.ExportUtil.exportActionsToCSV(allActions, (Stage) actionsContainerVBox.getScene().getWindow());
+    }
+
+    /**
+     * Crée une carte visuelle pour une action donnée.
+     * 
+     * @param action L'action à afficher.
+     * @return Le conteneur VBox.
+     */
     private VBox createActionCard(PlanAction action) {
-        VBox cardVBox = new VBox();
-        cardVBox.setSpacing(12);
+        VBox card = new VBox();
+        card.getStyleClass().add("goal-card-premium");
+        card.setSpacing(12);
 
-        String borderColor = switch (action.getPriorite()) {
-            case 1 -> "#e74c3c"; // High - red
-            case 2 -> "#f39c12"; // Medium - orange
-            default -> "#95a5a6"; // Low - gray
+        // Header
+        HBox header = new HBox();
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        Label title = new Label(action.getEtape());
+        title.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
+        title.setWrapText(true);
+        title.setMaxWidth(400);
+
+        javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        String priorityColor = switch (action.getPriorite()) {
+            case 1 -> "#e53e3e";
+            case 2 -> "#f39c12";
+            default -> "#4A9EEB";
         };
 
-        String bgColor = switch (action.getPriorite()) {
-            case 1 -> "#ffebee"; // Light red
-            case 2 -> "#fff3e0"; // Light orange
-            default -> "#f5f5f5"; // Light gray
-        };
+        Label priority = new Label(action.getPrioriteLabel().toUpperCase());
+        priority.setStyle("-fx-font-size: 9px; -fx-font-weight: bold; -fx-text-fill: white; -fx-background-color: "
+                + priorityColor + "; -fx-padding: 2 6; -fx-background-radius: 4;");
 
-        cardVBox.setStyle("-fx-border-radius: 12; -fx-padding: 20; -fx-background-color: white; -fx-border-left: 5px solid " + borderColor + "; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 12, 0, 0, 4);");
+        header.getChildren().addAll(title, spacer, priority);
 
-        // Header with priority indicator and description
-        HBox headerHBox = new HBox();
-        headerHBox.setSpacing(12);
-        headerHBox.setAlignment(Pos.CENTER_LEFT);
+        // Footer Actions
+        HBox actions = new HBox();
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        actions.setSpacing(10);
 
-        String priorityIcon = switch (action.getPriorite()) {
-            case 1 -> "🔥 HIGH";
-            case 2 -> "⭐ MEDIUM";
-            default -> "◯ LOW";
-        };
-
-        Label titleLabel = new Label(action.getEtape());
-        titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;");
-        titleLabel.setWrapText(true);
-
-        Label priorityLabel = new Label(priorityIcon);
-        priorityLabel.setStyle("-fx-font-size: 11px; -fx-padding: 5px 10px; -fx-background-color: " + borderColor +
-                             "; -fx-text-fill: white; -fx-border-radius: 15; -fx-font-weight: bold;");
-
-        HBox.setHgrow(titleLabel, Priority.ALWAYS);
-        headerHBox.getChildren().addAll(titleLabel, priorityLabel);
-
-        // Priority highlight box
-        VBox priorityBoxVBox = new VBox();
-        priorityBoxVBox.setSpacing(6);
-        priorityBoxVBox.setStyle("-fx-padding: 12; -fx-background-color: " + bgColor + "; -fx-border-radius: 8;");
-        
-        Label priorityTitleLabel = new Label("Priority Level");
-        priorityTitleLabel.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: " + borderColor + ";");
-        Label priorityDetailLabel = new Label(action.getPrioriteLabel() + " Priority");
-        priorityDetailLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: " + borderColor + ";");
-        
-        priorityBoxVBox.getChildren().addAll(priorityTitleLabel, priorityDetailLabel);
-
-        // Action buttons
-        HBox buttonsHBox = new HBox();
-        buttonsHBox.setSpacing(10);
-        buttonsHBox.setAlignment(Pos.CENTER_RIGHT);
-
-        Button editBtn = new Button("✏️ Edit");
-        editBtn.setStyle("-fx-padding: 8px 14px; -fx-font-size: 11px; -fx-background: linear-gradient(to right, #667eea, #5568d3); -fx-text-fill: white; -fx-border-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;");
+        Button editBtn = new Button("Edit");
+        editBtn.setStyle(
+                "-fx-background-color: transparent; -fx-text-fill: #4A9EEB; -fx-font-size: 11px; -fx-font-weight: bold; -fx-cursor: hand;");
         editBtn.setOnAction(e -> showEditDialog(action));
 
-        Button deleteBtn = new Button("🗑 Delete");
-        deleteBtn.setStyle("-fx-padding: 8px 14px; -fx-font-size: 11px; -fx-background: linear-gradient(to right, #667eea, #764ba2); -fx-text-fill: white; -fx-border-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;");
+        Button deleteBtn = new Button("Delete");
+        deleteBtn.setStyle(
+                "-fx-background-color: transparent; -fx-text-fill: #e53e3e; -fx-font-size: 11px; -fx-font-weight: bold; -fx-cursor: hand;");
         deleteBtn.setOnAction(e -> {
             Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
             confirmAlert.setTitle("Delete Action");
-            confirmAlert.setHeaderText("Are you sure?");
-            confirmAlert.setContentText("This action cannot be undone.");
+            confirmAlert.setHeaderText("Delete this action step?");
             if (confirmAlert.showAndWait().get() == ButtonType.OK) {
                 planActionController.supprimerPlanAction(action.getIdPlan());
                 loadAndDisplayActions();
@@ -184,13 +222,16 @@ public class PlanActionViewController implements Initializable {
             }
         });
 
-        buttonsHBox.getChildren().addAll(editBtn, deleteBtn);
-
-        cardVBox.getChildren().addAll(headerHBox, priorityBoxVBox, buttonsHBox);
-
-        return cardVBox;
+        actions.getChildren().addAll(editBtn, deleteBtn);
+        card.getChildren().addAll(header, actions);
+        return card;
     }
 
+    /**
+     * Ouvre une boîte de dialogue pour modifier une action existante.
+     * 
+     * @param action L'action à modifier.
+     */
     private void showEditDialog(PlanAction action) {
         Dialog<PlanAction> dialog = new Dialog<>();
         dialog.setTitle("Edit Action Step");
@@ -207,9 +248,8 @@ public class PlanActionViewController implements Initializable {
         priorityField.setValue(action.getPrioriteLabel());
 
         content.getChildren().addAll(
-            new Label("Step:"), stepField,
-            new Label("Priority:"), priorityField
-        );
+                new Label("Step:"), stepField,
+                new Label("Priority:"), priorityField);
 
         dialog.getDialogPane().setContent(content);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -236,6 +276,9 @@ public class PlanActionViewController implements Initializable {
         });
     }
 
+    /**
+     * Met à jour les compteurs de priorité.
+     */
     private void updateStatistics() {
         List<PlanAction> allActions = planActionController.getAllPlanActions();
         long highPriority = allActions.stream().filter(a -> a.getPriorite() == 1).count();
@@ -246,6 +289,9 @@ public class PlanActionViewController implements Initializable {
         mediumPriorityLabel.setText(String.valueOf(mediumPriority));
     }
 
+    /**
+     * Vide le formulaire après création.
+     */
     private void clearForm() {
         objectifComboBox.setValue(null);
         descriptionTextArea.clear();
@@ -260,15 +306,44 @@ public class PlanActionViewController implements Initializable {
         alert.showAndWait();
     }
 
-    private void goBackToMenu() {
-        try {
-            Stage stage = (Stage) backBtn.getScene().getWindow();
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/menu-view.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-        } catch (IOException e) {
-            e.printStackTrace();
+    /**
+     * Retourne au menu de sélection.
+     */
+    @FXML
+    public void handleBackToMenu() {
+        if (MenuViewController.getInstance() != null) {
+            MenuViewController.getInstance().openObjectifView(null);
         }
     }
+
+    /**
+     * Ouvre la vue des objectifs.
+     */
+    @FXML
+    public void openObjectifView() {
+        if (MenuViewController.getInstance() != null) {
+            MenuViewController.getInstance().openObjectifView(null);
+        }
+    }
+
+    /**
+     * Ouvre la vue des jalons.
+     */
+    @FXML
+    public void openJalonView() {
+        if (MenuViewController.getInstance() != null) {
+            MenuViewController.getInstance().openJalonView(null);
+        }
+    }
+
+    /**
+     * Ouvre la vue analytique.
+     */
+    @FXML
+    public void openInsightsView() {
+        if (MenuViewController.getInstance() != null) {
+            MenuViewController.getInstance().openInsightsView(null);
+        }
+    }
+
 }

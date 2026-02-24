@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+
+<ScrollPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.view.DashboardViewController"
+            fitToWidth="true" style="-fx-background-color: #f8fafc;"
+            stylesheets="@styles.css">
+    <VBox style="-fx-background-color: #f8fafc;"/>
+</ScrollPane>

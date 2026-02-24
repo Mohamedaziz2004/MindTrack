@@ -6,120 +6,136 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.example.view.PlanificateurIntelligentViewController"
-            prefWidth="1400" prefHeight="900"
+            minWidth="880" minHeight="560" prefWidth="1100" prefHeight="700"
             stylesheets="@styles.css"
             style="-fx-background-color: #f5f7fa;">
 
-    <!-- ===== TOP GRADIENT HEADER ===== -->
-    <top>
-        <VBox spacing="0" style="-fx-background: linear-gradient(to right, #00d2ff 0%, #3a7bd5 100%); -fx-padding: 40;">
-            <HBox alignment="CENTER_LEFT" spacing="15">
-                <Button text="←" fx:id="backBtn" 
-                       style="-fx-padding: 8px 12px; -fx-font-size: 14px; -fx-background: linear-gradient(to right, #00d2ff, #3a7bd5); -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-border-radius: 5;"/>
-                <VBox spacing="5">
-                    <Label text="⚙️ Intelligent Planner Settings" style="-fx-font-size: 30px; 
-              -fx-font-weight: bold; 
-              -fx-text-fill: #4A9EEB;"/>
-                    <Label text="Coming Soon - Optimize your workflow and daily capacity" 
-                           style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.9);"/>
-                </VBox>
-            </HBox>
-        </VBox>
-    </top>
+    <!-- Header removed from here to be integrated into scrollable content -->
 
     <!-- ===== CENTER CONTENT ===== -->
     <center>
-        <ScrollPane fitToWidth="true" style="-fx-background-color: #f5f7fa;">
-            <VBox spacing="30" style="-fx-padding: 50 60;">
-                
-                <!-- Information Card -->
-                <VBox spacing="18" 
-                      style="-fx-padding: 30; -fx-border-radius: 15; -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 15, 0, 0, 8); -fx-border-left: 5px solid #e74c3c;">
-                    
-                    <Label text="🚀 Feature Under Development" 
-                           style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;"/>
-                    
-                    <Label text="The Intelligent Planner is currently being developed. This powerful module will allow you to automatically organize your action steps based on priority or progression, adjust your daily capacity, and optimize your planning strategy with intelligent recommendations."
-                           style="-fx-font-size: 13px; -fx-text-fill: #555555; -fx-wrap-text: true; -fx-line-spacing: 1.5;"
-                           wrapText="true"/>
-                </VBox>
-
-                <!-- Coming Features -->
-                <VBox spacing="15">
-                    <Label text="✨ Planned Features" 
-                           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;"/>
-                    
-                    <HBox spacing="18">
-                        <VBox spacing="12" prefWidth="280"
-                              style="-fx-padding: 25; -fx-border-radius: 12; -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 4);">
-                            <Label text="🎯" style="-fx-font-size: 36px;"/>
-                            <Label text="Smart Prioritization" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;"/>
-                            <Label text="Auto-organize action steps by priority level, importance, and deadlines" 
-                                   style="-fx-font-size: 12px; -fx-text-fill: #666666; -fx-wrap-text: true;"
-                                   wrapText="true"/>
-                        </VBox>
-                        
-                        <VBox spacing="12" prefWidth="280"
-                              style="-fx-padding: 25; -fx-border-radius: 12; -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 4);">
-                            <Label text="⚡" style="-fx-font-size: 36px;"/>
-                            <Label text="Daily Capacity" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;"/>
-                            <Label text="Set your daily action capacity and let the system distribute tasks accordingly" 
-                                   style="-fx-font-size: 12px; -fx-text-fill: #666666; -fx-wrap-text: true;"
-                                   wrapText="true"/>
-                        </VBox>
-                        
-                        <VBox spacing="12" prefWidth="280"
-                              style="-fx-padding: 25; -fx-border-radius: 12; -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 4);">
-                            <Label text="📊" style="-fx-font-size: 36px;"/>
-                            <Label text="Progress Tracking" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;"/>
-                            <Label text="Monitor real-time progress and get intelligent adjustment recommendations" 
-                                   style="-fx-font-size: 12px; -fx-text-fill: #666666; -fx-wrap-text: true;"
-                                   wrapText="true"/>
+        <ScrollPane fitToWidth="true" styleClass="main-scroll" style="-fx-background-color: transparent;">
+            <VBox spacing="0">
+                <!-- INTEGRATED HEADER -->
+                <VBox styleClass="header-scrollable">
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Button text="← Back" fx:id="backBtn" styleClass="nav-back-btn"
+                               style="-fx-padding: 6 12; -fx-font-size: 11px; -fx-text-fill: white; -fx-font-weight: 800; -fx-cursor: hand; -fx-background-color: rgba(0,0,0,0.2); -fx-background-radius: 6;"/>
+                        <VBox spacing="2">
+                            <Label text="⚙️ Intelligent Planner Settings" style="-fx-font-size: 20px; -fx-font-weight: 900; -fx-text-fill: white;"/>
+                            <Label text="Coming Soon - Optimize your workflow and daily capacity" style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.9);"/>
                         </VBox>
                     </HBox>
                 </VBox>
+
+                <!-- INTERACTIVE SETTINGS -->
+                <HBox spacing="24" style="-fx-padding: 0 20 20 20;">
+                    
+                    <!-- LEFT COLUMN: Settings -->
+                    <VBox spacing="14" prefWidth="280" minWidth="240">
+                        <VBox spacing="12" styleClass="dashboard-card-white">
+                            <Label text="🛠️ Optimization Settings" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;"/>
+                            
+                            <VBox spacing="6">
+                                <Label text="Select Goal to Optimize" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                                <ComboBox fx:id="objectifComboBox" 
+                                         promptText="Choose a goal"
+                                         prefWidth="Infinity"
+                                         style="-fx-background-radius: 6; -fx-padding: 5;"/>
+                            </VBox>
+
+                            <VBox spacing="6">
+                                <Label text="Daily Action Capacity" fx:id="capacityLabel" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                                <Slider fx:id="capacitySlider" min="1" max="10" value="3" showTickLabels="true" showTickMarks="true" majorTickUnit="1" minorTickCount="0" snapToTicks="true"/>
+                            </VBox>
+
+                            <VBox spacing="6">
+                                <Label text="Strategy" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                                <HBox spacing="8">
+                                    <ToggleButton fx:id="priorityToggle" text="🔥 Priority" selected="true" styleClass="toggle-btn-left" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                                    <ToggleButton fx:id="balancedToggle" text="⚖️ Balanced" styleClass="toggle-btn-right" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                                </HBox>
+                            </VBox>
+
+                            <Button text="Generate Smart Plan ✨" fx:id="generateBtn" onAction="#handleGeneratePlan" styleClass="btn-sky" maxWidth="Infinity"/>
+                        </VBox>
+
+                        <!-- Stats/Tips Card -->
+                        <VBox spacing="10" styleClass="dashboard-card-white" style="-fx-background-color: #f0f7ff; -fx-border-color: #bee3f8;">
+                            <Label text="💡 Planner Tip" style="-fx-font-weight: bold; -fx-text-fill: #2b6cb0; -fx-font-size: 12px;"/>
+                            <Label text="Setting a capacity of 3-5 actions per day is scientifically proven to reduce burnout and maintain long-term motivation." 
+                                   wrapText="true" style="-fx-font-size: 11px; -fx-text-fill: #2c5282;"/>
+                        </VBox>
+
+                        <!-- AI SMART ADVICE CARD -->
+                        <VBox spacing="10" styleClass="dashboard-card-white" style="-fx-background-color: #fdf2f2; -fx-border-color: #feb2b2;">
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <Label text="🤖" style="-fx-font-size: 14px;"/>
+                                <Label text="AI Smart Advice" style="-fx-font-weight: 900; -fx-text-fill: #9b2c2c; -fx-font-size: 12px;"/>
+                            </HBox>
+                            <Label fx:id="aiAdviceLabel" text="Select a goal to get AI-powered productivity tips!" 
+                                   wrapText="true" style="-fx-font-size: 11px; -fx-text-fill: #c53030; -fx-font-style: italic;"/>
+                        </VBox>
+                    </VBox>
+
+                    <!-- RIGHT COLUMN: Generated Schedule -->
+                    <VBox spacing="12" HBox.hgrow="ALWAYS">
+                        <Label text="Your Optimized Schedule" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;"/>
+                        
+                        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                            <VBox fx:id="scheduleContainer" spacing="12">
+                                <!-- Days will be injected here -->
+                                <Label text="Select a goal and click 'Generate' to see your smart plan!" 
+                                       style="-fx-text-fill: #94a3b8; -fx-font-style: italic; -fx-padding: 20; -fx-font-size: 12px;"/>
+                            </VBox>
+                        </ScrollPane>
+                    </VBox>
+
+                </HBox>
 
                 <!-- Use Other Modules -->
-                <VBox spacing="15">
+                <VBox spacing="14" alignment="CENTER" style="-fx-padding: 20;">
                     <Label text="💡 Start Here - Use These Features" 
-                           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;"/>
+                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #4A9EEB;"/>
                     
-                    <HBox spacing="20">
-                        <VBox spacing="12" prefWidth="300"
-                              onMouseClicked="#goToObjectif"
-                              style="-fx-padding: 25; -fx-border-radius: 12; -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 4); -fx-cursor: hand; -fx-border-left: 5px solid #00d2ff;">
-                            <Label text="🎯" style="-fx-font-size: 40px;"/>
-                            <Label text="Create Goals" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #00d2ff;"/>
-                            <Label text="Start by defining your personal goals with clear deadlines and descriptions" 
-                                   style="-fx-font-size: 12px; -fx-text-fill: #555555; -fx-wrap-text: true; -fx-line-spacing: 1.2;"
-                                   wrapText="true"/>
-                            <Button text="Open Goals ▶" style="-fx-padding: 10px 16px; -fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: white; -fx-background: linear-gradient(to right, #00d2ff, #3a7bd5); -fx-border-radius: 6; -fx-cursor: hand;"/>
+                    <HBox spacing="14" alignment="CENTER">
+                        <!-- Create Goals -->
+                        <VBox spacing="10" prefWidth="200" minHeight="180" alignment="TOP_CENTER"
+                               onMouseClicked="#goToObjectif"
+                               style="-fx-padding: 16; -fx-border-radius: 10; -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 4); -fx-cursor: hand; -fx-border-color: #00d2ff; -fx-border-width: 0 0 0 4; -fx-border-style: solid;">
+                            <Label text="🎯" style="-fx-font-size: 28px;"/>
+                            <Label text="Create Goals" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #00d2ff;"/>
+                            <Label text="Start by defining your personal goals with clear deadlines" 
+                                   style="-fx-font-size: 11px; -fx-text-fill: #555555; -fx-text-alignment: center;"
+                                   wrapText="true" VBox.vgrow="ALWAYS"/>
+                            <Button text="Open Goals ▶" styleClass="btn-sky" style="-fx-font-size: 10px;"/>
                         </VBox>
                         
-                        <VBox spacing="12" prefWidth="300"
-                              onMouseClicked="#goToMilestones"
-                              style="-fx-padding: 25; -fx-border-radius: 12; -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 4); -fx-cursor: hand; -fx-border-left: 5px solid #3a7bd5;">
-                            <Label text="📍" style="-fx-font-size: 40px;"/>
-                            <Label text="Set Milestones" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #3a7bd5;"/>
-                            <Label text="Break down each goal into meaningful milestones to track progress" 
-                                   style="-fx-font-size: 12px; -fx-text-fill: #555555; -fx-wrap-text: true; -fx-line-spacing: 1.2;"
-                                   wrapText="true"/>
-                            <Button text="Open Milestones ▶" style="-fx-padding: 10px 16px; -fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: white; -fx-background: linear-gradient(to right, #00d2ff, #3a7bd5); -fx-border-radius: 6; -fx-cursor: hand;"/>
+                        <!-- Set Milestones -->
+                        <VBox spacing="10" prefWidth="200" minHeight="180" alignment="TOP_CENTER"
+                               onMouseClicked="#goToMilestones"
+                               style="-fx-padding: 16; -fx-border-radius: 10; -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 4); -fx-cursor: hand; -fx-border-color: #3a7bd5; -fx-border-width: 0 0 0 4; -fx-border-style: solid;">
+                            <Label text="📍" style="-fx-font-size: 28px;"/>
+                            <Label text="Set Milestones" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #3a7bd5;"/>
+                            <Label text="Break down each goal into meaningful milestones" 
+                                   style="-fx-font-size: 11px; -fx-text-fill: #555555; -fx-text-alignment: center;"
+                                   wrapText="true" VBox.vgrow="ALWAYS"/>
+                            <Button text="Open Milestones ▶" styleClass="btn-sky" style="-fx-font-size: 10px;"/>
                         </VBox>
                         
-                        <VBox spacing="12" prefWidth="300"
-                              onMouseClicked="#goToActions"
-                              style="-fx-padding: 25; -fx-border-radius: 12; -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 4); -fx-cursor: hand; -fx-border-left: 5px solid #f39c12;">
-                            <Label text="⚡" style="-fx-font-size: 40px;"/>
-                            <Label text="Plan Actions" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #f39c12;"/>
-                            <Label text="Define specific action steps with priorities to achieve your goals" 
-                                   style="-fx-font-size: 12px; -fx-text-fill: #555555; -fx-wrap-text: true; -fx-line-spacing: 1.2;"
-                                   wrapText="true"/>
-                            <Button text="Open Actions ▶" style="-fx-padding: 10px 16px; -fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: white; -fx-background: linear-gradient(to right, #00d2ff, #3a7bd5); -fx-border-radius: 6; -fx-cursor: hand;"/>
+                        <!-- Plan Actions -->
+                        <VBox spacing="10" prefWidth="200" minHeight="180" alignment="TOP_CENTER"
+                               onMouseClicked="#goToActions"
+                               style="-fx-padding: 16; -fx-border-radius: 10; -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 4); -fx-cursor: hand; -fx-border-color: #f39c12; -fx-border-width: 0 0 0 4; -fx-border-style: solid;">
+                            <Label text="⚡" style="-fx-font-size: 28px;"/>
+                            <Label text="Plan Actions" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #f39c12;"/>
+                            <Label text="Define specific action steps with priorities" 
+                                   style="-fx-font-size: 11px; -fx-text-fill: #555555; -fx-text-alignment: center;"
+                                   wrapText="true" VBox.vgrow="ALWAYS"/>
+                            <Button text="Open Actions ▶" styleClass="btn-sky" style="-fx-font-size: 10px;"/>
                         </VBox>
                     </HBox>
                 </VBox>
-
             </VBox>
         </ScrollPane>
     </center>

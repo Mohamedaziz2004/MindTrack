@@ -13,7 +13,7 @@ public class Objectif {
     private LocalDate dateFin;
     private String statut; // "Non commencée", "En cours", "Complétée"
     private int idU;
-    
+
     // Relations
     private List<JalonProgression> jalons;
     private List<PlanAction> planActions;
@@ -26,8 +26,8 @@ public class Objectif {
     }
 
     // Constructor complet
-    public Objectif(int idObj, String titre, String description, LocalDate dateDebut, 
-                    LocalDate dateFin, String statut, int idU) {
+    public Objectif(int idObj, String titre, String description, LocalDate dateDebut,
+            LocalDate dateFin, String statut, int idU) {
         this.idObj = idObj;
         this.titre = titre;
         this.description = description;
@@ -130,7 +130,22 @@ public class Objectif {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Objectif objectif = (Objectif) o;
+        return idObj == objectif.idObj;
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(idObj);
+    }
+
+    @Override
     public String toString() {
-        return titre + " (" + statut + ")";
+        return titre;
     }
 }

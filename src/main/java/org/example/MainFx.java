@@ -14,11 +14,17 @@ public class MainFx extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/menu-view.fxml"));
         Parent root = loader.load();
 
-        // Set up the scene
-        Scene scene = new Scene(root);
+        // Set up the scene - smaller default/min so it fits on small screens
+        double defaultWidth = 1100;
+        double defaultHeight = 700;
+        Scene scene = new Scene(root, defaultWidth, defaultHeight);
 
-        // Configure the stage
+        // Configure the stage - low minimum so small screens can use the app
         primaryStage.setTitle("MindTrack - Gestion des Objectifs Personnels");
+        primaryStage.setMinWidth(880);
+        primaryStage.setMinHeight(560);
+        primaryStage.setWidth(defaultWidth);
+        primaryStage.setHeight(defaultHeight);
 
         // Set application icon
         try {
@@ -32,6 +38,7 @@ public class MainFx extends Application {
 
         primaryStage.setScene(scene);
         primaryStage.setResizable(true);
+        primaryStage.centerOnScreen();
         primaryStage.show();
     }
 

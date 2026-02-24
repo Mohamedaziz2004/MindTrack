@@ -52,14 +52,13 @@
                                   prefRowCount="3"/>
                     </VBox>
 
-                    <!-- ✅ NEW : Type + Target -->
+                    <!-- Type + Target -->
                     <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="2">
                         <Label text="Type" styleClass="field-label"/>
                         <ComboBox fx:id="cbType" prefWidth="220"/>
                     </VBox>
 
                     <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                        <!-- ✅ FIX XML: & => &amp; -->
                         <Label text="Target &amp; Unit" styleClass="field-label"/>
                         <HBox spacing="10">
                             <Spinner fx:id="spTarget" prefWidth="110"/>
@@ -86,6 +85,12 @@
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label text="Your Habits" styleClass="section-title"/>
                     <Pane HBox.hgrow="ALWAYS"/>
+
+                    <!-- ✅ Search -->
+                    <TextField fx:id="tfSearch"
+                               promptText="Search habits..."
+                               prefWidth="260"
+                               styleClass="search-field"/>
 
                     <Label text="Sort:" styleClass="hint"/>
                     <ComboBox fx:id="cbSort" prefWidth="200"/>

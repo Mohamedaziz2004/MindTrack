@@ -25,8 +25,9 @@ public class HabitudeController {
     private final SuiviHabitudeService suiviService = new SuiviHabitudeService();
     private final SmartReminderService smartReminderService = new SmartReminderService();
 
-    // ===== SORT =====
+    // ===== SORT + SEARCH =====
     @FXML private ComboBox<String> cbSort;
+    @FXML private TextField tfSearch;
 
     // ===== FORM =====
     @FXML private TextField tfNom;
@@ -73,6 +74,11 @@ public class HabitudeController {
             cbSort.setOnAction(e -> renderCards());
         }
 
+        // ✅ Search live
+        if (tfSearch != null) {
+            tfSearch.textProperty().addListener((obs, oldV, newV) -> renderCards());
+        }
+
         loadHabitudes();
     }
 
@@ -103,7 +109,7 @@ public class HabitudeController {
         try {
             habitudes.setAll(habService.afficherParUser(Session.getIdU()));
 
-            // ✅ smart reminders auto check
+            // smart reminders auto check
             smartReminderService.evaluateAll(habitudes);
 
             // restore selection
@@ -228,7 +234,7 @@ public class HabitudeController {
         }
     }
 
-    // ================= UI: CARDS + TRI =================
+    // ================= UI: CARDS + TRI + SEARCH =================
 
     private void renderCards() {
         cardsContainer.getChildren().clear();
@@ -240,19 +246,40 @@ public class HabitudeController {
             return;
         }
 
+        // ✅ 1) Copy list
         List<Habitude> list = new ArrayList<>(habitudes);
-        String sort = (cbSort == null || cbSort.getValue() == null) ? "Newest" : cbSort.getValue();
 
+        // ✅ 2) Search filter
+        String q = (tfSearch == null || tfSearch.getText() == null) ? "" : tfSearch.getText().trim().toLowerCase();
+        if (!q.isEmpty()) {
+            list.removeIf(h -> {
+                String nom = safeText(h.getNom()).toLowerCase();
+                String freq = safeText(h.getFrequence()).toLowerCase();
+                String obj = safeText(h.getObjectif()).toLowerCase();
+                return !(nom.contains(q) || freq.contains(q) || obj.contains(q));
+            });
+        }
+
+        if (list.isEmpty()) {
+            Label empty = new Label("No results. Try another search.");
+            empty.getStyleClass().add("hint");
+            cardsContainer.getChildren().add(empty);
+            return;
+        }
+
+        // ✅ 3) Sort
+        String sort = (cbSort == null || cbSort.getValue() == null) ? "Newest" : cbSort.getValue();
         switch (sort) {
             case "Streak (High → Low)" ->
                     list.sort((a, b) -> Integer.compare(getStreak7Safe(b), getStreak7Safe(a)));
             case "Streak (Low → High)" ->
                     list.sort(Comparator.comparingInt(this::getStreak7Safe));
             case "Name (A → Z)" ->
-                    list.sort(Comparator.comparing(h -> h.getNom().toLowerCase()));
+                    list.sort(Comparator.comparing(h -> safeText(h.getNom()).toLowerCase()));
             default -> { /* Newest déjà desc */ }
         }
 
+        // ✅ 4) Render
         for (Habitude h : list) {
             cardsContainer.getChildren().add(buildHabitCard(h));
         }
@@ -368,15 +395,6 @@ public class HabitudeController {
             else if (partial) dot.getStyleClass().add("dot-partial-btn");
             else dot.getStyleClass().add("dot-miss-btn");
 
-            String tip;
-            if (h.isBooleanType()) {
-                tip = dayFinal + " : " + (done ? "Done" : "Not done");
-            } else {
-                String u = (h.getUnit() == null || h.getUnit().isBlank()) ? "" : (" " + h.getUnit());
-                tip = dayFinal + " : " + val + "/" + target + u + (done ? " ✅" : "");
-            }
-            Tooltip.install(dot, new Tooltip(tip));
-
             dot.setOnAction(ev -> {
                 try {
                     if (h.isBooleanType()) {
@@ -388,24 +406,19 @@ public class HabitudeController {
                         suiviService.marquerValeur(h.getIdHabitude(), dayFinal, userVal, target);
                     }
 
-                    // smart reminder auto update
                     smartReminderService.evaluateHabit(h);
-
                     loadHabitudes();
                 } catch (SQLException e) {
                     showError("Suivi", e.getMessage());
                 }
             });
 
-            // éviter sélection card via dot
             dot.addEventFilter(MouseEvent.MOUSE_CLICKED, MouseEvent::consume);
-
             dots.getChildren().add(dot);
         }
 
         progressBox.getChildren().addAll(daysRow, dots);
 
-        // "streak coché" = nb fait / 7
         int streak7 = getStreak7Safe(h);
         Label streakLabel = new Label(streak7 + " / 7 days");
         streakLabel.getStyleClass().add("habit-streak");
@@ -447,7 +460,8 @@ public class HabitudeController {
         tfObjectif.setText(h.getObjectif());
 
         if (cbType != null) cbType.getSelectionModel().select(h.getHabitType());
-        if (spTarget != null && spTarget.getValueFactory() != null) spTarget.getValueFactory().setValue(Math.max(1, h.getTargetValue()));
+        if (spTarget != null && spTarget.getValueFactory() != null)
+            spTarget.getValueFactory().setValue(Math.max(1, h.getTargetValue()));
         if (tfUnit != null) tfUnit.setText(h.getUnit());
 
         updateTargetUi();
@@ -473,6 +487,10 @@ public class HabitudeController {
 
     private String safeChip(String s) {
         return (s == null || s.isBlank()) ? "No frequency" : s.trim();
+    }
+
+    private String safeText(String s) {
+        return (s == null) ? "" : s;
     }
 
     // ================= Alerts =================

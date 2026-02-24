@@ -3,8 +3,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 
 <ScrollPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -22,7 +20,7 @@
             <!-- Header -->
             <VBox spacing="4">
                 <Label text="Habit Tracker" styleClass="page-title"/>
-                <Label text="Cultivate positive habits and track your progress. Consistency is key to personal growth and well-being. Mark your days to build powerful streaks!"
+                <Label text="Cultivate positive habits and track your progress. Mark your days to build powerful streaks!"
                        styleClass="page-subtitle"
                        wrapText="true"/>
             </VBox>
@@ -53,23 +51,31 @@
                                   promptText="e.g. Focus on mindfulness for 10 minutes"
                                   prefRowCount="3"/>
                     </VBox>
+
+                    <!-- ✅ NEW : Type + Target -->
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                        <Label text="Type" styleClass="field-label"/>
+                        <ComboBox fx:id="cbType" prefWidth="220"/>
+                    </VBox>
+
+                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                        <!-- ✅ FIX XML: & => &amp; -->
+                        <Label text="Target &amp; Unit" styleClass="field-label"/>
+                        <HBox spacing="10">
+                            <Spinner fx:id="spTarget" prefWidth="110"/>
+                            <TextField fx:id="tfUnit" promptText="unit (x/min)" prefWidth="160"/>
+                        </HBox>
+                    </VBox>
                 </GridPane>
 
                 <!-- Buttons row -->
                 <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Button text="＋ Add Habit"
-                            onAction="#ajouterHabitude"
+                    <Button text="＋ Add Habit" onAction="#ajouterHabitude"
                             styleClass="btn-primary"
-                            maxWidth="Infinity"
-                            HBox.hgrow="ALWAYS"/>
+                            maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
 
-                    <Button text="Edit Selected"
-                            onAction="#modifierHabitude"
-                            styleClass="btn-secondary"/>
-
-                    <Button text="Delete Selected"
-                            onAction="#supprimerHabitude"
-                            styleClass="btn-danger"/>
+                    <Button text="Edit Selected" onAction="#modifierHabitude" styleClass="btn-secondary"/>
+                    <Button text="Delete Selected" onAction="#supprimerHabitude" styleClass="btn-danger"/>
                 </HBox>
 
                 <Label text="Tip: click a habit card to select it, then edit/delete." styleClass="hint"/>
@@ -79,7 +85,6 @@
             <VBox spacing="10">
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label text="Your Habits" styleClass="section-title"/>
-
                     <Pane HBox.hgrow="ALWAYS"/>
 
                     <Label text="Sort:" styleClass="hint"/>
@@ -88,17 +93,13 @@
                     <Button text="Refresh" onAction="#loadHabitudes" styleClass="btn-outline btn-sm"/>
                 </HBox>
 
-                <!-- Cards grid -->
                 <FlowPane fx:id="cardsContainer"
                           hgap="14" vgap="14"
                           prefWrapLength="980"
                           styleClass="cards-grid"/>
             </VBox>
 
-            <VBox alignment="CENTER">
-                <Label text="© 2026 Mind Track. All rights reserved." styleClass="footer" />
-            </VBox>
-
+            <Label text="© 2026 Mind Track. All rights reserved." styleClass="footer"/>
         </VBox>
     </content>
 </ScrollPane>

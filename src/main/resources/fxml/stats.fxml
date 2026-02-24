@@ -3,34 +3,92 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="controllers.StatsController"
-      spacing="12">
+<ScrollPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.StatsController"
+            fitToWidth="true"
+            pannable="true"
+            styleClass="scroll-pane">
 
-    <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+    <content>
+        <VBox spacing="16">
+            <padding>
+                <Insets top="16" right="16" bottom="16" left="16"/>
+            </padding>
 
-    <Label text="Stats - Streak + Taux semaine/mois"
-           style="-fx-font-size:18px; -fx-font-weight:bold;"/>
+            <VBox spacing="4">
+                <Label text="Statistics &amp; Insights" styleClass="page-title"/>
+                <Label text="Monthly heatmap + trends + best day to help you improve consistency."
+                       styleClass="page-subtitle" wrapText="true"/>
+            </VBox>
 
-    <HBox spacing="10">
-        <Label text="Habitude:"/>
-        <ComboBox fx:id="cbHabitudes" prefWidth="260"/>
-        <Button text="Calculer" onAction="#calculer"/>
-    </HBox>
+            <!-- Controls -->
+            <VBox spacing="12" styleClass="card">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Habit:" styleClass="field-label"/>
+                    <ComboBox fx:id="cbHabitudes" prefWidth="280"/>
 
-    <GridPane hgap="15" vgap="10">
-        <Label text="Streak actuel:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-        <Label fx:id="lbStreak" text="-" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    <Label text="Month:" styleClass="field-label"/>
+                    <DatePicker fx:id="dpMonth" prefWidth="170"/>
 
-        <Label text="Taux semaine:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-        <Label fx:id="lbSemaine" text="-" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    <Button text="Load" onAction="#refresh" styleClass="btn-primary"/>
+                    <Button text="This month" onAction="#thisMonth" styleClass="btn-secondary"/>
+                </HBox>
+            </VBox>
 
-        <Label text="Taux mois:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-        <Label fx:id="lbMois" text="-" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-    </GridPane>
+            <!-- KPIs -->
+            <HBox spacing="12">
+                <VBox styleClass="kpi-card" spacing="6">
+                    <Label text="Current Streak" styleClass="kpi-label"/>
+                    <Label fx:id="lbStreak" text="-" styleClass="kpi-value"/>
+                </VBox>
 
-</VBox>
+                <VBox styleClass="kpi-card" spacing="6">
+                    <Label text="7 days rate" styleClass="kpi-label"/>
+                    <Label fx:id="lbSemaine" text="-" styleClass="kpi-value"/>
+                </VBox>
+
+                <VBox styleClass="kpi-card" spacing="6">
+                    <Label text="30 days rate" styleClass="kpi-label"/>
+                    <Label fx:id="lbMois" text="-" styleClass="kpi-value"/>
+                </VBox>
+
+                <VBox styleClass="kpi-card" spacing="6">
+                    <Label text="Best Day" styleClass="kpi-label"/>
+                    <Label fx:id="lbBestDay" text="-" styleClass="kpi-value"/>
+                </VBox>
+            </HBox>
+
+            <!-- Heatmap -->
+            <VBox spacing="12" styleClass="card">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Monthly Heatmap" styleClass="card-title"/>
+                    <Pane HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lbMonthSummary" text="-" styleClass="hint"/>
+                </HBox>
+
+                <GridPane fx:id="gpHeatmap" hgap="6" vgap="6"/>
+
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <Label text="Less" styleClass="hint"/>
+                    <Region styleClass="legend-box heat-0"/>
+                    <Region styleClass="legend-box heat-1"/>
+                    <Region styleClass="legend-box heat-2"/>
+                    <Region styleClass="legend-box heat-3"/>
+                    <Label text="More" styleClass="hint"/>
+                </HBox>
+            </VBox>
+
+            <!-- Trend -->
+            <VBox spacing="10" styleClass="card">
+                <Label text="Trend" styleClass="card-title"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Month consistency:" styleClass="field-label"/>
+                    <ProgressBar fx:id="pbMonth" prefWidth="260"/>
+                    <Label fx:id="lbConsistency" text="-" styleClass="hint"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </content>
+</ScrollPane>

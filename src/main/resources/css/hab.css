@@ -370,3 +370,97 @@
     -fx-opacity: 1;
     -fx-visible: true;
 }
+/* ===== Typography classes used in FXML ===== */
+.page-title { -fx-font-size: 26px; -fx-font-weight: 900; }
+.page-subtitle { -fx-text-fill: #6b7280; -fx-font-size: 13px; }
+.card-title { -fx-font-size: 16px; -fx-font-weight: 900; }
+.section-title { -fx-font-size: 16px; -fx-font-weight: 900; }
+.field-label { -fx-font-weight: 800; }
+.hint { -fx-text-fill: #6b7280; -fx-font-size: 12px; }
+.footer { -fx-text-fill: #9ca3af; -fx-font-size: 11px; }
+
+/* ===== Habit card extra ===== */
+.chip {
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+.chip-soft {
+    -fx-background-color: #f3f4f6;
+    -fx-text-fill: #111827;
+}
+.chip-outline {
+    -fx-background-color: transparent;
+    -fx-border-color: #e5e7eb;
+    -fx-text-fill: #374151;
+}
+
+/* ===== Dots: done / miss / partial ===== */
+.dot-done-btn, .dot-miss-btn, .dot-partial-btn {
+    -fx-min-width: 22;
+    -fx-min-height: 22;
+    -fx-pref-width: 22;
+    -fx-pref-height: 22;
+    -fx-alignment: center;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.dot-done-btn { -fx-background-color: #16a34a; -fx-text-fill: white; }
+.dot-done-btn:hover { -fx-background-color: #15803d; }
+
+.dot-miss-btn { -fx-background-color: #e5e7eb; -fx-text-fill: #6b7280; }
+.dot-miss-btn:hover { -fx-background-color: #d1d5db; }
+
+.dot-partial-btn { -fx-background-color: #3b82f6; -fx-text-fill: white; }
+.dot-partial-btn:hover { -fx-background-color: #2563eb; }
+
+/* ===== KPI cards ===== */
+.kpi-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: #e5e7eb;
+    -fx-padding: 14;
+    -fx-effect: dropshadow(gaussian, rgba(17,24,39,0.08), 18, 0.18, 0, 4);
+}
+.kpi-label { -fx-text-fill: #6b7280; -fx-font-weight: 800; }
+.kpi-value { -fx-font-size: 22px; -fx-font-weight: 900; }
+
+/* ===== Heatmap ===== */
+.heat-header {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-min-width: 22;
+    -fx-alignment: center;
+}
+.heat-cell {
+    -fx-min-width: 22;
+    -fx-min-height: 22;
+    -fx-pref-width: 22;
+    -fx-pref-height: 22;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-border-color: rgba(17,24,39,0.06);
+}
+
+.heat-0 { -fx-background-color: #eef2f7; }
+.heat-1 { -fx-background-color: #bfdbfe; }
+.heat-2 { -fx-background-color: #60a5fa; }
+.heat-3 { -fx-background-color: #16a34a; }
+
+.legend-box {
+    -fx-min-width: 16;
+    -fx-min-height: 16;
+    -fx-pref-width: 16;
+    -fx-pref-height: 16;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+}

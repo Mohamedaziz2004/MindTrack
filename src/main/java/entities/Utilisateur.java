@@ -10,27 +10,39 @@ public class Utilisateur {
     private String mdpsU;
     private int ageU;
     private String role;
-    private byte[] faceEncoding;
+    private String faceSubject;
+    private String faceImageId;
+    private boolean faceEnabled;
 
     // 🔹 Constructeur vide (OBLIGATOIRE pour JDBC)
     public Utilisateur() {
     }
 
     // 🔹 Constructeur sans id (pour insertion)
-    public Utilisateur(String nomU, String prenomU, String emailU, String mdpsU, int ageU , String role, byte[] faceEncoding) {
-         this.faceEncoding = faceEncoding;
+    public Utilisateur(String nomU, String prenomU, String emailU, String mdpsU, int ageU , String role) {
         this.nomU = nomU;
         this.prenomU = prenomU;
         this.emailU = emailU;
         this.mdpsU = mdpsU;
         this.ageU = ageU;
         this.role = role;
-        this.faceEncoding = faceEncoding;
+    }
+
+    public Utilisateur(String nomU, String prenomU, String emailU, String mdpsU, int ageU, String role,
+                       String faceSubject, String faceImageId, boolean faceEnabled) {
+        this.nomU = nomU;
+        this.prenomU = prenomU;
+        this.emailU = emailU;
+        this.mdpsU = mdpsU;
+        this.ageU = ageU;
+        this.role = role;
+        this.faceSubject = faceSubject;
+        this.faceImageId = faceImageId;
+        this.faceEnabled = faceEnabled;
     }
 
     // 🔹 Constructeur complet
-    public Utilisateur(int idU, String nomU, String prenomU, String emailU, String mdpsU, int ageU , String role, byte[] faceEncoding) {
-         this.faceEncoding = faceEncoding;
+    public Utilisateur(int idU, String nomU, String prenomU, String emailU, String mdpsU, int ageU , String role) {
         this.idU = idU;
         this.nomU = nomU;
         this.prenomU = prenomU;
@@ -38,7 +50,20 @@ public class Utilisateur {
         this.mdpsU = mdpsU;
         this.ageU = ageU;
         this.role = role;
-        this.faceEncoding = faceEncoding;
+    }
+
+    public Utilisateur(int idU, String nomU, String prenomU, String emailU, String mdpsU, int ageU, String role,
+                       String faceSubject, String faceImageId, boolean faceEnabled) {
+        this.idU = idU;
+        this.nomU = nomU;
+        this.prenomU = prenomU;
+        this.emailU = emailU;
+        this.mdpsU = mdpsU;
+        this.ageU = ageU;
+        this.role = role;
+        this.faceSubject = faceSubject;
+        this.faceImageId = faceImageId;
+        this.faceEnabled = faceEnabled;
     }
 
     // Getters & Setters
@@ -89,6 +114,7 @@ public class Utilisateur {
     public void setAgeU(int ageU) {
         this.ageU = ageU;
     }
+
     public String getRole() {
         return role;
     }
@@ -97,12 +123,27 @@ public class Utilisateur {
         this.role = role;
     }
 
-    public byte[] getFaceEncoding() {
-        return faceEncoding;
+    public String getFaceSubject() {
+        return faceSubject;
     }
 
-    public void setFaceEncoding(byte[] faceEncoding) {
-        this.faceEncoding = faceEncoding;
+    public void setFaceSubject(String faceSubject) {
+        this.faceSubject = faceSubject;
+    }
+
+    public String getFaceImageId() {
+        return faceImageId;
+    }
+
+    public void setFaceImageId(String faceImageId) {
+        this.faceImageId = faceImageId;
+    }
+
+    public boolean isFaceEnabled() {
+        return faceEnabled;
+    }
+
+    public void setFaceEnabled(boolean faceEnabled) {
+        this.faceEnabled = faceEnabled;
     }
 }
-

@@ -62,10 +62,11 @@
                     maxWidth="Infinity"
                     styleClass="primary-button"/>
 
-            <Button text="Capture Face"
-                    fx:id="captureFaceBtn"
+            <Button text="Login with Face ID"
                     onAction="#handleFaceLogin"
-                    styleClass="primary-button"/>
+                    maxWidth="Infinity"
+                    styleClass="secondary-button"/>
+
 
             <!-- Forgot password -->
             <Hyperlink text="Forgot Password?"

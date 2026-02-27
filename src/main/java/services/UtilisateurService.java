@@ -1,11 +1,7 @@
 package services;
 
 import entities.Utilisateur;
-import org.opencv.core.Mat;
 import utils.DatabaseConnection;
-import utils.FaceRecognitionUtil;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.core.MatOfByte;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -25,7 +21,7 @@ public class UtilisateurService implements IService<Utilisateur> {
     // CREATE
     @Override
     public void ajouter(Utilisateur u) throws SQLException {
-        String sql = "INSERT INTO utilisateur (nomU, prenomU, emailU, mdpsU, ageU, roleU, face_encoding) VALUES (?, ?, ?, ?, ?,default,?)";
+        String sql = "INSERT INTO utilisateur (nomU, prenomU, emailU, mdpsU, ageU, roleU) VALUES (?, ?, ?, ?, ?, default)";
 
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setString(1, u.getNomU());
@@ -33,12 +29,47 @@ public class UtilisateurService implements IService<Utilisateur> {
         ps.setString(3, u.getEmailU());
         ps.setString(4, u.getMdpsU());
         ps.setInt(5, u.getAgeU());
-        ps.setBytes(6, u.getFaceEncoding());
 
         ps.executeUpdate();
+    }
 
+    public int ajouterAndReturnId(Utilisateur u) throws SQLException {
+        String sql = "INSERT INTO utilisateur (nomU, prenomU, emailU, mdpsU, ageU, roleU) VALUES (?, ?, ?, ?, ?, default)";
+        PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        ps.setString(1, u.getNomU());
+        ps.setString(2, u.getPrenomU());
+        ps.setString(3, u.getEmailU());
+        ps.setString(4, u.getMdpsU());
+        ps.setInt(5, u.getAgeU());
+        ps.executeUpdate();
 
+        try (ResultSet rs = ps.getGeneratedKeys()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        throw new SQLException("Failed to get generated user ID.");
+    }
 
+    public void updateFaceInfo(int userId, String faceSubject, String faceImageId, boolean faceEnabled) throws SQLException {
+        String sql = "UPDATE utilisateur SET face_subject = ?, face_image_id = ?, face_enabled = ? WHERE idU = ?";
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, faceSubject);
+        ps.setString(2, faceImageId);
+        ps.setBoolean(3, faceEnabled);
+        ps.setInt(4, userId);
+        ps.executeUpdate();
+    }
+
+    public Utilisateur findByFaceSubject(String faceSubject) throws SQLException {
+        String sql = "SELECT * FROM utilisateur WHERE face_subject = ? AND face_enabled = 1";
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, faceSubject);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return mapUser(rs);
+        }
+        return null;
     }
 
     // DELETE
@@ -54,7 +85,7 @@ public class UtilisateurService implements IService<Utilisateur> {
     // UPDATE
     @Override
     public void update(Utilisateur u) throws SQLException {
-        String sql = "UPDATE utilisateur SET nomU = ?, prenomU = ?, emailU = ?, mdpsU = ?, ageU = ? WHERE idU = ?";
+        String sql = "UPDATE utilisateur SET nomU = ?, prenomU = ?, emailU = ?, mdpsU = ?, ageU = ?, face_subject = ?, face_image_id = ?, face_enabled = ? WHERE idU = ?";
 
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setString(1, u.getNomU());
@@ -62,7 +93,10 @@ public class UtilisateurService implements IService<Utilisateur> {
         ps.setString(3, u.getEmailU());
         ps.setString(4, u.getMdpsU());
         ps.setInt(5, u.getAgeU());
-        ps.setInt(6, u.getIdU());
+        ps.setString(6, u.getFaceSubject());
+        ps.setString(7, u.getFaceImageId());
+        ps.setBoolean(8, u.isFaceEnabled());
+        ps.setInt(9, u.getIdU());
 
         ps.executeUpdate();
     }
@@ -77,17 +111,7 @@ public class UtilisateurService implements IService<Utilisateur> {
         ResultSet rs = st.executeQuery(sql);
 
         while (rs.next()) {
-            Utilisateur u = new Utilisateur();
-            u.setIdU(rs.getInt("idU"));
-            u.setNomU(rs.getString("nomU"));
-            u.setPrenomU(rs.getString("prenomU"));
-            u.setEmailU(rs.getString("emailU"));
-            u.setMdpsU(rs.getString("mdpsU"));
-            u.setAgeU(rs.getInt("ageU"));
-            u.setRole(rs.getString("roleU"));
-            u.setFaceEncoding(rs.getBytes("face_encoding"));
-
-            utilisateurs.add(u);
+            utilisateurs.add(mapUser(rs));
         }
         return utilisateurs;
     }
@@ -102,18 +126,24 @@ public class UtilisateurService implements IService<Utilisateur> {
         ResultSet rs = ps.executeQuery();
 
         if (rs.next()) {
-            return new Utilisateur(
-                    rs.getInt("idU"),
-                    rs.getString("nomU"),
-                    rs.getString("prenomU"),
-                    rs.getString("emailU"),
-                    rs.getString("mdpsU"),
-                    rs.getInt("ageU"),
-                    rs.getString("roleU"),
-                    rs.getBytes("face_encoding")
-            );
+            return mapUser(rs);
         }
         return null;
+    }
+
+    private Utilisateur mapUser(ResultSet rs) throws SQLException {
+        return new Utilisateur(
+                rs.getInt("idU"),
+                rs.getString("nomU"),
+                rs.getString("prenomU"),
+                rs.getString("emailU"),
+                rs.getString("mdpsU"),
+                rs.getInt("ageU"),
+                rs.getString("roleU"),
+                rs.getString("face_subject"),
+                rs.getString("face_image_id"),
+                rs.getBoolean("face_enabled")
+        );
     }
 
     public boolean emailExists(String email) throws SQLException {
@@ -127,59 +157,5 @@ public class UtilisateurService implements IService<Utilisateur> {
         return false;
     }
 
-    public Utilisateur loginWithFace(byte[] capturedFaceBytes) throws SQLException {
-
-        if (capturedFaceBytes == null) {
-            return null;
-        }
-
-        // Convert captured face → LBP features
-        Mat capturedFaceMat = FaceRecognitionUtil.byteArrayToMat(capturedFaceBytes);
-        byte[] capturedLBP = FaceRecognitionUtil.extractLBPFeatures(capturedFaceMat);
-
-        String sql = "SELECT * FROM utilisateur WHERE face_encoding IS NOT NULL";
-        Statement st = connection.createStatement();
-        ResultSet rs = st.executeQuery(sql);
-
-        double bestScore = Double.MAX_VALUE;
-        Utilisateur bestUser = null;
-
-        while (rs.next()) {
-
-            byte[] storedLBP = rs.getBytes("face_encoding");
-
-            if (storedLBP != null) {
-
-                // Compare LBP feature vectors
-                double distance = FaceRecognitionUtil.compareLBP(capturedLBP, storedLBP);
-
-                System.out.println("User ID: " + rs.getInt("idU") + " distance: " + distance);
-
-                if (distance < bestScore) {
-                    bestScore = distance;
-
-                    bestUser = new Utilisateur(
-                            rs.getInt("idU"),
-                            rs.getString("nomU"),
-                            rs.getString("prenomU"),
-                            rs.getString("emailU"),
-                            rs.getString("mdpsU"),
-                            rs.getInt("ageU"),
-                            rs.getString("roleU"),
-                            storedLBP
-                    );
-                }
-            }
-        }
-
-        // 🎯 LBP threshold (VERY IMPORTANT)
-        double threshold = 0.6; // start here
-
-        if (bestUser != null && bestScore < threshold) {
-            return bestUser;
-        }
-
-        return null;
-    }
 
 }

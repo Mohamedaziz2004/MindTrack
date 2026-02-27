@@ -3,6 +3,7 @@ package controllers;
 import entities.ProfilPsychologique;
 import entities.Utilisateur;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -12,11 +13,14 @@ import services.UtilisateurService;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.io.IOException;
 
-import utils.FaceRecognitionUtil;
+import services.ComprefaceClient;
+import utils.ComprefaceConfig;
+import utils.FaceCaptureDialog;
 import utils.UserSession;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Objects;
 
@@ -31,7 +35,7 @@ public class LoginController {
     @FXML
     private Label messageLabel;
 
-    private UtilisateurService userService = new UtilisateurService();
+    private final UtilisateurService userService = new UtilisateurService();
 
     @FXML
     public void handleLogin() {
@@ -104,6 +108,62 @@ public class LoginController {
 
     }
 
+    @FXML
+    public void handleFaceLogin() {
+        messageLabel.setStyle("-fx-text-fill: red;");
+        try {
+            File captured = FaceCaptureDialog.captureFace(emailField.getScene().getWindow());
+            if (captured == null) {
+                messageLabel.setText("Face capture canceled.");
+                return;
+            }
+
+            ComprefaceClient client = new ComprefaceClient();
+            ComprefaceClient.RecognitionMatch match = client.recognizeFace(captured.toPath())
+                    .orElse(null);
+            if (match == null) {
+                messageLabel.setText("No face recognized.");
+                return;
+            }
+
+            double threshold = ComprefaceConfig.getSimilarityThreshold();
+            if (match.similarity() < threshold) {
+                messageLabel.setText("Face not recognized with enough confidence.");
+                return;
+            }
+
+            Utilisateur user = userService.findByFaceSubject(match.subject());
+            if (user == null) {
+                messageLabel.setText("No user linked to this face.");
+                return;
+            }
+
+            ProfilPsychologiqueService profilService = new ProfilPsychologiqueService();
+            ProfilPsychologique profil = profilService.findByUserId(user.getIdU());
+
+            if (profil == null) {
+                profilService.createDefaultProfile(user.getIdU());
+            }
+
+            UserSession.setCurrentUser(user);
+
+            messageLabel.setStyle("-fx-text-fill: green;");
+            messageLabel.setText("Welcome " + user.getPrenomU());
+
+            openProfile();
+
+        } catch (IOException e) {
+            messageLabel.setText("Face login failed. Check camera/API key.");
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            messageLabel.setText("Face login interrupted.");
+            e.printStackTrace();
+        } catch (SQLException e) {
+            messageLabel.setText("Database error. Please try again.");
+            e.printStackTrace();
+        }
+    }
 
     @FXML
     public void openRegister() throws IOException {
@@ -139,36 +199,4 @@ public class LoginController {
         loginStage.close();
     }
 
-    @FXML
-    public void handleFaceLogin() {
-        try {
-            byte[] capturedFace = FaceRecognitionUtil.captureFace();
-            if (capturedFace == null) {
-                messageLabel.setText("No face detected.");
-                return;
-            }
-
-            Utilisateur user = userService.loginWithFace(capturedFace);
-
-            if (user != null) {
-                UserSession.setCurrentUser(user);
-                messageLabel.setStyle("-fx-text-fill: green;");
-                messageLabel.setText("Welcome " + user.getPrenomU());
-                openProfile();
-            } else {
-                messageLabel.setText("Face not recognized.");
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            messageLabel.setText("Database error.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            messageLabel.setText("Face login failed.");
-        }
-    }
-
-
-
 }
-

@@ -20,11 +20,11 @@ public class GoogleOAuthServiceTest {
         GoogleAuthConfig config = GoogleAuthConfig.of(
                 "test-client",
                 null,
-                "http://localhost:8080/callback"
+                "http://localhost:0/"
         );
         String url = GoogleOAuthService.buildAuthorizationUrl(config, "state123", "challenge123", config.getRedirectUri());
         assertTrue(url.contains("client_id=test-client"));
-        assertTrue(url.contains("redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fcallback"));
+        assertTrue(url.contains("redirect_uri=http%3A%2F%2Flocalhost%3A0%2F"));
         assertTrue(url.contains("code_challenge=challenge123"));
     }
 }

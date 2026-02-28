@@ -129,22 +129,7 @@ public class GoogleOAuthService {
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
-            String body = response.body();
-            try {
-                JsonNode errorNode = objectMapper.readTree(body);
-                String error = textValue(errorNode, "error");
-                String description = textValue(errorNode, "error_description");
-                if (response.statusCode() == 400
-                        && "invalid_request".equals(error)
-                        && description != null
-                        && description.toLowerCase().contains("client_secret is missing")
-                        && config.getClientSecret() == null) {
-                    throw new IOException("Token exchange failed: client_secret is missing. "
-                            + "Use a Desktop OAuth client ID or set google.clientSecret / GOOGLE_CLIENT_SECRET.");
-                }
-            } catch (Exception ignored) {
-            }
-            throw new IOException("Token exchange failed: " + response.statusCode() + " " + body);
+            throw new IOException("Token exchange failed: " + response.statusCode() + " " + response.body());
         }
 
         JsonNode node = objectMapper.readTree(response.body());
@@ -266,15 +251,7 @@ public class GoogleOAuthService {
                     : redirectUri.getPath();
             this.expectedState = expectedState;
             this.future = new CompletableFuture<>();
-            try {
-                this.server = HttpServer.create(new InetSocketAddress(redirectUri.getHost(), port), 0);
-            } catch (IOException e) {
-                if (e instanceof java.net.BindException) {
-                    throw new IOException("Google OAuth callback port " + port + " is already in use. "
-                            + "Close the app using it or change google.redirectUri / GOOGLE_REDIRECT_URI.", e);
-                }
-                throw e;
-            }
+            this.server = HttpServer.create(new InetSocketAddress(redirectUri.getHost(), port), 0);
             this.server.createContext(path, this::handleCallback);
             try {
                 int actualPort = this.server.getAddress().getPort();

@@ -1,9 +1,11 @@
 package org.mindtrack.mindtrackfxx.controller;
 
 import entities.humeur;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
@@ -146,25 +148,46 @@ public class StatisticsController {
 
     private void applyPieChartColors() {
         // Apply custom colors after data is set
-        int index = 0;
         for (PieChart.Data data : moodPieChart.getData()) {
-            String color;
-            String name = data.getName().toLowerCase();
-            if (name.contains("happy")) {
-                color = "#22c55e";
-            } else if (name.contains("calm")) {
-                color = "#0ea5e9";
-            } else if (name.contains("neutral")) {
-                color = "#64748b";
-            } else if (name.contains("sad")) {
-                color = "#f59e0b";
-            } else if (name.contains("anxious")) {
-                color = "#ef4444";
-            } else {
-                color = "#94a3b8";
-            }
+            String color = resolveMoodColor(data.getName());
             data.getNode().setStyle("-fx-pie-color: " + color + ";");
-            index++;
+        }
+
+        // Ensure legend symbols match the slice colors
+        Platform.runLater(this::applyPieChartLegendColors);
+    }
+
+    private String resolveMoodColor(String name) {
+        String lower = name.toLowerCase();
+        if (lower.contains("happy")) {
+            return "#22c55e";
+        }
+        if (lower.contains("calm")) {
+            return "#0ea5e9";
+        }
+        if (lower.contains("neutral")) {
+            return "#64748b";
+        }
+        if (lower.contains("sad")) {
+            return "#f59e0b";
+        }
+        if (lower.contains("anxious")) {
+            return "#ef4444";
+        }
+        return "#94a3b8";
+    }
+
+    private void applyPieChartLegendColors() {
+        for (Node item : moodPieChart.lookupAll(".chart-legend-item")) {
+            Node labelNode = item.lookup(".label");
+            if (!(labelNode instanceof Label)) {
+                continue;
+            }
+            String color = resolveMoodColor(((Label) labelNode).getText());
+            Node symbol = item.lookup(".chart-legend-item-symbol");
+            if (symbol != null) {
+                symbol.setStyle("-fx-background-color: " + color + ";");
+            }
         }
     }
 }

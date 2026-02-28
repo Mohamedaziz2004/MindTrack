@@ -67,6 +67,10 @@
                     maxWidth="Infinity"
                     styleClass="secondary-button"/>
 
+            <Button text="Sign in with Google"
+                    onAction="#handleGoogleLogin"
+                    maxWidth="Infinity"
+                    styleClass="secondary-button"/>
 
             <!-- Forgot password -->
             <Hyperlink text="Forgot Password?"

@@ -8,6 +8,7 @@ module com.example.mindtrack {
     requires java.desktop;
     requires java.sql;
     requires java.net.http;
+    requires jdk.httpserver;
 
     // Third-party automatic modules
     requires mysql.connector.j;

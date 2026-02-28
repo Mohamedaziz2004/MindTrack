@@ -2,11 +2,14 @@ package controllers;
 
 import entities.ProfilPsychologique;
 import entities.Utilisateur;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import services.GoogleOAuthService;
+import services.GoogleUserInfo;
 import services.ProfilPsychologiqueService;
 import services.UtilisateurService;
 
@@ -17,12 +20,16 @@ import javafx.stage.Stage;
 import services.ComprefaceClient;
 import utils.ComprefaceConfig;
 import utils.FaceCaptureDialog;
+import utils.GoogleAuthConfig;
 import utils.UserSession;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 public class LoginController {
 
@@ -197,6 +204,90 @@ public class LoginController {
         // Close login window
         Stage loginStage = (Stage) emailField.getScene().getWindow();
         loginStage.close();
+    }
+
+    @FXML
+    public void handleGoogleLogin() {
+        messageLabel.setStyle("-fx-text-fill: red;");
+        messageLabel.setText("Opening browser for Google sign-in...");
+
+        CompletableFuture
+                .supplyAsync(() -> {
+                    try {
+                        GoogleOAuthService service = new GoogleOAuthService(GoogleAuthConfig.load());
+                        return service.signIn();
+                    } catch (IOException | InterruptedException e) {
+                        throw new CompletionException(e);
+                    }
+                })
+                .thenAccept(userInfo -> Platform.runLater(() -> completeGoogleLogin(userInfo)))
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> {
+                        messageLabel.setStyle("-fx-text-fill: red;");
+                        messageLabel.setText("Google sign-in failed: " + rootMessage(ex));
+                    });
+                    return null;
+                });
+    }
+
+    private void completeGoogleLogin(GoogleUserInfo userInfo) {
+        if (!userInfo.emailVerified()) {
+            messageLabel.setStyle("-fx-text-fill: red;");
+            messageLabel.setText("Google account email is not verified.");
+            return;
+        }
+
+        try {
+            Utilisateur user = userService.findByEmail(userInfo.email());
+            if (user == null) {
+                String prenom = userInfo.givenName() != null ? userInfo.givenName() : "Google";
+                String nom = userInfo.familyName() != null ? userInfo.familyName() : "User";
+                Utilisateur newUser = new Utilisateur(
+                        nom,
+                        prenom,
+                        userInfo.email(),
+                        UUID.randomUUID().toString(),
+                        0,
+                        "user"
+                );
+                userService.ajouterAndReturnId(newUser);
+                user = userService.findByEmail(userInfo.email());
+            }
+
+            if (user == null) {
+                messageLabel.setStyle("-fx-text-fill: red;");
+                messageLabel.setText("Unable to create user for Google sign-in.");
+                return;
+            }
+
+            ProfilPsychologiqueService profilService = new ProfilPsychologiqueService();
+            ProfilPsychologique profil = profilService.findByUserId(user.getIdU());
+            if (profil == null) {
+                profilService.createDefaultProfile(user.getIdU());
+            }
+
+            UserSession.setCurrentUser(user);
+            messageLabel.setStyle("-fx-text-fill: green;");
+            messageLabel.setText("Welcome " + user.getPrenomU());
+            openProfile();
+
+        } catch (SQLException e) {
+            messageLabel.setStyle("-fx-text-fill: red;");
+            messageLabel.setText("Database error. Please try again.");
+            e.printStackTrace();
+        } catch (IOException e) {
+            messageLabel.setStyle("-fx-text-fill: red;");
+            messageLabel.setText("Navigation error.");
+            e.printStackTrace();
+        }
+    }
+
+    private String rootMessage(Throwable throwable) {
+        Throwable current = throwable;
+        while (current.getCause() != null) {
+            current = current.getCause();
+        }
+        return current.getMessage() != null ? current.getMessage() : "unexpected error";
     }
 
 }

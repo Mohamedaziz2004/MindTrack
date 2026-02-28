@@ -72,6 +72,17 @@ public class UtilisateurService implements IService<Utilisateur> {
         return null;
     }
 
+    public Utilisateur findByEmail(String email) throws SQLException {
+        String sql = "SELECT * FROM utilisateur WHERE emailU = ?";
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, email);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return mapUser(rs);
+        }
+        return null;
+    }
+
     // DELETE
     @Override
     public void supprimer(int id) throws SQLException {

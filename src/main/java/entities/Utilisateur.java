@@ -13,6 +13,7 @@ public class Utilisateur {
     private String faceSubject;
     private String faceImageId;
     private boolean faceEnabled;
+    private String profilePicturePath;
 
     // 🔹 Constructeur vide (OBLIGATOIRE pour JDBC)
     public Utilisateur() {
@@ -53,7 +54,7 @@ public class Utilisateur {
     }
 
     public Utilisateur(int idU, String nomU, String prenomU, String emailU, String mdpsU, int ageU, String role,
-                       String faceSubject, String faceImageId, boolean faceEnabled) {
+                       String profilePicturePath, String faceSubject, String faceImageId, boolean faceEnabled) {
         this.idU = idU;
         this.nomU = nomU;
         this.prenomU = prenomU;
@@ -61,6 +62,7 @@ public class Utilisateur {
         this.mdpsU = mdpsU;
         this.ageU = ageU;
         this.role = role;
+        this.profilePicturePath = profilePicturePath;
         this.faceSubject = faceSubject;
         this.faceImageId = faceImageId;
         this.faceEnabled = faceEnabled;
@@ -145,5 +147,13 @@ public class Utilisateur {
 
     public void setFaceEnabled(boolean faceEnabled) {
         this.faceEnabled = faceEnabled;
+    }
+
+    public String getProfilePicturePath() {
+        return profilePicturePath;
+    }
+
+    public void setProfilePicturePath(String profilePicturePath) {
+        this.profilePicturePath = profilePicturePath;
     }
 }

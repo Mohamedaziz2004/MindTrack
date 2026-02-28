@@ -4,11 +4,21 @@ import entities.ProfilPsychologique;
 import entities.Utilisateur;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
 import services.ProfilPsychologiqueService;
 import services.UtilisateurService;
 import utils.UserSession;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
+import java.util.Locale;
 
 public class ProfileController {
 
@@ -21,7 +31,11 @@ public class ProfileController {
     @FXML private TextField motivationField;
     @FXML private TextArea descriptionArea;
 
+    @FXML private ImageView profileImageView;
+
     @FXML private Label messageLabel;
+
+    private static final String DEFAULT_PROFILE_PICTURE = "/pfp_temp.png";
 
     private UtilisateurService userService = new UtilisateurService();
     private ProfilPsychologiqueService profileService = new ProfilPsychologiqueService();
@@ -32,16 +46,18 @@ public class ProfileController {
     @FXML
     public void initialize() throws SQLException {
         currentUser = UserSession.getCurrentUser();
-        profile = profileService.findByUserId(currentUser.getIdU());
-
 
         if (currentUser == null) {
             System.out.println("ERROR: No user in session");
             return;
         }
 
+        profile = profileService.findByUserId(currentUser.getIdU());
+
         loadUserData();
         loadProfileData();
+        loadProfilePicture();
+        applyRoundedClip();
     }
 
 
@@ -64,6 +80,97 @@ public class ProfileController {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private void loadProfilePicture() {
+        if (profileImageView == null || currentUser == null) {
+            return;
+        }
+
+        Image image = null;
+        String path = currentUser.getProfilePicturePath();
+        if (path != null && !path.isBlank()) {
+            Path filePath = Paths.get(path);
+            if (Files.exists(filePath)) {
+                image = new Image(filePath.toUri().toString(), true);
+            }
+        }
+
+        if (image == null) {
+            var resource = getClass().getResource(DEFAULT_PROFILE_PICTURE);
+            if (resource != null) {
+                image = new Image(resource.toExternalForm(), true);
+            }
+        }
+
+        if (image != null) {
+            profileImageView.setImage(image);
+        }
+    }
+
+    private void applyRoundedClip() {
+        if (profileImageView == null) {
+            return;
+        }
+        profileImageView.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
+            double radius = Math.min(newBounds.getWidth(), newBounds.getHeight()) / 2.0;
+            javafx.scene.shape.Circle clip = new javafx.scene.shape.Circle(
+                    newBounds.getMinX() + newBounds.getWidth() / 2.0,
+                    newBounds.getMinY() + newBounds.getHeight() / 2.0,
+                    radius
+            );
+            profileImageView.setClip(clip);
+        });
+    }
+
+    @FXML
+    public void handleUploadPicture() {
+        messageLabel.setStyle("-fx-text-fill: red;");
+
+        if (currentUser == null) {
+            messageLabel.setText("No user session found.");
+            return;
+        }
+
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Select Profile Picture");
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+        );
+
+        File selected = chooser.showOpenDialog(messageLabel.getScene().getWindow());
+        if (selected == null) {
+            return;
+        }
+
+        try {
+            Path targetDir = Paths.get(System.getProperty("user.home"), ".mindtrack", "profile_pictures");
+            Files.createDirectories(targetDir);
+
+            String extension = getFileExtension(selected.getName());
+            String fileName = "user_" + currentUser.getIdU() + (extension.isEmpty() ? ".png" : extension);
+            Path targetFile = targetDir.resolve(fileName);
+
+            Files.copy(selected.toPath(), targetFile, StandardCopyOption.REPLACE_EXISTING);
+            currentUser.setProfilePicturePath(targetFile.toString());
+            userService.update(currentUser);
+
+            loadProfilePicture();
+            messageLabel.setStyle("-fx-text-fill: green;");
+            messageLabel.setText("Profile picture updated.");
+
+        } catch (IOException | SQLException e) {
+            messageLabel.setText("Unable to update profile picture.");
+            e.printStackTrace();
+        }
+    }
+
+    private String getFileExtension(String fileName) {
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex < 0 || dotIndex == fileName.length() - 1) {
+            return "";
+        }
+        return fileName.substring(dotIndex).toLowerCase(Locale.ROOT);
     }
 
     @FXML

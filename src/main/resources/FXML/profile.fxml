@@ -73,8 +73,8 @@
 
                     <!-- PLACEHOLDER UI (NO fx:id) -->
                     <HBox alignment="CENTER_LEFT" spacing="10">
-                     <ImageView fitHeight="54.0" fitWidth="62.0" pickOnBounds="true" preserveRatio="true" />
-                        <Button styleClass="secondary-button" text="Upload New Picture" />
+                        <ImageView fx:id="profileImageView" fitHeight="54.0" fitWidth="62.0" pickOnBounds="true" preserveRatio="true" />
+                        <Button onAction="#handleUploadPicture" styleClass="secondary-button" text="Upload New Picture" />
                     </HBox>
 
                     <TextArea prefHeight="80" promptText="About Me" styleClass="textarea" />

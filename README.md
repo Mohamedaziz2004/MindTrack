@@ -11,7 +11,7 @@ The loopback redirect must be set to:
 - `http://localhost:8080/callback`
 
 ### 2) Configure credentials
-Set environment variables (preferred), or create a local `.env` file in the project root, or update `src/main/resources/google.properties`.
+Set environment variables (preferred) or create a local `.env` file in the project root.
 
 Environment variables:
 

@@ -2,7 +2,6 @@ package utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,38 +31,27 @@ public class GoogleAuthConfig {
     }
 
     public static GoogleAuthConfig load() {
-        Properties properties = new Properties();
-        try (InputStream input = GoogleAuthConfig.class.getResourceAsStream("/google.properties")) {
-            if (input != null) {
-                properties.load(input);
-            }
-        } catch (IOException ignored) {
-        }
-
         Properties dotEnv = loadDotEnv();
 
         String clientId = firstNonBlank(
                 System.getenv("GOOGLE_CLIENT_ID"),
                 dotEnv.getProperty("GOOGLE_CLIENT_ID"),
-                dotEnv.getProperty("google.clientId"),
-                properties.getProperty("google.clientId")
+                dotEnv.getProperty("google.clientId")
         );
         String clientSecret = firstNonBlank(
                 System.getenv("GOOGLE_CLIENT_SECRET"),
                 dotEnv.getProperty("GOOGLE_CLIENT_SECRET"),
-                dotEnv.getProperty("google.clientSecret"),
-                properties.getProperty("google.clientSecret")
+                dotEnv.getProperty("google.clientSecret")
         );
         String redirectUri = firstNonBlank(
                 System.getenv("GOOGLE_REDIRECT_URI"),
                 dotEnv.getProperty("GOOGLE_REDIRECT_URI"),
                 dotEnv.getProperty("google.redirectUri"),
-                properties.getProperty("google.redirectUri"),
                 "http://localhost:0/"
         );
 
         if (clientId == null || clientId.isBlank()) {
-            throw new IllegalStateException("Google client ID not configured. Set GOOGLE_CLIENT_ID or google.clientId.");
+            throw new IllegalStateException("Google client ID not configured. Set GOOGLE_CLIENT_ID or .env google.clientId.");
         }
 
         return new GoogleAuthConfig(clientId.trim(), blankToNull(clientSecret), redirectUri.trim());

@@ -9,11 +9,17 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Window;
 import services.HabitudeService;
 import services.SmartReminderService;
 import services.SuiviHabitudeService;
+import utils.PdfExportUtil;
 import utils.Session;
-
+import javafx.stage.FileChooser;
+import java.io.File;
+import java.io.File;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
@@ -34,7 +40,7 @@ public class HabitudeController {
     @FXML private TextField tfFrequence;
     @FXML private TextArea tfObjectif;
 
-    // ✅ NEW form (métier B)
+    // ===== METIER B (quantitatif) =====
     @FXML private ComboBox<String> cbType;
     @FXML private Spinner<Integer> spTarget;
     @FXML private TextField tfUnit;
@@ -48,21 +54,18 @@ public class HabitudeController {
     @FXML
     public void initialize() {
 
-        // type choices
         if (cbType != null) {
             cbType.setItems(FXCollections.observableArrayList("BOOLEAN", "COUNT", "TIME"));
             cbType.getSelectionModel().select("BOOLEAN");
             cbType.setOnAction(e -> updateTargetUi());
         }
 
-        // target spinner
         if (spTarget != null) {
             spTarget.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 9999, 1));
         }
 
         updateTargetUi();
 
-        // sort choices
         if (cbSort != null) {
             cbSort.setItems(FXCollections.observableArrayList(
                     "Newest",
@@ -74,9 +77,8 @@ public class HabitudeController {
             cbSort.setOnAction(e -> renderCards());
         }
 
-        // ✅ Search live
         if (tfSearch != null) {
-            tfSearch.textProperty().addListener((obs, oldV, newV) -> renderCards());
+            tfSearch.textProperty().addListener((obs, o, n) -> renderCards());
         }
 
         loadHabitudes();
@@ -85,7 +87,7 @@ public class HabitudeController {
     private void updateTargetUi() {
         if (cbType == null || spTarget == null || tfUnit == null) return;
         String t = cbType.getValue();
-        boolean isBool = "BOOLEAN".equalsIgnoreCase(t);
+        boolean isBool = (t == null) || "BOOLEAN".equalsIgnoreCase(t);
 
         spTarget.setDisable(isBool);
         tfUnit.setDisable(isBool);
@@ -101,7 +103,6 @@ public class HabitudeController {
     }
 
     // ================= LOAD =================
-
     @FXML
     public void loadHabitudes() {
         Integer keepSelected = (selected == null) ? null : selected.getIdHabitude();
@@ -109,11 +110,11 @@ public class HabitudeController {
         try {
             habitudes.setAll(habService.afficherParUser(Session.getIdU()));
 
-            // smart reminders auto check
+            // auto smart evaluation (si ton service est OK)
             smartReminderService.evaluateAll(habitudes);
 
-            // restore selection
             if (keepSelected != null) {
+                selected = null;
                 for (Habitude h : habitudes) {
                     if (h.getIdHabitude() == keepSelected) {
                         selected = h;
@@ -129,7 +130,6 @@ public class HabitudeController {
     }
 
     // ================= CRUD =================
-
     @FXML
     public void ajouterHabitude() {
         String nom = tfNom.getText().trim();
@@ -234,22 +234,144 @@ public class HabitudeController {
         }
     }
 
-    // ================= UI: CARDS + TRI + SEARCH =================
+    // ================= PDF EXPORT =================
+    @FXML
+    public void exportPdf() {
+        try {
+            String search = (tfSearch == null) ? "" : tfSearch.getText().trim();
+            String sort = (cbSort == null || cbSort.getValue() == null) ? "Newest" : cbSort.getValue();
 
+            // 1) base list
+            List<Habitude> list = new ArrayList<>(habitudes);
+
+            // 2) filter search
+            if (!search.isBlank()) {
+                String q = search.toLowerCase();
+                list.removeIf(h ->
+                        (h.getNom() == null || !h.getNom().toLowerCase().contains(q)) &&
+                                (h.getFrequence() == null || !h.getFrequence().toLowerCase().contains(q)) &&
+                                (h.getObjectif() == null || !h.getObjectif().toLowerCase().contains(q))
+                );
+            }
+
+            // 3) sort (same as UI)
+            switch (sort) {
+                case "Streak (High -> Low)", "Streak (High → Low)" ->
+                        list.sort((a, b) -> Integer.compare(calcDoneDays7(b), calcDoneDays7(a)));
+                case "Streak (Low -> High)", "Streak (Low → High)" ->
+                        list.sort(Comparator.comparingInt(this::calcDoneDays7));
+                case "Name (A -> Z)", "Name (A → Z)" ->
+                        list.sort(Comparator.comparing(h -> (h.getNom() == null ? "" : h.getNom().toLowerCase())));
+                default -> { /* Newest */ }
+            }
+
+            // 4) build rows with REAL progress + score
+            List<PdfExportUtil.HabitRow> rows = new ArrayList<>();
+            for (Habitude h : list) {
+                // values last 7 days (oldest -> today)
+                List<Integer> values;
+                try {
+                    values = suiviService.getValeursDerniersJours(h.getIdHabitude(), 7);
+                } catch (SQLException e) {
+                    values = java.util.Collections.nCopies(7, 0);
+                }
+
+                int target = Math.max(1, h.getTargetValue());
+
+                int doneDays = 0;
+                int cappedSum = 0; // sum(min(val,target)) for % score
+
+                for (int v : values) {
+                    if (h.isBooleanType()) {
+                        if (v >= 1) doneDays++;
+                        cappedSum += (v >= 1 ? 1 : 0);
+                    } else {
+                        if (v >= target) doneDays++;
+                        cappedSum += Math.min(Math.max(v, 0), target);
+                    }
+                }
+
+                String progress = doneDays + " / 7 days";
+
+                int denom = h.isBooleanType() ? 7 : (target * 7);
+                int scorePct = denom == 0 ? 0 : (int) Math.round((cappedSum * 100.0) / denom);
+                String score = scorePct + "%";
+
+                rows.add(new PdfExportUtil.HabitRow(
+                        h.getNom(),
+                        h.getFrequence(),
+                        (h.targetLabel() == null ? "" : h.targetLabel()),
+                        progress,
+                        score
+                ));
+            }
+
+            // 5) choose file
+            javafx.stage.FileChooser fc = new javafx.stage.FileChooser();
+            fc.setTitle("Export Habits PDF");
+            fc.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("PDF", "*.pdf"));
+            java.io.File file = fc.showSaveDialog(cardsContainer.getScene().getWindow());
+            if (file == null) return;
+
+            // 6) export
+            PdfExportUtil.exportHabitsPdf(file, rows, search, sort);
+
+            showInfo("PDF", "Exported successfully:\n" + file.getAbsolutePath());
+        } catch (Exception e) {
+            showError("PDF", e.getMessage());
+        }
+    }
+
+    /**
+     * Used only for sorting in export (done days in last 7)
+     */
+    private int calcDoneDays7(Habitude h) {
+        try {
+            List<Integer> values = suiviService.getValeursDerniersJours(h.getIdHabitude(), 7);
+            int target = Math.max(1, h.getTargetValue());
+            int done = 0;
+
+            for (int v : values) {
+                if (h.isBooleanType()) {
+                    if (v >= 1) done++;
+                } else {
+                    if (v >= target) done++;
+                }
+            }
+            return done;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private int getStreak7Safe(Habitude b) {
+        return 0;
+    }
+
+    // ================= UI RENDER =================
     private void renderCards() {
         cardsContainer.getChildren().clear();
 
-        if (habitudes.isEmpty()) {
-            Label empty = new Label("No habits yet. Add your first habit above.");
+        List<HabitVM> vms = buildDisplayedVms();
+
+        if (vms.isEmpty()) {
+            Label empty = new Label((tfSearch != null && !tfSearch.getText().isBlank())
+                    ? "No results. Try another search."
+                    : "No habits yet. Add your first habit above.");
             empty.getStyleClass().add("hint");
             cardsContainer.getChildren().add(empty);
             return;
         }
 
-        // ✅ 1) Copy list
+        for (HabitVM vm : vms) {
+            cardsContainer.getChildren().add(buildHabitCard(vm));
+        }
+    }
+
+    private List<HabitVM> buildDisplayedVms() {
         List<Habitude> list = new ArrayList<>(habitudes);
 
-        // ✅ 2) Search filter
+        // Search
         String q = (tfSearch == null || tfSearch.getText() == null) ? "" : tfSearch.getText().trim().toLowerCase();
         if (!q.isEmpty()) {
             list.removeIf(h -> {
@@ -260,46 +382,34 @@ public class HabitudeController {
             });
         }
 
-        if (list.isEmpty()) {
-            Label empty = new Label("No results. Try another search.");
-            empty.getStyleClass().add("hint");
-            cardsContainer.getChildren().add(empty);
-            return;
+        // Build VMs (load values once)
+        List<HabitVM> vms = new ArrayList<>();
+        for (Habitude h : list) {
+            List<Integer> values7 = getValuesSafe(h, 7);
+            int doneCount7 = countDoneFromValues(h, values7);
+            vms.add(new HabitVM(h, values7, doneCount7));
         }
 
-        // ✅ 3) Sort
+        // Sort
         String sort = (cbSort == null || cbSort.getValue() == null) ? "Newest" : cbSort.getValue();
         switch (sort) {
-            case "Streak (High → Low)" ->
-                    list.sort((a, b) -> Integer.compare(getStreak7Safe(b), getStreak7Safe(a)));
-            case "Streak (Low → High)" ->
-                    list.sort(Comparator.comparingInt(this::getStreak7Safe));
-            case "Name (A → Z)" ->
-                    list.sort(Comparator.comparing(h -> safeText(h.getNom()).toLowerCase()));
-            default -> { /* Newest déjà desc */ }
+            case "Streak (High → Low)" -> vms.sort((a, b) -> Integer.compare(b.doneCount7, a.doneCount7));
+            case "Streak (Low → High)" -> vms.sort(Comparator.comparingInt(a -> a.doneCount7));
+            case "Name (A → Z)" -> vms.sort(Comparator.comparing(a -> safeText(a.h.getNom()).toLowerCase()));
+            default -> { /* Newest: service already returns DESC */ }
         }
 
-        // ✅ 4) Render
-        for (Habitude h : list) {
-            cardsContainer.getChildren().add(buildHabitCard(h));
-        }
+        return vms;
     }
 
-    private int getStreak7Safe(Habitude h) {
-        try {
-            return suiviService.countDoneDerniersJours(h.getIdHabitude(), 7);
-        } catch (SQLException e) {
-            return 0;
-        }
-    }
+    private VBox buildHabitCard(HabitVM vm) {
+        Habitude h = vm.h;
 
-    private VBox buildHabitCard(Habitude h) {
         VBox card = new VBox(10);
         card.getStyleClass().add("habit-card");
         card.setPadding(new Insets(14));
         card.setPrefWidth(330);
 
-        // Header
         Label title = new Label(h.getNom());
         title.getStyleClass().add("habit-title");
 
@@ -325,29 +435,26 @@ public class HabitudeController {
         HBox header = new HBox(8, title, spacer, btnEdit, btnDelete);
         header.setAlignment(Pos.CENTER_LEFT);
 
-        // Meta chips
         Label chipFreq = new Label(safeChip(h.getFrequence()));
         chipFreq.getStyleClass().addAll("chip", "chip-soft");
 
-        Label chipTarget = new Label(h.targetLabel());
+        Label chipTarget = new Label(buildTargetLabel(h));
         chipTarget.getStyleClass().addAll("chip", "chip-outline");
 
         HBox meta = new HBox(8, chipFreq, chipTarget);
         meta.setAlignment(Pos.CENTER_LEFT);
 
-        // Description
         Label desc = new Label(safe(h.getObjectif()));
         desc.getStyleClass().add("habit-desc");
         desc.setWrapText(true);
 
-        // 7 jours
         VBox progressBox = new VBox(6);
 
         final LocalDate today = LocalDate.now();
         final int n = 7;
         final LocalDate start = today.minusDays(n - 1);
+        final int target = Math.max(1, h.getTargetValue());
 
-        // day letters
         HBox daysRow = new HBox(12);
         daysRow.setAlignment(Pos.CENTER_LEFT);
 
@@ -363,17 +470,6 @@ public class HabitudeController {
             daysRow.getChildren().add(d);
         }
 
-        // valeurs 7 jours
-        final List<Integer> values;
-        try {
-            values = suiviService.getValeursDerniersJours(h.getIdHabitude(), n);
-        } catch (SQLException e) {
-            showError("Suivi", e.getMessage());
-            return card;
-        }
-
-        final int target = Math.max(1, h.getTargetValue());
-
         HBox dots = new HBox(6);
         dots.setAlignment(Pos.CENTER_LEFT);
 
@@ -381,10 +477,10 @@ public class HabitudeController {
             final int idx = i;
             final LocalDate dayFinal = start.plusDays(i);
 
-            int val = values.get(idx);
+            int val = vm.values7.get(idx);
 
-            boolean done = h.isBooleanType() ? (val >= 1) : (val >= target);
-            boolean partial = !h.isBooleanType() && val > 0 && val < target;
+            boolean done = isDoneValue(h, val, target);
+            boolean partial = !isBooleanType(h) && val > 0 && val < target;
 
             String text = done ? "✓" : (partial ? (val <= 9 ? String.valueOf(val) : "•") : "○");
 
@@ -397,11 +493,11 @@ public class HabitudeController {
 
             dot.setOnAction(ev -> {
                 try {
-                    if (h.isBooleanType()) {
-                        int newVal = (values.get(idx) >= 1) ? 0 : 1;
+                    if (isBooleanType(h)) {
+                        int newVal = (vm.values7.get(idx) >= 1) ? 0 : 1;
                         suiviService.marquerValeur(h.getIdHabitude(), dayFinal, newVal, 1);
                     } else {
-                        Integer userVal = askValue(h, dayFinal, values.get(idx), target);
+                        Integer userVal = askValue(h, dayFinal, vm.values7.get(idx), target);
                         if (userVal == null) return;
                         suiviService.marquerValeur(h.getIdHabitude(), dayFinal, userVal, target);
                     }
@@ -419,12 +515,10 @@ public class HabitudeController {
 
         progressBox.getChildren().addAll(daysRow, dots);
 
-        int streak7 = getStreak7Safe(h);
-        Label streakLabel = new Label(streak7 + " / 7 days");
+        Label streakLabel = new Label(vm.doneCount7 + " / 7 days");
         streakLabel.getStyleClass().add("habit-streak");
 
         card.setOnMouseClicked(e -> selectHabit(h));
-
         if (selected != null && selected.getIdHabitude() == h.getIdHabitude()) {
             card.getStyleClass().add("habit-card-selected");
         }
@@ -459,10 +553,10 @@ public class HabitudeController {
         tfFrequence.setText(h.getFrequence());
         tfObjectif.setText(h.getObjectif());
 
-        if (cbType != null) cbType.getSelectionModel().select(h.getHabitType());
+        if (cbType != null) cbType.getSelectionModel().select(safeText(h.getHabitType()));
         if (spTarget != null && spTarget.getValueFactory() != null)
             spTarget.getValueFactory().setValue(Math.max(1, h.getTargetValue()));
-        if (tfUnit != null) tfUnit.setText(h.getUnit());
+        if (tfUnit != null) tfUnit.setText(safeText(h.getUnit()));
 
         updateTargetUi();
         renderCards();
@@ -481,6 +575,78 @@ public class HabitudeController {
         updateTargetUi();
     }
 
+    // ===== DONE LOGIC =====
+    private boolean isBooleanType(Habitude h) {
+        String t = h.getHabitType();
+        return (t == null || t.isBlank() || "BOOLEAN".equalsIgnoreCase(t));
+    }
+
+    private boolean isDoneValue(Habitude h, int val, int target) {
+        if (isBooleanType(h)) return val >= 1;
+        return val >= target;
+    }
+
+    private int countDoneFromValues(Habitude h, List<Integer> values) {
+        int target = Math.max(1, h.getTargetValue());
+        int c = 0;
+        for (int v : values) {
+            if (isDoneValue(h, v, target)) c++;
+        }
+        return c;
+    }
+
+    private List<Integer> getValuesSafe(Habitude h, int n) {
+        try {
+            List<Integer> v = suiviService.getValeursDerniersJours(h.getIdHabitude(), n);
+            if (v == null || v.size() != n) return Collections.nCopies(n, 0);
+            return v;
+        } catch (SQLException e) {
+            return Collections.nCopies(n, 0);
+        }
+    }
+
+    // ===== PDF HELPERS =====
+    private String buildTargetLabel(Habitude h) {
+        String type = safeText(h.getHabitType());
+        if (type.isBlank() || "BOOLEAN".equalsIgnoreCase(type)) return "BOOLEAN";
+
+        int target = Math.max(1, h.getTargetValue());
+        String unit = safeText(h.getUnit()).trim();
+        if (unit.isBlank()) unit = "COUNT".equalsIgnoreCase(type) ? "x" : "min";
+
+        return type.toUpperCase() + " • " + target + " " + unit;
+    }
+
+    private String buildProgressLine(Habitude h, List<Integer> values7) {
+        // Example: "L M M J V S D | ✓ ○ 3 ○ ✓ ○ ○"
+        LocalDate today = LocalDate.now();
+        LocalDate start = today.minusDays(6);
+        int target = Math.max(1, h.getTargetValue());
+
+        StringBuilder days = new StringBuilder();
+        for (int i = 0; i < 7; i++) {
+            LocalDate d = start.plusDays(i);
+            String letter = d.getDayOfWeek()
+                    .getDisplayName(TextStyle.SHORT, Locale.FRENCH)
+                    .substring(0, 1)
+                    .toUpperCase();
+            days.append(letter).append(i == 6 ? "" : " ");
+        }
+
+        StringBuilder sym = new StringBuilder();
+        for (int i = 0; i < 7; i++) {
+            int val = (values7 != null && values7.size() == 7) ? values7.get(i) : 0;
+            boolean done = isDoneValue(h, val, target);
+            boolean partial = !isBooleanType(h) && val > 0 && val < target;
+
+            String s = done ? "✓" : (partial ? String.valueOf(Math.min(val, 9)) : "○");
+            sym.append(s).append(i == 6 ? "" : " ");
+        }
+
+        return days + " | " + sym;
+    }
+
+    // ===== SAFE TEXT =====
     private String safe(String s) {
         return (s == null || s.isBlank()) ? "No description." : s;
     }
@@ -493,8 +659,7 @@ public class HabitudeController {
         return (s == null) ? "" : s;
     }
 
-    // ================= Alerts =================
-
+    // ===== ALERTS =====
     private void showInfo(String title, String msg) {
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         a.setTitle(title);
@@ -509,5 +674,17 @@ public class HabitudeController {
         a.setHeaderText("Erreur");
         a.setContentText(msg);
         a.showAndWait();
+    }
+
+    private static class HabitVM {
+        final Habitude h;
+        final List<Integer> values7;
+        final int doneCount7;
+
+        HabitVM(Habitude h, List<Integer> values7, int doneCount7) {
+            this.h = h;
+            this.values7 = values7;
+            this.doneCount7 = doneCount7;
+        }
     }
 }

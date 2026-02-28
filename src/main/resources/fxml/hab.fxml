@@ -79,7 +79,6 @@
 
                 <Label text="Tip: click a habit card to select it, then edit/delete." styleClass="hint"/>
             </VBox>
-
             <!-- Your Habits -->
             <VBox spacing="10">
                 <HBox alignment="CENTER_LEFT" spacing="10">
@@ -94,7 +93,7 @@
 
                     <Label text="Sort:" styleClass="hint"/>
                     <ComboBox fx:id="cbSort" prefWidth="200"/>
-
+                    <Button text="Export PDF" onAction="#exportPdf" styleClass="btn-secondary"/>
                     <Button text="Refresh" onAction="#loadHabitudes" styleClass="btn-outline btn-sm"/>
                 </HBox>
 

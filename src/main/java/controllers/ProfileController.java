@@ -6,9 +6,13 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Pos;
 import javafx.stage.FileChooser;
 import services.ProfilPsychologiqueService;
 import services.UtilisateurService;
+import utils.TotpUtil;
 import utils.UserSession;
 
 import java.io.File;
@@ -19,6 +23,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.util.Locale;
+import java.util.Optional;
 
 public class ProfileController {
 
@@ -32,6 +37,8 @@ public class ProfileController {
     @FXML private TextArea descriptionArea;
 
     @FXML private ImageView profileImageView;
+    @FXML private Label totpStatusLabel;
+    @FXML private Button totpToggleButton;
 
     @FXML private Label messageLabel;
 
@@ -58,6 +65,7 @@ public class ProfileController {
         loadProfileData();
         loadProfilePicture();
         applyRoundedClip();
+        refreshTotpStatus();
     }
 
 
@@ -121,6 +129,27 @@ public class ProfileController {
             );
             profileImageView.setClip(clip);
         });
+    }
+
+    private void refreshTotpStatus() {
+        if (totpStatusLabel == null || totpToggleButton == null || currentUser == null) {
+            return;
+        }
+        if (currentUser.isTotpEnabled()) {
+            totpStatusLabel.setText("Enabled");
+            totpToggleButton.setText("Disable 2FA");
+        } else {
+            totpStatusLabel.setText("Disabled");
+            totpToggleButton.setText("Enable 2FA");
+        }
+    }
+
+    private Optional<String> promptForTotpCode(String header, String contentText) {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Two-Factor Authentication");
+        dialog.setHeaderText(header);
+        dialog.setContentText(contentText);
+        return dialog.showAndWait().map(String::trim).filter(code -> !code.isEmpty());
     }
 
     @FXML
@@ -309,6 +338,80 @@ public class ProfileController {
         }
     }
 
+    @FXML
+    public void handleTotpToggle() {
+        messageLabel.setStyle("-fx-text-fill: red;");
+
+        if (currentUser == null) {
+            messageLabel.setText("No user session found.");
+            return;
+        }
+
+        try {
+            if (currentUser.isTotpEnabled()) {
+                Optional<String> code = promptForTotpCode("Disable two-factor authentication", "Enter your current six-digit code.");
+                if (code.isEmpty()) {
+                    return;
+                }
+                if (!TotpUtil.verify(currentUser.getTotpSecret(), code.get())) {
+                    messageLabel.setText("Invalid code. Try again.");
+                    return;
+                }
+                currentUser.setTotpEnabled(false);
+                currentUser.setTotpSecret(null);
+                userService.update(currentUser);
+                messageLabel.setStyle("-fx-text-fill: green;");
+                messageLabel.setText("Two-factor authentication disabled.");
+            } else {
+                String secret = TotpUtil.generateSecret();
+                String provisioningUri = TotpUtil.getTotpUri("MindTrack", currentUser.getEmailU(), secret);
+
+                // Generate QR code for scanning
+                java.awt.image.BufferedImage qrImage = TotpUtil.generateQrCode(provisioningUri, 300);
+                javafx.scene.image.Image fxImage = SwingFXUtils.toFXImage(qrImage, null);
+
+                Alert instructions = new Alert(Alert.AlertType.INFORMATION);
+                instructions.setTitle("Set up two-factor authentication");
+                instructions.setHeaderText("Scan the QR code with Google Authenticator or Authy.");
+
+                VBox content = new VBox(10);
+                content.setAlignment(javafx.geometry.Pos.CENTER);
+                ImageView qrCodeView = new ImageView(fxImage);
+                qrCodeView.setFitWidth(250);
+                qrCodeView.setFitHeight(250);
+                qrCodeView.setPreserveRatio(true);
+
+                Label fallbackLabel = new Label("Can't scan? Enter this secret manually:");
+                TextArea secretArea = new TextArea(secret);
+                secretArea.setEditable(false);
+                secretArea.setWrapText(true);
+                secretArea.setPrefRowCount(3);
+
+                content.getChildren().addAll(qrCodeView, fallbackLabel, secretArea);
+                instructions.getDialogPane().setContent(content);
+                instructions.showAndWait();
+
+                Optional<String> code = promptForTotpCode("Verify code", "Enter the six-digit code shown in your authenticator.");
+                if (code.isEmpty()) {
+                    messageLabel.setText("Two-factor setup cancelled.");
+                    return;
+                }
+                if (!TotpUtil.verify(secret, code.get())) {
+                    messageLabel.setText("Invalid code. Please try enabling 2FA again.");
+                    return;
+                }
+                currentUser.setTotpSecret(secret);
+                currentUser.setTotpEnabled(true);
+                userService.update(currentUser);
+                messageLabel.setStyle("-fx-text-fill: green;");
+                messageLabel.setText("Two-factor authentication enabled.");
+            }
+            refreshTotpStatus();
+        } catch (SQLException e) {
+            messageLabel.setText("Database error. Please try again.");
+            e.printStackTrace();
+        }
+    }
 
 }
 

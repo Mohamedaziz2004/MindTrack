@@ -168,6 +168,15 @@
                         <Button onAction="#handleDelete" styleClass="danger-button" text="Delete Account" />
                     </HBox>
 
+                    <!-- ================= TWO-FACTOR AUTHENTICATION ================= -->
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Two-Factor" />
+                        <Label fx:id="totpStatusLabel" text="Disabled" styleClass="tag-label" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="totpToggleButton" onAction="#handleTotpToggle" styleClass="secondary-button" text="Enable 2FA" />
+                    </HBox>
+                    <Label styleClass="muted-text" text="Use Google Authenticator, Authy, or any TOTP app." />
+
                 </VBox>
 
                 <!-- ================= ACTION BUTTONS (WORKING) ================= -->

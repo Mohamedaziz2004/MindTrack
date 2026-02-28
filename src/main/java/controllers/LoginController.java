@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import services.GoogleOAuthService;
 import services.GoogleUserInfo;
 import services.ProfilPsychologiqueService;
@@ -22,6 +23,7 @@ import utils.ComprefaceConfig;
 import utils.FaceCaptureDialog;
 import utils.GoogleAuthConfig;
 import utils.UserSession;
+import utils.TotpUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +32,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.Optional;
 
 public class LoginController {
 
@@ -83,6 +86,10 @@ public class LoginController {
             Utilisateur user = userService.login(email, password);
 
             if (user != null) {
+
+                if (!requireTwoFactor(user)) {
+                    return;
+                }
 
                 ProfilPsychologiqueService profilService = new ProfilPsychologiqueService();
                 ProfilPsychologique profil = profilService.findByUserId(user.getIdU());
@@ -142,6 +149,10 @@ public class LoginController {
             Utilisateur user = userService.findByFaceSubject(match.subject());
             if (user == null) {
                 messageLabel.setText("No user linked to this face.");
+                return;
+            }
+
+            if (!requireTwoFactor(user)) {
                 return;
             }
 
@@ -260,6 +271,10 @@ public class LoginController {
                 return;
             }
 
+            if (!requireTwoFactor(user)) {
+                return;
+            }
+
             ProfilPsychologiqueService profilService = new ProfilPsychologiqueService();
             ProfilPsychologique profil = profilService.findByUserId(user.getIdU());
             if (profil == null) {
@@ -280,6 +295,30 @@ public class LoginController {
             messageLabel.setText("Navigation error.");
             e.printStackTrace();
         }
+    }
+
+    private boolean requireTwoFactor(Utilisateur user) {
+        if (user == null || !user.isTotpEnabled()) {
+            return true;
+        }
+        Optional<String> code = promptForTotpCode("Two-factor authentication required");
+        if (code.isEmpty()) {
+            messageLabel.setText("Two-factor code is required.");
+            return false;
+        }
+        if (!TotpUtil.verify(user.getTotpSecret(), code.get())) {
+            messageLabel.setText("Invalid two-factor code.");
+            return false;
+        }
+        return true;
+    }
+
+    private Optional<String> promptForTotpCode(String header) {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Two-Factor Authentication");
+        dialog.setHeaderText(header);
+        dialog.setContentText("Enter the six-digit code from your authenticator.");
+        return dialog.showAndWait().map(String::trim).filter(code -> !code.isEmpty());
     }
 
     private String rootMessage(Throwable throwable) {

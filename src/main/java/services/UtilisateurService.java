@@ -96,7 +96,7 @@ public class UtilisateurService implements IService<Utilisateur> {
     // UPDATE
     @Override
     public void update(Utilisateur u) throws SQLException {
-        String sql = "UPDATE utilisateur SET nomU = ?, prenomU = ?, emailU = ?, mdpsU = ?, ageU = ?, profile_picture_path = ?, face_subject = ?, face_image_id = ?, face_enabled = ? WHERE idU = ?";
+        String sql = "UPDATE utilisateur SET nomU = ?, prenomU = ?, emailU = ?, mdpsU = ?, ageU = ?, profile_picture_path = ?, totp_secret = ?, totp_enabled = ?, face_subject = ?, face_image_id = ?, face_enabled = ? WHERE idU = ?";
 
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setString(1, u.getNomU());
@@ -105,10 +105,12 @@ public class UtilisateurService implements IService<Utilisateur> {
         ps.setString(4, u.getMdpsU());
         ps.setInt(5, u.getAgeU());
         ps.setString(6, u.getProfilePicturePath());
-        ps.setString(7, u.getFaceSubject());
-        ps.setString(8, u.getFaceImageId());
-        ps.setBoolean(9, u.isFaceEnabled());
-        ps.setInt(10, u.getIdU());
+        ps.setString(7, u.getTotpSecret());
+        ps.setBoolean(8, u.isTotpEnabled());
+        ps.setString(9, u.getFaceSubject());
+        ps.setString(10, u.getFaceImageId());
+        ps.setBoolean(11, u.isFaceEnabled());
+        ps.setInt(12, u.getIdU());
 
         ps.executeUpdate();
     }
@@ -153,6 +155,8 @@ public class UtilisateurService implements IService<Utilisateur> {
                 rs.getInt("ageU"),
                 rs.getString("roleU"),
                 rs.getString("profile_picture_path"),
+                rs.getString("totp_secret"),
+                rs.getBoolean("totp_enabled"),
                 rs.getString("face_subject"),
                 rs.getString("face_image_id"),
                 rs.getBoolean("face_enabled")

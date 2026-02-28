@@ -14,6 +14,9 @@ module com.example.mindtrack {
     requires mysql.connector.j;
     requires com.fasterxml.jackson.databind;
     requires webcam.capture;
+    requires org.apache.commons.codec;
+    requires com.google.zxing;
+    requires com.google.zxing.javase;
 
 
     opens controllers to javafx.fxml;

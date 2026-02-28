@@ -14,6 +14,8 @@ public class Utilisateur {
     private String faceImageId;
     private boolean faceEnabled;
     private String profilePicturePath;
+    private String totpSecret;
+    private boolean totpEnabled;
 
     // 🔹 Constructeur vide (OBLIGATOIRE pour JDBC)
     public Utilisateur() {
@@ -63,6 +65,24 @@ public class Utilisateur {
         this.ageU = ageU;
         this.role = role;
         this.profilePicturePath = profilePicturePath;
+        this.faceSubject = faceSubject;
+        this.faceImageId = faceImageId;
+        this.faceEnabled = faceEnabled;
+    }
+
+    public Utilisateur(int idU, String nomU, String prenomU, String emailU, String mdpsU, int ageU, String role,
+                       String profilePicturePath, String totpSecret, boolean totpEnabled,
+                       String faceSubject, String faceImageId, boolean faceEnabled) {
+        this.idU = idU;
+        this.nomU = nomU;
+        this.prenomU = prenomU;
+        this.emailU = emailU;
+        this.mdpsU = mdpsU;
+        this.ageU = ageU;
+        this.role = role;
+        this.profilePicturePath = profilePicturePath;
+        this.totpSecret = totpSecret;
+        this.totpEnabled = totpEnabled;
         this.faceSubject = faceSubject;
         this.faceImageId = faceImageId;
         this.faceEnabled = faceEnabled;
@@ -155,5 +175,21 @@ public class Utilisateur {
 
     public void setProfilePicturePath(String profilePicturePath) {
         this.profilePicturePath = profilePicturePath;
+    }
+
+    public String getTotpSecret() {
+        return totpSecret;
+    }
+
+    public void setTotpSecret(String totpSecret) {
+        this.totpSecret = totpSecret;
+    }
+
+    public boolean isTotpEnabled() {
+        return totpEnabled;
+    }
+
+    public void setTotpEnabled(boolean totpEnabled) {
+        this.totpEnabled = totpEnabled;
     }
 }

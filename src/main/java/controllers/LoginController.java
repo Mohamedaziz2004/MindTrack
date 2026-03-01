@@ -104,21 +104,17 @@ public class LoginController {
 
         emailField.focusedProperty().addListener((obs, oldV, newV) -> {
             if (!newV) {
-                validateEmailField(true);
+                validateEmailField(true, true);
             }
         });
         passwordField.focusedProperty().addListener((obs, oldV, newV) -> {
             if (!newV) {
-                if (validateEmailField(false)) {
-                    validatePasswordField(true);
-                }
+                validatePasswordField(true, true);
             }
         });
         captchaInput.focusedProperty().addListener((obs, oldV, newV) -> {
             if (!newV) {
-                if (validateEmailField(false) && validatePasswordField(false)) {
-                    validateCaptchaField(true);
-                }
+                validateCaptchaField(true, true);
             }
         });
     }
@@ -149,6 +145,9 @@ public class LoginController {
     private void clearErrorOnChange(TextInputControl field, Label errorLabel) {
         if (field == null) return;
         field.textProperty().addListener((obs, oldV, newV) -> {
+            if (newV == null || newV.isBlank()) {
+                return; // keep error visible after we clear the field on invalid input
+            }
             field.getStyleClass().remove(ERROR_CLASS);
             if (errorLabel != null) {
                 errorLabel.setText("");
@@ -210,7 +209,7 @@ public class LoginController {
         pt.play();
     }
 
-    private boolean validateEmailField(boolean showErrors) {
+    private boolean validateEmailField(boolean showErrors, boolean showSuccess) {
         String email = emailField.getText() != null ? emailField.getText().trim() : "";
         if (email.isEmpty()) {
             if (showErrors) {
@@ -228,13 +227,13 @@ public class LoginController {
             }
             return false;
         }
-        if (showErrors) {
+        if (showSuccess) {
             applySuccess(emailField);
         }
         return true;
     }
 
-    private boolean validatePasswordField(boolean showErrors) {
+    private boolean validatePasswordField(boolean showErrors, boolean showSuccess) {
         String password = passwordField.getText() != null ? passwordField.getText().trim() : "";
         if (password.isEmpty()) {
             if (showErrors) {
@@ -252,13 +251,13 @@ public class LoginController {
             }
             return false;
         }
-        if (showErrors) {
+        if (showSuccess) {
             applySuccess(passwordField);
         }
         return true;
     }
 
-    private boolean validateCaptchaField(boolean showErrors) {
+    private boolean validateCaptchaField(boolean showErrors, boolean showSuccess) {
         String captchaAnswer = captchaInput.getText() != null ? captchaInput.getText().trim() : "";
         if (!captchaUtil.verify(captchaAnswer)) {
             if (showErrors) {
@@ -269,7 +268,7 @@ public class LoginController {
             }
             return false;
         }
-        if (showErrors) {
+        if (showSuccess) {
             applySuccess(captchaInput);
         }
         return true;
@@ -282,13 +281,13 @@ public class LoginController {
         messageLabel.setText("");
         resetErrors();
 
-        if (!validateEmailField(true)) {
+        if (!validateEmailField(true, false)) {
             return;
         }
-        if (!validatePasswordField(true)) {
+        if (!validatePasswordField(true, false)) {
             return;
         }
-        if (!validateCaptchaField(true)) {
+        if (!validateCaptchaField(true, false)) {
             return;
         }
 
@@ -315,11 +314,7 @@ public class LoginController {
 
                 UserSession.setCurrentUser(user);
 
-                // All fields green on success
-                applySuccess(emailField);
-                applySuccess(passwordField);
-                applySuccess(captchaInput);
-
+                // No green borders on button submit; just proceed
                 messageLabel.setStyle("-fx-text-fill: green;");
                 messageLabel.setText("Welcome " + user.getPrenomU());
 
@@ -328,17 +323,22 @@ public class LoginController {
                 openProfile();
 
             } else {
-                // Database mismatch — show error under both email and password
+                // Database mismatch — show error under the button and mark all fields red
                 consecutiveMistakes++;
-                String msg = pickMessage("Invalid email or password");
-                markError(emailField, emailErrorLabel, msg);
-                markError(passwordField, passwordErrorLabel, msg);
+                messageLabel.setStyle("-fx-text-fill: red;");
+                messageLabel.setText(pickMessage("Invalid email or password"));
+                markError(emailField, null, "");
+                markError(passwordField, null, "");
+                markError(captchaInput, null, "");
             }
 
         } catch (SQLException e) {
             consecutiveMistakes++;
-            String msg = pickMessage("Database error. Please try again.");
-            markError(emailField, emailErrorLabel, msg);
+            messageLabel.setStyle("-fx-text-fill: red;");
+            messageLabel.setText(pickMessage("Database error. Please try again."));
+            markError(emailField, null, "");
+            markError(passwordField, null, "");
+            markError(captchaInput, null, "");
             e.printStackTrace();
         } catch (IOException e) {
             messageLabel.setText("Navigation error.");

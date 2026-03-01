@@ -46,6 +46,8 @@
             <Label text="Last Name" styleClass="glass-label"/>
             <TextField fx:id="nomField" promptText="Doe"
                        styleClass="glass-input" prefHeight="34"/>
+            <Label fx:id="nomErrorLabel" text="" visible="false" managed="false"
+                   styleClass="input-error-label"/>
         </VBox>
 
         <!-- FIRST NAME -->
@@ -53,6 +55,8 @@
             <Label text="First Name" styleClass="glass-label"/>
             <TextField fx:id="prenomField" promptText="John"
                        styleClass="glass-input" prefHeight="34"/>
+            <Label fx:id="prenomErrorLabel" text="" visible="false" managed="false"
+                   styleClass="input-error-label"/>
         </VBox>
 
         <!-- EMAIL -->
@@ -60,6 +64,8 @@
             <Label text="Email" styleClass="glass-label"/>
             <TextField fx:id="emailField" promptText="you@example.com"
                        styleClass="glass-input" prefHeight="34"/>
+            <Label fx:id="emailErrorLabel" text="" visible="false" managed="false"
+                   styleClass="input-error-label"/>
         </VBox>
 
         <!-- PASSWORD -->
@@ -67,6 +73,8 @@
             <Label text="Password" styleClass="glass-label"/>
             <PasswordField fx:id="passwordField" promptText="••••••••"
                            styleClass="glass-input" prefHeight="34"/>
+            <Label fx:id="passwordErrorLabel" text="" visible="false" managed="false"
+                   styleClass="input-error-label"/>
         </VBox>
 
         <!-- AGE -->
@@ -74,6 +82,8 @@
             <Label text="Age" styleClass="glass-label"/>
             <TextField fx:id="ageField" promptText="25"
                        styleClass="glass-input" prefHeight="34"/>
+            <Label fx:id="ageErrorLabel" text="" visible="false" managed="false"
+                   styleClass="input-error-label"/>
         </VBox>
 
         <!-- FACE CAPTURE -->

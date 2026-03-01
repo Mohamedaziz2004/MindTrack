@@ -124,23 +124,11 @@
                     <graphic>
                         <HBox spacing="15" alignment="CENTER_LEFT">
                             <Label text="📋" styleClass="nav-icon"/>
-                            <Label text="Todo List" styleClass="nav-text"/>
                         </HBox>
                     </graphic>
                 </Button>
 
-                <Button fx:id="btnBadges"
-                        text="Badges"
-                        onAction="#showBadges"
-                        styleClass="nav-button"
-                        maxWidth="Infinity">
-                    <graphic>
-                        <HBox spacing="15" alignment="CENTER_LEFT">
-                            <Label text="🏆" styleClass="nav-icon"/>
-                            <Label text="Badges" styleClass="nav-text"/>
-                        </HBox>
-                    </graphic>
-                </Button>
+
             </VBox>
 
             <!-- Spacer -->

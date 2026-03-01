@@ -221,18 +221,6 @@ public class MissionShellController implements Initializable {
         expandAnimation.play();
     }
 
-    @FXML
-    public void showBadges() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Badges.fxml"));
-            Node view = loader.load();
-            animateContentChange(view);
-            setActiveButton(btnBadges);
-        } catch (IOException e) {
-            e.printStackTrace();
-            showErrorPlaceholder("Erreur chargement badges");
-        }
-    }
 
     @FXML
     public void collapseSidebar() {

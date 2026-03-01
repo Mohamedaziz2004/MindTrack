@@ -518,3 +518,17 @@
 .hint {
     -fx-text-fill: #64748b;
 }
+/* =========================
+   TOAST (top-right)
+========================= */
+.toast {
+    -fx-background-color: rgba(17, 24, 39, 0.92); /* dark */
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 18, 0.2, 0, 8);
+}
+
+.toast-text {
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}

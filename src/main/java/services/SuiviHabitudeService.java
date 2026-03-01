@@ -331,4 +331,32 @@ public class SuiviHabitudeService implements IService<SuiviHabitude> {
                 rs.getInt("idHabitude")
         );
     }
+    public List<Integer> getValeursSemaineCourante(int idHabitude) throws SQLException {
+        LocalDate today = LocalDate.now();
+        LocalDate start = today.with(java.time.DayOfWeek.MONDAY);
+        LocalDate end = start.plusDays(6);
+
+        String sql = """
+        SELECT date, valeur
+        FROM suivihabitude
+        WHERE idHabitude = ? AND date BETWEEN ? AND ?
+    """;
+
+        Map<LocalDate, Integer> map = new HashMap<>();
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, idHabitude);
+            ps.setDate(2, Date.valueOf(start));
+            ps.setDate(3, Date.valueOf(end));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    LocalDate d = rs.getDate("date").toLocalDate();
+                    map.put(d, rs.getInt("valeur"));
+                }
+            }
+        }
+
+        List<Integer> out = new ArrayList<>();
+        for (int i = 0; i < 7; i++) out.add(map.getOrDefault(start.plusDays(i), 0));
+        return out; // Lundi -> Dimanche
+    }
 }

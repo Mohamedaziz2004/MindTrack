@@ -41,7 +41,7 @@
             <Button styleClass="sidebar-button" text="Statistics" />
             <Button styleClass="sidebar-button" text="Admin" />
             <Button styleClass="sidebar-button" text="Settings" />
-            <Button styleClass="sidebar-button" text="Log Out" />
+            <Button styleClass="sidebar-button" text="Log Out" onAction="#handleLogout" />
 
         </children>
         <padding>

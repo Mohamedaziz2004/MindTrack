@@ -1,85 +1,100 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="500" prefWidth="900" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.RegisterController">
+<StackPane xmlns="http://javafx.com/javafx/17"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="controllers.RegisterController"
+           prefWidth="1120" prefHeight="700">
 
-    <children>
+    <!-- BACKGROUND IMAGE -->
+    <ImageView fx:id="bgImageView" fitWidth="1366" fitHeight="768"
+               preserveRatio="false" pickOnBounds="true">
+        <image><Image url="@../RegisterBg.jpg"/></image>
+    </ImageView>
 
-        <!-- LEFT FORM CARD -->
-        <VBox layoutX="120" layoutY="40" prefWidth="300" spacing="12" styleClass="card">
+    <!-- DARK OVERLAY -->
+    <Pane style="-fx-background-color: rgba(0,0,0,0.4);"/>
 
-            <children>
+    <!-- GLASS CARD -->
+    <VBox alignment="CENTER" maxWidth="420" maxHeight="620"
+          spacing="8" styleClass="glass-card">
+        <padding><Insets topRightBottomLeft="22"/></padding>
 
-                <!-- LOGO + APP NAME -->
-                <HBox alignment="CENTER_LEFT" spacing="8">
-                    <children>
-                        <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
-                            <image>
-                                <Image url="@../logo.png" />
-                            </image>
-                        </ImageView>
+        <!-- LOGO -->
+        <HBox spacing="8" alignment="CENTER">
+            <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
+                <image><Image url="@../logo.png"/></image>
+            </ImageView>
+            <Label text="MindTrack" styleClass="glass-title"
+                   style="-fx-font-size: 16px;"/>
+        </HBox>
 
-                        <Label styleClass="app-title" text="Mind Track" />
-                    </children>
-                </HBox>
-                <Label styleClass="title" text="Create Your Mind Track Account" />
-                <Label styleClass="subtitle" text="Start your journey to mental clarity and peace.ensure" wrapText="true" />
+        <Label text="Create your account" styleClass="glass-title"
+               style="-fx-font-size: 22px;"/>
 
-                <TextField fx:id="nomField" promptText="Last Name" styleClass="input" />
+        <Label text="Start your mental wellness journey today"
+               styleClass="glass-subtitle" wrapText="true" textAlignment="CENTER"
+               style="-fx-font-size: 12px;"/>
 
-                <TextField fx:id="prenomField" promptText="First Name" styleClass="input" />
-
-                <TextField fx:id="emailField" promptText="Email" styleClass="input" />
-
-                <PasswordField fx:id="passwordField" promptText="Password" styleClass="input" />
-
-                <TextField fx:id="ageField" promptText="Age" styleClass="input" />
-
-                <Button maxWidth="Infinity" onAction="#handleCaptureFace" styleClass="secondary-button" text="Capture Face" />
-
-                <Button maxWidth="Infinity" onAction="#handleRegister" styleClass="primary-button" text="Create Account" />
-
-                <Label fx:id="messageLabel" styleClass="message-label" wrapText="true" />
-
-            </children>
-
-            <padding>
-                <Insets bottom="25" left="25" right="25" top="25" />
-            </padding>
-
+        <!-- LAST NAME -->
+        <VBox spacing="3" alignment="CENTER_LEFT">
+            <Label text="Last Name" styleClass="glass-label"/>
+            <TextField fx:id="nomField" promptText="Doe"
+                       styleClass="glass-input" prefHeight="34"/>
         </VBox>
 
-        <!-- RIGHT INFO CARD -->
-        <VBox alignment="CENTER" layoutX="460" layoutY="80" prefHeight="300" prefWidth="300" spacing="10" styleClass="info-card">
-
-            <children>
-                <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
-                   <image>
-                      <Image url="@../register_img.jpg" />
-                   </image>
-                </ImageView>
-
-                <Label styleClass="info-title" text="Discover Your Inner Calm" wrapText="true" />
-
-                <Label styleClass="info-text" text="Mind Track helps you build resilience, reduce stress, and find peace through guided practices and insightful resources." wrapText="true" />
-
-            </children>
-
-            <padding>
-                <Insets bottom="20" left="20" right="20" top="20" />
-            </padding>
-
+        <!-- FIRST NAME -->
+        <VBox spacing="3" alignment="CENTER_LEFT">
+            <Label text="First Name" styleClass="glass-label"/>
+            <TextField fx:id="prenomField" promptText="John"
+                       styleClass="glass-input" prefHeight="34"/>
         </VBox>
 
-    </children>
-</AnchorPane>
+        <!-- EMAIL -->
+        <VBox spacing="3" alignment="CENTER_LEFT">
+            <Label text="Email" styleClass="glass-label"/>
+            <TextField fx:id="emailField" promptText="you@example.com"
+                       styleClass="glass-input" prefHeight="34"/>
+        </VBox>
+
+        <!-- PASSWORD -->
+        <VBox spacing="3" alignment="CENTER_LEFT">
+            <Label text="Password" styleClass="glass-label"/>
+            <PasswordField fx:id="passwordField" promptText="••••••••"
+                           styleClass="glass-input" prefHeight="34"/>
+        </VBox>
+
+        <!-- AGE -->
+        <VBox spacing="3" alignment="CENTER_LEFT">
+            <Label text="Age" styleClass="glass-label"/>
+            <TextField fx:id="ageField" promptText="25"
+                       styleClass="glass-input" prefHeight="34"/>
+        </VBox>
+
+        <!-- FACE CAPTURE -->
+        <Button text="Capture Face" onAction="#handleCaptureFace"
+                maxWidth="Infinity" prefHeight="32"
+                styleClass="outline-button"/>
+
+        <!-- CREATE -->
+        <Button text="Create Account" onAction="#handleRegister"
+                maxWidth="Infinity" prefHeight="36"
+                styleClass="accent-button"/>
+
+        <!-- LOGIN LINK -->
+        <HBox alignment="CENTER" spacing="4">
+            <Label text="Already have an account?" styleClass="glass-subtitle"/>
+            <Hyperlink text="Sign in" onAction="#openLogin"
+                       styleClass="glass-link"/>
+        </HBox>
+
+        <!-- MESSAGE -->
+        <Label fx:id="messageLabel" wrapText="true" textAlignment="CENTER"
+               styleClass="glass-subtitle" style="-fx-font-size: 12px;"/>
+    </VBox>
+</StackPane>

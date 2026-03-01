@@ -3,6 +3,7 @@ module com.example.mindtrack {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.swing;
+    requires javafx.media;
 
     // JDK
     requires java.desktop;
@@ -22,6 +23,6 @@ module com.example.mindtrack {
     opens controllers to javafx.fxml;
     opens main to javafx.fxml;
     opens entities to javafx.base;
-
     exports main;
+    exports utils;
 }

@@ -3,17 +3,22 @@ package controllers;
 import entities.ProfilPsychologique;
 import entities.Utilisateur;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Pos;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import services.ProfilPsychologiqueService;
 import services.UtilisateurService;
 import utils.TotpUtil;
 import utils.UserSession;
+import utils.WindowBarHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +28,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 public class ProfileController {
@@ -409,6 +415,29 @@ public class ProfileController {
             refreshTotpStatus();
         } catch (SQLException e) {
             messageLabel.setText("Database error. Please try again.");
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void handleLogout() {
+        try {
+            UserSession.clear();
+
+            Stage stage = (Stage) messageLabel.getScene().getWindow();
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/fxml/login.fxml"));
+            Parent root = loader.load();
+            Parent wrapped = WindowBarHelper.wrap(root, stage, true, false);
+            Scene scene = new Scene(wrapped);
+            scene.getStylesheets().add(
+                    Objects.requireNonNull(getClass().getResource("/css/style.css")).toExternalForm());
+
+            stage.setWidth(1120);
+            stage.setHeight(700);
+            stage.setScene(scene);
+        } catch (IOException e) {
+            messageLabel.setText("Logout error.");
             e.printStackTrace();
         }
     }

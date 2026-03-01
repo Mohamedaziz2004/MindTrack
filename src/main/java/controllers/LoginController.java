@@ -2,19 +2,28 @@ package controllers;
 
 import entities.ProfilPsychologique;
 import entities.Utilisateur;
+import javafx.animation.PauseTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
+import javafx.util.Duration;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.TextInputControl;
+import javafx.scene.control.Button;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
 import services.GoogleOAuthService;
 import services.GoogleUserInfo;
 import services.ProfilPsychologiqueService;
 import services.UtilisateurService;
 
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -24,65 +33,271 @@ import utils.FaceCaptureDialog;
 import utils.GoogleAuthConfig;
 import utils.UserSession;
 import utils.TotpUtil;
+import utils.CaptchaUtil;
+import utils.WindowBarHelper;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.Optional;
 
 public class LoginController {
 
-    @FXML
-    private TextField emailField;
+    @FXML private TextField emailField;
+    @FXML private PasswordField passwordField;
+    @FXML private Label messageLabel;
+    @FXML private MediaView bgMediaView;
+    @FXML private Canvas captchaCanvas;
+    @FXML private TextField captchaInput;
+    @FXML private Button loginButton;
 
-    @FXML
-    private PasswordField passwordField;
+    @FXML private Label emailErrorLabel;
+    @FXML private Label passwordErrorLabel;
+    @FXML private Label captchaErrorLabel;
 
-    @FXML
-    private Label messageLabel;
-
+    private MediaPlayer mediaPlayer;
     private final UtilisateurService userService = new UtilisateurService();
+    private CaptchaUtil captchaUtil;
+
+    private int consecutiveMistakes = 0;
+
+    private static final String ERROR_CLASS = "input-error";
+    private static final String SUCCESS_CLASS = "input-success";
+    private static final String[] MOTIVATION = new String[] {
+            "Take a breath, you are almost there.",
+            "Keep going, you have got this.",
+            "Small steps, big progress. Try again."
+    };
+
+    @FXML
+    public void initialize() {
+        try {
+            String videoPath = Objects.requireNonNull(
+                    getClass().getResource("/LoginBg.mp4")).toExternalForm();
+            Media media = new Media(videoPath);
+            mediaPlayer = new MediaPlayer(media);
+            mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+            mediaPlayer.setMute(true);
+            mediaPlayer.setAutoPlay(true);
+            bgMediaView.setMediaPlayer(mediaPlayer);
+        } catch (Exception e) {
+            System.err.println("Video background not loaded: " + e.getMessage());
+        }
+
+        captchaUtil = new CaptchaUtil();
+        captchaUtil.drawCaptcha(captchaCanvas);
+
+        if (loginButton != null) {
+            loginButton.disableProperty().bind(
+                    emailField.textProperty().isEmpty()
+                            .or(passwordField.textProperty().isEmpty())
+                            .or(captchaInput.textProperty().isEmpty()));
+        }
+
+        clearErrorOnChange(emailField, emailErrorLabel);
+        clearErrorOnChange(passwordField, passwordErrorLabel);
+        clearErrorOnChange(captchaInput, captchaErrorLabel);
+
+        emailField.focusedProperty().addListener((obs, oldV, newV) -> {
+            if (!newV) {
+                validateEmailField(true);
+            }
+        });
+        passwordField.focusedProperty().addListener((obs, oldV, newV) -> {
+            if (!newV) {
+                if (validateEmailField(false)) {
+                    validatePasswordField(true);
+                }
+            }
+        });
+        captchaInput.focusedProperty().addListener((obs, oldV, newV) -> {
+            if (!newV) {
+                if (validateEmailField(false) && validatePasswordField(false)) {
+                    validateCaptchaField(true);
+                }
+            }
+        });
+    }
+
+    private void shake(javafx.scene.Node node) {
+        if (node == null) return;
+        TranslateTransition tt = new TranslateTransition(Duration.millis(60), node);
+        tt.setFromX(0);
+        tt.setByX(8);
+        tt.setCycleCount(6);
+        tt.setAutoReverse(true);
+        tt.play();
+    }
+
+    private void markError(TextInputControl field, Label errorLabel, String message) {
+        if (field == null) return;
+        if (!field.getStyleClass().contains(ERROR_CLASS)) {
+            field.getStyleClass().add(ERROR_CLASS);
+        }
+        if (errorLabel != null) {
+            errorLabel.setText(message);
+            errorLabel.setVisible(true);
+            errorLabel.setManaged(true);
+        }
+        shake(field);
+    }
+
+    private void clearErrorOnChange(TextInputControl field, Label errorLabel) {
+        if (field == null) return;
+        field.textProperty().addListener((obs, oldV, newV) -> {
+            field.getStyleClass().remove(ERROR_CLASS);
+            if (errorLabel != null) {
+                errorLabel.setText("");
+                errorLabel.setVisible(false);
+                errorLabel.setManaged(false);
+            }
+        });
+    }
+
+    private String pickMessage(String inputMessage) {
+        if (consecutiveMistakes > 0 && consecutiveMistakes % 3 == 0) {
+            int idx = (consecutiveMistakes / 3 - 1) % MOTIVATION.length;
+            return MOTIVATION[idx];
+        }
+        return inputMessage;
+    }
+
+    private void resetErrors() {
+        if (emailErrorLabel != null) {
+            emailErrorLabel.setText("");
+            emailErrorLabel.setVisible(false);
+            emailErrorLabel.setManaged(false);
+        }
+        if (passwordErrorLabel != null) {
+            passwordErrorLabel.setText("");
+            passwordErrorLabel.setVisible(false);
+            passwordErrorLabel.setManaged(false);
+        }
+        if (captchaErrorLabel != null) {
+            captchaErrorLabel.setText("");
+            captchaErrorLabel.setVisible(false);
+            captchaErrorLabel.setManaged(false);
+        }
+    }
+
+    @FXML
+    public void refreshCaptcha() {
+        captchaUtil.generateCaptcha();
+        captchaUtil.drawCaptcha(captchaCanvas);
+        if (captchaInput != null) {
+            captchaInput.clear();
+            captchaInput.getStyleClass().remove(ERROR_CLASS);
+        }
+        if (captchaErrorLabel != null) {
+            captchaErrorLabel.setText("");
+            captchaErrorLabel.setVisible(false);
+            captchaErrorLabel.setManaged(false);
+        }
+    }
+
+    private void applySuccess(TextInputControl field) {
+        if (field == null) return;
+        field.getStyleClass().remove(ERROR_CLASS);
+        if (!field.getStyleClass().contains(SUCCESS_CLASS)) {
+            field.getStyleClass().add(SUCCESS_CLASS);
+        }
+        PauseTransition pt = new PauseTransition(Duration.seconds(2));
+        pt.setOnFinished(e -> field.getStyleClass().remove(SUCCESS_CLASS));
+        pt.play();
+    }
+
+    private boolean validateEmailField(boolean showErrors) {
+        String email = emailField.getText() != null ? emailField.getText().trim() : "";
+        if (email.isEmpty()) {
+            if (showErrors) {
+                consecutiveMistakes++;
+                markError(emailField, emailErrorLabel, pickMessage("Email is required"));
+                emailField.clear();
+            }
+            return false;
+        }
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            if (showErrors) {
+                consecutiveMistakes++;
+                markError(emailField, emailErrorLabel, pickMessage("Email format is invalid"));
+                emailField.clear();
+            }
+            return false;
+        }
+        if (showErrors) {
+            applySuccess(emailField);
+        }
+        return true;
+    }
+
+    private boolean validatePasswordField(boolean showErrors) {
+        String password = passwordField.getText() != null ? passwordField.getText().trim() : "";
+        if (password.isEmpty()) {
+            if (showErrors) {
+                consecutiveMistakes++;
+                markError(passwordField, passwordErrorLabel, pickMessage("Password is required"));
+                passwordField.clear();
+            }
+            return false;
+        }
+        if (password.length() < 4) {
+            if (showErrors) {
+                consecutiveMistakes++;
+                markError(passwordField, passwordErrorLabel, pickMessage("Password too short"));
+                passwordField.clear();
+            }
+            return false;
+        }
+        if (showErrors) {
+            applySuccess(passwordField);
+        }
+        return true;
+    }
+
+    private boolean validateCaptchaField(boolean showErrors) {
+        String captchaAnswer = captchaInput.getText() != null ? captchaInput.getText().trim() : "";
+        if (!captchaUtil.verify(captchaAnswer)) {
+            if (showErrors) {
+                consecutiveMistakes++;
+                markError(captchaInput, captchaErrorLabel, pickMessage("Invalid CAPTCHA"));
+                captchaInput.clear();
+                refreshCaptcha();
+            }
+            return false;
+        }
+        if (showErrors) {
+            applySuccess(captchaInput);
+        }
+        return true;
+    }
 
     @FXML
     public void handleLogin() {
 
-        String email = emailField.getText() != null ? emailField.getText().trim() : "";
-        String password = passwordField.getText() != null ? passwordField.getText().trim() : "";
-
-
         messageLabel.setStyle("-fx-text-fill: red;");
+        messageLabel.setText("");
+        resetErrors();
 
-
-        if (email.isEmpty() || password.isEmpty()) {
-            messageLabel.setText("Please fill in all fields.");
+        if (!validateEmailField(true)) {
+            return;
+        }
+        if (!validatePasswordField(true)) {
+            return;
+        }
+        if (!validateCaptchaField(true)) {
             return;
         }
 
+        consecutiveMistakes = 0;
 
-        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            messageLabel.setText("Invalid email format.");
-            return;
-        }
-
-        if (password.length() < 4) {
-            messageLabel.setText("Password must be at least 4 characters.");
-            return;
-        }
-
-        emailField.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.contains(" ")) {
-                emailField.setText(newVal.replace(" ", ""));
-            }
-        });
-
+        String email = emailField.getText().trim();
+        String password = passwordField.getText().trim();
 
         try {
-
-
             Utilisateur user = userService.login(email, password);
 
             if (user != null) {
@@ -100,6 +315,11 @@ public class LoginController {
 
                 UserSession.setCurrentUser(user);
 
+                // All fields green on success
+                applySuccess(emailField);
+                applySuccess(passwordField);
+                applySuccess(captchaInput);
+
                 messageLabel.setStyle("-fx-text-fill: green;");
                 messageLabel.setText("Welcome " + user.getPrenomU());
 
@@ -108,11 +328,17 @@ public class LoginController {
                 openProfile();
 
             } else {
-                messageLabel.setText("Invalid email or password.");
+                // Database mismatch — show error under both email and password
+                consecutiveMistakes++;
+                String msg = pickMessage("Invalid email or password");
+                markError(emailField, emailErrorLabel, msg);
+                markError(passwordField, passwordErrorLabel, msg);
             }
 
         } catch (SQLException e) {
-            messageLabel.setText("Database error. Please try again.");
+            consecutiveMistakes++;
+            String msg = pickMessage("Database error. Please try again.");
+            markError(emailField, emailErrorLabel, msg);
             e.printStackTrace();
         } catch (IOException e) {
             messageLabel.setText("Navigation error.");
@@ -185,36 +411,35 @@ public class LoginController {
 
     @FXML
     public void openRegister() throws IOException {
-        FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/fxml/register.fxml")
-        );
-        Scene scene = new Scene(loader.load());
+        stopVideo();
+        Stage stage = (Stage) emailField.getScene().getWindow();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/register.fxml"));
+        Parent root = loader.load();
+        Parent wrapped = WindowBarHelper.wrap(root, stage, true, false);
+        Scene scene = new Scene(wrapped);
         scene.getStylesheets().add(
-                Objects.requireNonNull(getClass().getResource("/css/style.css")).toExternalForm()
-        );
-        Stage stage = new Stage();
-        stage.setTitle("Register");
+                Objects.requireNonNull(getClass().getResource("/css/style.css")).toExternalForm());
         stage.setScene(scene);
-        stage.show();
     }
 
     private void openProfile() throws IOException {
-        FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/fxml/profile.fxml")
-        );
-
-        Scene scene = new Scene(loader.load());
+        stopVideo();
+        Stage stage = (Stage) emailField.getScene().getWindow();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/profile.fxml"));
+        Parent root = loader.load();
+        Parent wrapped = WindowBarHelper.wrap(root, stage, false, false);
+        Scene scene = new Scene(wrapped);
         scene.getStylesheets().add(
-                Objects.requireNonNull(getClass().getResource("/css/style.css")).toExternalForm()
-        );
-        Stage stage = new Stage();
-        stage.setTitle("My Profile");
+                Objects.requireNonNull(getClass().getResource("/css/style.css")).toExternalForm());
         stage.setScene(scene);
-        stage.show();
+    }
 
-        // Close login window
-        Stage loginStage = (Stage) emailField.getScene().getWindow();
-        loginStage.close();
+    private void stopVideo() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.dispose();
+            mediaPlayer = null;
+        }
     }
 
     @FXML

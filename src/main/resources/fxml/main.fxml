@@ -3,74 +3,83 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:id="root"
-            fx:controller="controllers.MainController"
-            prefWidth="1200" prefHeight="720"
-            stylesheets="@/css/hab.css"
-            styleClass="app-root">
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="controllers.MainController"
+           prefWidth="1200" prefHeight="720"
+           stylesheets="@/css/hab.css"
+           styleClass="app-root">
 
-    <left>
-        <!-- ✅ IMPORTANT: supprimer padding="15" -->
-        <VBox spacing="10"
-              prefWidth="240" minWidth="240">
+    <!-- ✅ Ton layout principal (inchangé) -->
+    <BorderPane fx:id="root">
 
-            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="brand">
-                <ImageView fx:id="logoImage" fitWidth="28" fitHeight="28" preserveRatio="true"/>
-                <Label text="Mind Track" styleClass="brand-title"/>
-            </HBox>
+        <left>
+            <VBox spacing="10" prefWidth="240" minWidth="240">
 
-            <VBox spacing="6" styleClass="nav">
-                <Button text="Journal"    maxWidth="Infinity" styleClass="nav-btn"/>
-                <Button text="Goals"      maxWidth="Infinity" styleClass="nav-btn"/>
-                <Button text="Exercises"  maxWidth="Infinity" styleClass="nav-btn"/>
-                <Button text="Habits"     onAction="#goHabitudes" maxWidth="Infinity" styleClass="nav-btn nav-btn-active"/>
-                <Button text="Profile"    maxWidth="Infinity" styleClass="nav-btn"/>
-                <Button text="Statistics" onAction="#goStats" maxWidth="Infinity" styleClass="nav-btn"/>
-                <Button text="Admin"      maxWidth="Infinity" styleClass="nav-btn"/>
-            </VBox>
-
-            <Pane VBox.vgrow="ALWAYS"/>
-
-            <VBox spacing="8" styleClass="nav">
-                <Button text="Settings" maxWidth="Infinity" styleClass="nav-btn"/>
-                <Button text="Log Out"  onAction="#quitter" maxWidth="Infinity" styleClass="nav-btn nav-btn-danger"/>
-            </VBox>
-
-            <!-- ✅ padding correct -->
-            <padding>
-                <Insets top="16" right="16" bottom="16" left="16"/>
-            </padding>
-        </VBox>
-    </left>
-
-    <center>
-        <BorderPane styleClass="content-root">
-            <top>
-                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="topbar">
-                    <Label text="Mind Track" styleClass="topbar-title"/>
-                    <Pane HBox.hgrow="ALWAYS"/>
-                    <Button text="🔔" styleClass="icon-btn"/>
-                    <Button text="👤" styleClass="icon-btn"/>
-                    <padding>
-                        <Insets top="12" right="16" bottom="12" left="16"/>
-                    </padding>
+                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="brand">
+                    <ImageView fx:id="logoImage" fitWidth="28" fitHeight="28" preserveRatio="true"/>
+                    <Label text="Mind Track" styleClass="brand-title"/>
                 </HBox>
-            </top>
 
-            <center>
-                <StackPane>
-                    <padding>
-                        <Insets top="16" right="16" bottom="16" left="16"/>
-                    </padding>
-                    <Label text="Chargement..." styleClass="subtitle"/>
-                </StackPane>
-            </center>
-        </BorderPane>
-    </center>
+                <VBox spacing="6" styleClass="nav">
+                    <Button text="Journal"    maxWidth="Infinity" styleClass="nav-btn"/>
+                    <Button text="Goals"      maxWidth="Infinity" styleClass="nav-btn"/>
+                    <Button text="Exercises"  maxWidth="Infinity" styleClass="nav-btn"/>
+                    <Button text="Habits"     onAction="#goHabitudes" maxWidth="Infinity" styleClass="nav-btn nav-btn-active"/>
+                    <Button text="Profile"    maxWidth="Infinity" styleClass="nav-btn"/>
+                    <Button text="Statistics" onAction="#goStats" maxWidth="Infinity" styleClass="nav-btn"/>
+                    <Button text="Admin"      maxWidth="Infinity" styleClass="nav-btn"/>
+                </VBox>
 
-</BorderPane>
+                <Pane VBox.vgrow="ALWAYS"/>
+
+                <VBox spacing="8" styleClass="nav">
+                    <Button text="Settings" maxWidth="Infinity" styleClass="nav-btn"/>
+                    <Button text="Log Out"  onAction="#quitter" maxWidth="Infinity" styleClass="nav-btn nav-btn-danger"/>
+                </VBox>
+
+                <padding>
+                    <Insets top="16" right="16" bottom="16" left="16"/>
+                </padding>
+            </VBox>
+        </left>
+
+        <center>
+            <BorderPane styleClass="content-root">
+                <top>
+                    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="topbar">
+                        <Label text="Mind Track" styleClass="topbar-title"/>
+                        <Pane HBox.hgrow="ALWAYS"/>
+                        <Button text="🔔" styleClass="icon-btn"/>
+                        <Button text="👤" styleClass="icon-btn"/>
+                        <padding>
+                            <Insets top="12" right="16" bottom="12" left="16"/>
+                        </padding>
+                    </HBox>
+                </top>
+
+                <center>
+                    <StackPane>
+                        <padding>
+                            <Insets top="16" right="16" bottom="16" left="16"/>
+                        </padding>
+                        <Label text="Chargement..." styleClass="subtitle"/>
+                    </StackPane>
+                </center>
+            </BorderPane>
+        </center>
+
+    </BorderPane>
+
+    <!-- ✅ Bulle chatbot flottante -->
+    <Button fx:id="btnChat"
+            text="💬"
+            onAction="#openChat"
+            StackPane.alignment="BOTTOM_RIGHT"
+            styleClass="chat-fab"
+            translateX="-18"
+            translateY="-18"/>
+
+</StackPane>

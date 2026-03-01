@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.ChatController"
+      spacing="12"
+      stylesheets="@/css/chat.css"
+      styleClass="chat-card">
+
+    <Label text="MindTrack Assistant" styleClass="chat-title"/>
+
+    <ScrollPane fitToWidth="true" prefHeight="420" styleClass="scroll-pane">
+        <content>
+            <VBox fx:id="messagesBox" spacing="10" styleClass="messages-area">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+            </VBox>
+        </content>
+    </ScrollPane>
+
+    <Label fx:id="lbStatus" text="" styleClass="status"/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT" styleClass="input-bar">
+        <TextField fx:id="tfMessage"
+                   promptText="Écris ton message..."
+                   HBox.hgrow="ALWAYS"/>
+        <Button text="Send" onAction="#send" styleClass="btn-send"/>
+    </HBox>
+
+</VBox>

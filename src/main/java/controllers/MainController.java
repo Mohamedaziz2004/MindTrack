@@ -5,6 +5,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import utils.Navigator;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 public class MainController {
 
@@ -28,6 +31,21 @@ public class MainController {
             logoImage.setImage(new Image(url.toExternalForm()));
             logoImage.setVisible(true);
             logoImage.setManaged(true);
+        }
+    }
+    @FXML
+    public void openChat() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/chat.fxml"));
+            Scene scene = new Scene(loader.load());
+
+            Stage st = new Stage();
+            st.setTitle("Chatbot");
+            st.setScene(scene);
+            st.setResizable(false);
+            st.show();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

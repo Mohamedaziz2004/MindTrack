@@ -32,7 +32,7 @@ public class PdfExportUtil {
 
     /**
      * Export PDF des habitudes (avec info de tri/recherche en haut).
-     * IMPORTANT: on évite les caractères Unicode (→ ✓ …) pour ne pas casser Helvetica.
+     * IMPORTANT: on évite les caractères Unicode pour ne pas casser Helvetica.
      */
     public static void exportHabitsPdf(File file,
                                        List<HabitRow> rows,
@@ -41,107 +41,95 @@ public class PdfExportUtil {
 
         try (PDDocument doc = new PDDocument()) {
 
+            float margin = 48f;
+            float[] colW = {170, 110, 90, 80, 60}; // total ~510
+            String[] header = {"Name", "Frequency", "Target", "Progress", "Score"};
+
             PDPage page = new PDPage(PDRectangle.A4);
             doc.addPage(page);
 
-            float margin = 48f;
-            float y = page.getMediaBox().getHeight() - margin;
+            float pageH = page.getMediaBox().getHeight();
+            float y = pageH - margin;
 
-            float leading = 14f;
+            PDPageContentStream cs = new PDPageContentStream(doc, page);
 
-            try (PDPageContentStream cs = new PDPageContentStream(doc, page)) {
+            // ----- Title
+            y = drawTitleAndMeta(cs, margin, y, search, sort);
 
-                // Title
-                cs.beginText();
-                cs.setFont(PDType1Font.HELVETICA_BOLD, 18);
-                cs.newLineAtOffset(margin, y);
-                cs.showText("MindTrack - Habits Export");
-                cs.endText();
+            // ----- Table header
+            drawRow(cs, margin, y, colW, header, true);
+            y -= 18;
 
-                y -= 24;
+            // ----- Rows
+            if (rows != null) {
+                for (HabitRow r : rows) {
 
-                // Meta line
-                String meta = "Generated: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-                meta += " | Search: " + safe(search);
-                meta += " | Sort: " + safe(sort);
+                    String[] cells = {
+                            normalizePdfText(r.name),
+                            normalizePdfText(r.frequency),
+                            normalizePdfText(r.target),
+                            normalizePdfText(r.progress),
+                            normalizePdfText(r.score)
+                    };
 
-                meta = normalizePdfText(meta);
+                    // besoin nouvelle page ?
+                    if (y < margin + 40) {
+                        cs.close();
 
-                cs.beginText();
-                cs.setFont(PDType1Font.HELVETICA, 10);
-                cs.newLineAtOffset(margin, y);
-                cs.showText(crop(meta, 110));
-                cs.endText();
+                        page = new PDPage(PDRectangle.A4);
+                        doc.addPage(page);
 
-                y -= 22;
+                        pageH = page.getMediaBox().getHeight();
+                        y = pageH - margin;
 
-                // Table header
-                float[] colW = {170, 110, 90, 80, 60}; // total ~510
-                String[] header = {"Name", "Frequency", "Target", "Progress", "Score"};
+                        cs = new PDPageContentStream(doc, page);
 
-                drawRow(cs, margin, y, colW, header, true);
-                y -= 18;
-
-                // Rows
-                if (rows != null) {
-                    for (HabitRow r : rows) {
-                        String[] cells = {
-                                normalizePdfText(r.name),
-                                normalizePdfText(r.frequency),
-                                normalizePdfText(r.target),
-                                normalizePdfText(r.progress),
-                                normalizePdfText(r.score)
-                        };
-
-                        // si on dépasse la page -> nouvelle page
-                        if (y < margin + 60) {
-                            cs.close();
-
-                            page = new PDPage(PDRectangle.A4);
-                            doc.addPage(page);
-                            y = page.getMediaBox().getHeight() - margin;
-
-                            try (PDPageContentStream cs2 = new PDPageContentStream(doc, page)) {
-                                // redessiner header sur la nouvelle page
-                                drawRow(cs2, margin, y, colW, header, true);
-                                y -= 18;
-
-                                drawRow(cs2, margin, y, colW, cells, false);
-                                y -= 16;
-
-                                // on continue avec cs2 : astuce => on relance une nouvelle fonction
-                                // mais plus simple: on sauvegarde maintenant et on retourne
-                                // => donc pour multi-pages clean, on fait une version simple:
-                                // ici on va juste continuer avec cs2 en écrivant le reste dans cette page.
-                                // (On ne peut pas “revenir” à cs d’avant, mais c’est ok)
-                                for (int i = rows.indexOf(r) + 1; i < rows.size(); i++) {
-                                    HabitRow rr = rows.get(i);
-                                    String[] cc = {
-                                            normalizePdfText(rr.name),
-                                            normalizePdfText(rr.frequency),
-                                            normalizePdfText(rr.target),
-                                            normalizePdfText(rr.progress),
-                                            normalizePdfText(rr.score)
-                                    };
-                                    if (y < margin + 40) break; // simple (une page en plus max)
-                                    drawRow(cs2, margin, y, colW, cc, false);
-                                    y -= 16;
-                                }
-                            }
-
-                            doc.save(file);
-                            return;
-                        }
-
-                        drawRow(cs, margin, y, colW, cells, false);
-                        y -= 16;
+                        // répéter title + header sur chaque page (optionnel mais pro)
+                        y = drawTitleAndMeta(cs, margin, y, search, sort);
+                        drawRow(cs, margin, y, colW, header, true);
+                        y -= 18;
                     }
-                }
 
+                    drawRow(cs, margin, y, colW, cells, false);
+                    y -= 16;
+                }
             }
 
+            cs.close();
             doc.save(file);
         }
+    }
+
+    private static float drawTitleAndMeta(PDPageContentStream cs,
+                                          float margin,
+                                          float y,
+                                          String search,
+                                          String sort) throws Exception {
+
+        // Title
+        cs.beginText();
+        cs.setFont(PDType1Font.HELVETICA_BOLD, 18);
+        cs.newLineAtOffset(margin, y);
+        cs.showText("MindTrack - Habits Export");
+        cs.endText();
+
+        y -= 24;
+
+        // Meta line
+        String meta = "Generated: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        meta += " | Search: " + safe(search);
+        meta += " | Sort: " + safe(sort);
+
+        meta = normalizePdfText(meta);
+
+        cs.beginText();
+        cs.setFont(PDType1Font.HELVETICA, 10);
+        cs.newLineAtOffset(margin, y);
+        cs.showText(crop(meta, 120));
+        cs.endText();
+
+        y -= 22;
+        return y;
     }
 
     private static void drawRow(PDPageContentStream cs,

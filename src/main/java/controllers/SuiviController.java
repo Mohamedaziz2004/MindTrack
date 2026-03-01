@@ -20,10 +20,18 @@ public class SuiviController {
 
     @FXML private ComboBox<Habitude> cbHabitudes;
     @FXML private DatePicker dpDate;
+
+    // UI boolean
     @FXML private CheckBox chkEtat;
+
+    // UI quantitatif
+    @FXML private Spinner<Integer> spValeur;
+
+    @FXML private Label lbHint;
 
     @FXML private TableView<SuiviHabitude> tvHistorique;
     @FXML private TableColumn<SuiviHabitude, String> colDate;
+    @FXML private TableColumn<SuiviHabitude, String> colValeur;
     @FXML private TableColumn<SuiviHabitude, String> colEtat;
 
     private final ObservableList<SuiviHabitude> hist = FXCollections.observableArrayList();
@@ -33,17 +41,55 @@ public class SuiviController {
         dpDate.setValue(LocalDate.now());
 
         colDate.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(String.valueOf(c.getValue().getDate())));
-        colEtat.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().isEtat() ? "Faite" : "Non faite"));
+        colValeur.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(String.valueOf(c.getValue().getValeur())));
+        colEtat.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().isEtat() ? "Done ✅" : "Miss"));
+
         tvHistorique.setItems(hist);
 
+        // spinner default
+        if (spValeur != null) {
+            spValeur.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 9999, 0));
+        }
+
         loadHabitudes();
+
+        cbHabitudes.setOnAction(e -> updateUiForType());
+        updateUiForType();
     }
 
     private void loadHabitudes() {
         try {
             cbHabitudes.setItems(FXCollections.observableArrayList(habService.afficherParUser(Session.getIdU())));
+            if (!cbHabitudes.getItems().isEmpty()) cbHabitudes.getSelectionModel().select(0);
+            updateUiForType();
+            chargerHistorique();
         } catch (SQLException e) {
             erreur("Habitudes", e.getMessage());
+        }
+    }
+
+    private void updateUiForType() {
+        Habitude h = cbHabitudes.getValue();
+        if (h == null) return;
+
+        boolean isBool = h.isBooleanType();
+        int target = Math.max(1, h.getTargetValue());
+        String unit = (h.getUnit() == null) ? "" : h.getUnit().trim();
+
+        if (chkEtat != null) chkEtat.setDisable(!isBool);
+        if (spValeur != null) spValeur.setDisable(isBool);
+
+        if (isBool) {
+            lbHint.setText("Type BOOLEAN: coche Done/Not done.");
+            if (spValeur != null && spValeur.getValueFactory() != null) {
+                spValeur.getValueFactory().setValue(0);
+            }
+        } else {
+            String u = unit.isBlank() ? ("COUNT".equalsIgnoreCase(h.getHabitType()) ? "x" : "min") : unit;
+            lbHint.setText("Type " + h.getHabitType() + ": entre une valeur (objectif = " + target + " " + u + ").");
+            if (spValeur != null) {
+                spValeur.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 9999, target));
+            }
         }
     }
 
@@ -52,12 +98,21 @@ public class SuiviController {
         Habitude h = cbHabitudes.getValue();
         if (h == null) { info("Suivi", "Choisis une habitude."); return; }
 
-        LocalDate d = dpDate.getValue() == null ? LocalDate.now() : dpDate.getValue();
-        boolean etat = chkEtat.isSelected();
+        LocalDate d = (dpDate.getValue() == null) ? LocalDate.now() : dpDate.getValue();
+        int target = Math.max(1, h.getTargetValue());
 
         try {
-            suiviService.marquerCommeFaite(h.getIdHabitude(), d, etat);
-            info("Suivi", "Enregistré : " + (etat ? "Faite" : "Non faite"));
+            if (h.isBooleanType()) {
+                boolean done = chkEtat != null && chkEtat.isSelected();
+                int valeur = done ? 1 : 0;
+                suiviService.marquerValeur(h.getIdHabitude(), d, valeur, 1);
+            } else {
+                int valeur = (spValeur == null || spValeur.getValue() == null) ? 0 : spValeur.getValue();
+                if (valeur < 0) valeur = 0;
+                suiviService.marquerValeur(h.getIdHabitude(), d, valeur, target);
+            }
+
+            info("Suivi", "Enregistré ✅");
             chargerHistorique();
         } catch (SQLException e) {
             erreur("Suivi", e.getMessage());

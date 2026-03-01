@@ -10,7 +10,7 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
-import servives.humeurService;
+import services.humeurService;
 
 import java.util.HashMap;
 import java.util.List;

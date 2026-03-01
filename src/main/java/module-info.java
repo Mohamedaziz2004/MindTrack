@@ -8,6 +8,8 @@ module org.mindtrack.mindtrackfxx {
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;
     requires net.synedra.validatorfx;
+    requires java.desktop;
+    requires java.net.http;
 
     // Open packages to FXML reflection
     opens org.mindtrack.mindtrackfxx.controller to javafx.fxml;
@@ -22,6 +24,6 @@ module org.mindtrack.mindtrackfxx {
 
     // Entity and service packages
     exports entities;
-    exports servives;
+    exports services;
     exports utils;
 }

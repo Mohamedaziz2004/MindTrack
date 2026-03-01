@@ -18,10 +18,14 @@ import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import services.SpeechToTextService;
 import org.mindtrack.mindtrackfxx.util.*;
-import servives.JournalService;
-import servives.humeurService;
-import servives.JournalAnalysisService;
+import services.JournalService;
+import services.humeurService;
+import services.JournalAnalysisService;
+
+import javax.sound.sampled.*;
+import java.io.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -42,6 +46,8 @@ public class EmotionalJournalController {
     // Journal Section
     @FXML private TextArea entryTextArea;
     @FXML private Button saveEntryButton;
+    @FXML private Button recordAudioButton;
+
     @FXML private Label currentDateTimeLabel;
 
     // Mood Section
@@ -150,6 +156,10 @@ public class EmotionalJournalController {
     private static final int MAX_NOTE_LENGTH = 5000;
     private static final String[] FORBIDDEN_WORDS = {}; // Add words if needed
 
+
+    private TargetDataLine line;
+    private File recordedFile;
+
     // ========================================
     // INITIALIZATION
     // ========================================
@@ -241,6 +251,68 @@ public class EmotionalJournalController {
             currentDateTimeLabel.setText(LocalDateTime.now().format(DATE_TIME_FORMATTER));
         }
     }
+
+
+    @FXML
+    private void onRecordAudio() {
+        if (line == null || !line.isOpen()) {
+            // Start recording
+            try {
+                AudioFormat format = new AudioFormat(16000, 16, 1, true, true);
+                DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
+                line = (TargetDataLine) AudioSystem.getLine(info);
+                line.open(format);
+                line.start();
+
+                recordedFile = new File("journal_recording.wav");
+                Thread recordingThread = new Thread(() -> {
+                    try (AudioInputStream ais = new AudioInputStream(line)) {
+                        AudioSystem.write(ais, AudioFileFormat.Type.WAVE, recordedFile);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                });
+                recordingThread.start();
+                recordAudioButton.setText("Stop Recording");
+            } catch (Exception ex) {
+                showAlert("Could not start recording: " + ex.getMessage());
+            }
+        } else {
+            // Stop recording
+            line.stop();
+            line.close();
+            line = null;
+            recordAudioButton.setText("Record Audio");
+            showSuccess("Audio recorded and saved!");
+
+            // Transcribe audio in background
+            new Thread(() -> {
+                try {
+                    SpeechToTextService speechService = new SpeechToTextService();
+                    String transcribedText = speechService.transcribeAudio(recordedFile);
+                    javafx.application.Platform.runLater(() -> {
+                        entryTextArea.setText(transcribedText);
+                        showSuccess("Speech transcribed and added to journal!");
+                    });
+                }
+                catch (Exception ex) {
+                    System.err.println("Transcription failed: " + ex.getMessage());
+                    javafx.application.Platform.runLater(() -> {
+                        if (ex.getMessage().contains("401")) {
+                            showAlert("Transcription failed: Invalid API key.");
+                        } else if (ex.getMessage().contains("429")) {
+                            showAlert("Transcription failed: Rate limit exceeded. Please wait and try again.");
+                        } else {
+                            showAlert("Transcription failed: " + ex.getMessage());
+                        }
+                    });
+                }
+            }).start();
+
+        }
+    }
+
+
 
     // ========================================
     // JOURNAL ENTRY ACTIONS

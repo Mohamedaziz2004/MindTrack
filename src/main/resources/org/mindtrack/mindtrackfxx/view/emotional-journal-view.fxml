@@ -158,6 +158,14 @@
                                     </HBox>
                                 </graphic>
                             </Button>
+                            <Button fx:id="recordAudioButton" text="Record Audio" onAction="#onRecordAudio" styleClass="btn, btn-secondary">+
+                                <graphic>
+                                    <HBox spacing="6" alignment="CENTER">
+                                        <SVGPath fill="transparent" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z M17 21v-8H7v8 M7 3v5h8" scaleX="0.6" scaleY="0.6"/>
+                                        <Label text="Save Journal" styleClass="btn-label" style="-fx-text-fill: #ffffff;"/>
+                                    </HBox>
+                                </graphic>
+                            </Button>
                             <Button fx:id="analyseButton" onAction="#onAnalyseEntry" styleClass="btn, btn-ai">
                                 <graphic>
                                     <HBox spacing="6" alignment="CENTER">

@@ -10,14 +10,17 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import services.ComprefaceClient;
 import services.UtilisateurService;
 import utils.FaceCaptureDialog;
+import utils.PasswordHasher;
 import utils.WindowBarHelper;
 
 import java.io.File;
@@ -33,6 +36,7 @@ public class RegisterController {
     @FXML private TextField prenomField;
     @FXML private TextField emailField;
     @FXML private PasswordField passwordField;
+    @FXML private PasswordField confirmPasswordField;
     @FXML private TextField ageField;
     @FXML private Label messageLabel;
     @FXML private ImageView bgImageView;
@@ -43,8 +47,15 @@ public class RegisterController {
     @FXML private Label passwordErrorLabel;
     @FXML private Label ageErrorLabel;
 
+    @FXML private Label passwordMatchLabel;
+
+    @FXML private VBox passwordMeterBox;
+    @FXML private ProgressBar passwordStrengthBar;
+    @FXML private Label passwordStrengthLabel;
+
     private static final String ERROR_CLASS = "input-error";
     private static final String SUCCESS_CLASS = "input-success";
+    private static final String MATCH_OK_CLASS = "password-match-ok";
 
     private final UtilisateurService userService = new UtilisateurService();
     private File capturedFaceFile;
@@ -92,6 +103,20 @@ public class RegisterController {
                 validateAge(true, true);
             }
         });
+
+        passwordStrengthBar.getStyleClass().add("password-strength-bar");
+
+        passwordField.focusedProperty().addListener((obs, oldV, newV) -> togglePasswordMeter(newV, passwordField.getText()));
+        confirmPasswordField.focusedProperty().addListener((obs, oldV, newV) -> togglePasswordMeter(newV, passwordField.getText()));
+
+        passwordField.textProperty().addListener((obs, oldV, newV) -> {
+            updatePasswordStrengthMeter(newV);
+            updatePasswordMatchLabel();
+        });
+        confirmPasswordField.textProperty().addListener((obs, oldV, newV) -> updatePasswordMatchLabel());
+
+        updatePasswordStrengthMeter(passwordField.getText());
+        updatePasswordMatchLabel();
     }
 
     @FXML
@@ -188,6 +213,12 @@ public class RegisterController {
             ageErrorLabel.setVisible(false);
             ageErrorLabel.setManaged(false);
         }
+        if (passwordMatchLabel != null) {
+            passwordMatchLabel.setText("");
+            passwordMatchLabel.setVisible(false);
+            passwordMatchLabel.setManaged(false);
+            passwordMatchLabel.getStyleClass().remove(MATCH_OK_CLASS);
+        }
         nomField.getStyleClass().remove(ERROR_CLASS);
         prenomField.getStyleClass().remove(ERROR_CLASS);
         emailField.getStyleClass().remove(ERROR_CLASS);
@@ -263,6 +294,7 @@ public class RegisterController {
 
     private boolean validatePassword(boolean showErrors, boolean showSuccess) {
         String password = passwordField.getText() != null ? passwordField.getText().trim() : "";
+        String confirm = confirmPasswordField.getText() != null ? confirmPasswordField.getText().trim() : "";
         if (password.isEmpty()) {
             if (showErrors) {
                 markError(passwordField, passwordErrorLabel, "Password is required.");
@@ -270,17 +302,36 @@ public class RegisterController {
             }
             return false;
         }
-        if (password.length() < 4) {
+        if (!isStrongPassword(password)) {
             if (showErrors) {
-                markError(passwordField, passwordErrorLabel, "Password too short.");
+                markError(passwordField, passwordErrorLabel, "Use 8+ chars with upper, lower, and a number.");
                 passwordField.clear();
+            }
+            return false;
+        }
+        if (!confirm.isEmpty() && !password.equals(confirm)) {
+            if (showErrors) {
+                markError(confirmPasswordField, passwordErrorLabel, "Passwords do not match.");
             }
             return false;
         }
         if (showSuccess) {
             applySuccess(passwordField);
+            if (!confirm.isEmpty()) {
+                applySuccess(confirmPasswordField);
+            }
         }
         return true;
+    }
+
+    private boolean isStrongPassword(String value) {
+        if (value.length() < 8) {
+            return false;
+        }
+        boolean upper = value.matches(".*[A-Z].*");
+        boolean lower = value.matches(".*[a-z].*");
+        boolean digit = value.matches(".*[0-9].*");
+        return upper && lower && digit;
     }
 
     private boolean validateAge(boolean showErrors, boolean showSuccess) {
@@ -314,6 +365,64 @@ public class RegisterController {
         return true;
     }
 
+    private void updatePasswordStrengthMeter(String password) {
+        if (passwordStrengthBar == null || passwordStrengthLabel == null) return;
+        Strength strength = calculateStrength(password);
+        passwordStrengthBar.setProgress(strength.progress);
+        passwordStrengthBar.setStyle("-fx-accent: " + strength.color + ";");
+        passwordStrengthLabel.setText(strength.label);
+        passwordStrengthLabel.setStyle("-fx-text-fill: " + strength.color + "; -fx-font-size: 11px;");
+    }
+
+    private Strength calculateStrength(String password) {
+        String value = password != null ? password : "";
+        int score = 0;
+        if (value.length() >= 8) score++;
+        if (value.length() >= 12) score++;
+        if (value.matches(".*[A-Z].*")) score++;
+        if (value.matches(".*[a-z].*")) score++;
+        if (value.matches(".*[0-9].*")) score++;
+
+        if (score <= 2) {
+            return new Strength(0.33, "Weak", "#ff6b6b");
+        }
+        if (score <= 3) {
+            return new Strength(0.66, "Good", "#f39c12");
+        }
+        return new Strength(1.0, "Strong", "#2ecc71");
+    }
+
+    private record Strength(double progress, String label, String color) {}
+
+    private void updatePasswordMatchLabel() {
+        if (passwordMatchLabel == null) return;
+        String password = passwordField.getText() != null ? passwordField.getText().trim() : "";
+        String confirm = confirmPasswordField.getText() != null ? confirmPasswordField.getText().trim() : "";
+        boolean show = !confirm.isEmpty();
+        passwordMatchLabel.setVisible(show);
+        passwordMatchLabel.setManaged(show);
+        if (!show) {
+            return;
+        }
+        boolean match = !password.isEmpty() && password.equals(confirm);
+        passwordMatchLabel.getStyleClass().remove(MATCH_OK_CLASS);
+        if (match) {
+            if (!passwordMatchLabel.getStyleClass().contains(MATCH_OK_CLASS)) {
+                passwordMatchLabel.getStyleClass().add(MATCH_OK_CLASS);
+            }
+            passwordMatchLabel.setText("Passwords match");
+        } else {
+            passwordMatchLabel.setText("Passwords do not match");
+        }
+    }
+
+    private void togglePasswordMeter(boolean focused, String password) {
+        if (passwordMeterBox == null) return;
+        boolean show = focused || (password != null && !password.isBlank());
+        passwordMeterBox.setVisible(show);
+        passwordMeterBox.setManaged(show);
+    }
+
     @FXML
     public void handleRegister() {
 
@@ -339,8 +448,10 @@ public class RegisterController {
                 return;
             }
 
+            String rawPassword = passwordField.getText().trim();
+            String passwordHash = PasswordHasher.hash(rawPassword);
             Utilisateur user = new Utilisateur(nomField.getText().trim(), prenomField.getText().trim(),
-                    emailField.getText().trim(), passwordField.getText().trim(),
+                    emailField.getText().trim(), passwordHash,
                     Integer.parseInt(ageField.getText().trim()), "USER");
             int userId = userService.ajouterAndReturnId(user);
 
@@ -367,6 +478,7 @@ public class RegisterController {
             prenomField.clear();
             emailField.clear();
             passwordField.clear();
+            confirmPasswordField.clear();
             ageField.clear();
             capturedFaceFile = null;
 

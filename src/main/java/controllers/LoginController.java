@@ -35,6 +35,7 @@ import utils.UserSession;
 import utils.TotpUtil;
 import utils.CaptchaUtil;
 import utils.WindowBarHelper;
+import utils.PasswordHasher;
 
 import java.io.File;
 import java.io.IOException;
@@ -83,6 +84,20 @@ public class LoginController {
             mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
             mediaPlayer.setMute(true);
             mediaPlayer.setAutoPlay(true);
+            mediaPlayer.setOnReady(() -> {
+                mediaPlayer.play();
+            });
+            mediaPlayer.setOnStalled(() -> {
+                // Attempt to resume if the decoder stalls
+                mediaPlayer.play();
+            });
+            mediaPlayer.setOnEndOfMedia(() -> {
+                mediaPlayer.seek(Duration.ZERO);
+                mediaPlayer.play();
+            });
+            mediaPlayer.setOnError(() -> {
+                System.err.println("Video playback error: " + mediaPlayer.getError());
+            });
             bgMediaView.setMediaPlayer(mediaPlayer);
         } catch (Exception e) {
             System.err.println("Video background not loaded: " + e.getMessage());
@@ -422,6 +437,19 @@ public class LoginController {
         stage.setScene(scene);
     }
 
+    @FXML
+    public void openForgotPassword() throws IOException {
+        stopVideo();
+        Stage stage = (Stage) emailField.getScene().getWindow();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/forgot_password.fxml"));
+        Parent root = loader.load();
+        Parent wrapped = WindowBarHelper.wrap(root, stage, true, false);
+        Scene scene = new Scene(wrapped);
+        scene.getStylesheets().add(
+                Objects.requireNonNull(getClass().getResource("/css/style.css")).toExternalForm());
+        stage.setScene(scene);
+    }
+
     private void openProfile() throws IOException {
         stopVideo();
         Stage stage = (Stage) emailField.getScene().getWindow();
@@ -478,11 +506,13 @@ public class LoginController {
             if (user == null) {
                 String prenom = userInfo.givenName() != null ? userInfo.givenName() : "Google";
                 String nom = userInfo.familyName() != null ? userInfo.familyName() : "User";
+                String randomPassword = UUID.randomUUID().toString();
+                String passwordHash = PasswordHasher.hash(randomPassword);
                 Utilisateur newUser = new Utilisateur(
                         nom,
                         prenom,
                         userInfo.email(),
-                        UUID.randomUUID().toString(),
+                        passwordHash,
                         0,
                         "user"
                 );

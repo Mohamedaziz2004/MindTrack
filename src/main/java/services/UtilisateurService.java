@@ -2,6 +2,7 @@ package services;
 
 import entities.Utilisateur;
 import utils.DatabaseConnection;
+import utils.PasswordHasher;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -130,17 +131,33 @@ public class UtilisateurService implements IService<Utilisateur> {
         return utilisateurs;
     }
 
+    public void updatePasswordHash(int userId, String newHash) throws SQLException {
+        String sql = "UPDATE utilisateur SET mdpsU = ? WHERE idU = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, newHash);
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+        }
+    }
+
     //login
     public Utilisateur login(String email, String password) throws SQLException {
-        String sql = "SELECT * FROM utilisateur WHERE emailU = ? AND mdpsU = ?";
+        String sql = "SELECT * FROM utilisateur WHERE emailU = ?";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setString(1, email);
-        ps.setString(2, password);
 
         ResultSet rs = ps.executeQuery();
 
         if (rs.next()) {
-            return mapUser(rs);
+            Utilisateur user = mapUser(rs);
+            if (PasswordHasher.matches(password, user.getMdpsU())) {
+                if (!PasswordHasher.isBcryptHash(user.getMdpsU())) {
+                    String upgraded = PasswordHasher.hash(password);
+                    updatePasswordHash(user.getIdU(), upgraded);
+                    user.setMdpsU(upgraded);
+                }
+                return user;
+            }
         }
         return null;
     }

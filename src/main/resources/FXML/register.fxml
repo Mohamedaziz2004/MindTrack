@@ -73,8 +73,22 @@
             <Label text="Password" styleClass="glass-label"/>
             <PasswordField fx:id="passwordField" promptText="••••••••"
                            styleClass="glass-input" prefHeight="34"/>
+            <VBox fx:id="passwordMeterBox" spacing="2" visible="false" managed="false">
+                <ProgressBar fx:id="passwordStrengthBar" prefWidth="360" prefHeight="6" maxHeight="6"
+                             styleClass="password-strength-bar" progress="0"/>
+                <Label fx:id="passwordStrengthLabel" text="Password strength" styleClass="glass-subtitle" style="-fx-font-size: 11px;"/>
+            </VBox>
             <Label fx:id="passwordErrorLabel" text="" visible="false" managed="false"
                    styleClass="input-error-label"/>
+        </VBox>
+
+        <!-- CONFIRM PASSWORD -->
+        <VBox spacing="3" alignment="CENTER_LEFT">
+            <Label text="Re-enter Password" styleClass="glass-label"/>
+            <PasswordField fx:id="confirmPasswordField" promptText="••••••••"
+                           styleClass="glass-input" prefHeight="34"/>
+            <Label fx:id="passwordMatchLabel" text="" visible="false" managed="false"
+                   styleClass="password-match-label"/>
         </VBox>
 
         <!-- AGE -->

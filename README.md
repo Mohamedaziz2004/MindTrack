@@ -42,3 +42,27 @@ Add a profile picture path column to the `utilisateur` table:
 ALTER TABLE utilisateur
     ADD COLUMN profile_picture_path VARCHAR(512) NULL;
 ```
+
+## Forgot Password (Email OTP)
+
+### 1) Create reset-token table
+Run the SQL in `src/main/resources/db/password_reset_tokens.sql`.
+
+### 2) Configure Gmail SMTP
+Use a Gmail App Password (recommended). You can set env vars or a local `smtp.properties` in the project root:
+
+```properties
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your_account@gmail.com
+SMTP_PASSWORD=your_app_password
+SMTP_FROM=your_account@gmail.com
+SMTP_TLS=true
+SMTP_AUTH=true
+```
+
+### Security note
+Do not commit real SMTP secrets under `src/main/resources`. Prefer a project-root `smtp.properties` or environment variables.
+
+### 3) Password hashing
+New passwords are stored with BCrypt. Legacy plaintext passwords are upgraded on next login.

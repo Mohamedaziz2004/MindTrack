@@ -18,6 +18,9 @@ module com.example.mindtrack {
     requires org.apache.commons.codec;
     requires com.google.zxing;
     requires com.google.zxing.javase;
+    requires jbcrypt;
+    requires jakarta.mail;
+    requires jakarta.activation;
 
 
     opens controllers to javafx.fxml;

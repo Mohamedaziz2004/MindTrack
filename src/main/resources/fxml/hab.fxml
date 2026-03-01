@@ -25,6 +25,21 @@
                        wrapText="true"/>
             </VBox>
 
+            <!-- ✅ Motivation + Weather row -->
+            <HBox spacing="14">
+                <VBox spacing="8" styleClass="card" HBox.hgrow="ALWAYS">
+                    <Label text="Daily Motivation" styleClass="card-title"/>
+                    <Label fx:id="lbQuote" text="Loading quote..." wrapText="true" styleClass="subtitle"/>
+                    <Label fx:id="lbQuoteAuthor" text="" styleClass="hint"/>
+                </VBox>
+
+                <VBox spacing="8" styleClass="card" prefWidth="380">
+                    <Label text="Weather Coach" styleClass="card-title"/>
+                    <Label fx:id="lbWeather" text="Loading weather..." styleClass="subtitle" wrapText="true"/>
+                    <Label fx:id="lbWeatherCoach" text="" styleClass="hint" wrapText="true"/>
+                </VBox>
+            </HBox>
+
             <!-- Add New Habit Card -->
             <VBox spacing="12" styleClass="card">
                 <Label text="Add New Habit" styleClass="card-title"/>
@@ -79,13 +94,13 @@
 
                 <Label text="Tip: click a habit card to select it, then edit/delete." styleClass="hint"/>
             </VBox>
+
             <!-- Your Habits -->
             <VBox spacing="10">
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label text="Your Habits" styleClass="section-title"/>
                     <Pane HBox.hgrow="ALWAYS"/>
 
-                    <!-- ✅ Search -->
                     <TextField fx:id="tfSearch"
                                promptText="Search habits..."
                                prefWidth="260"

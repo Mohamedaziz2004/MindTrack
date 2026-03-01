@@ -4,6 +4,9 @@ import entities.Habitude;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.application.Platform;
+import services.MotivationService;
+import services.WeatherService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -30,11 +33,17 @@ public class HabitudeController {
     private final HabitudeService habService = new HabitudeService();
     private final SuiviHabitudeService suiviService = new SuiviHabitudeService();
     private final SmartReminderService smartReminderService = new SmartReminderService();
+    private final MotivationService motivationService = new MotivationService();
+    private final WeatherService weatherService = new WeatherService();
 
     // ===== SORT + SEARCH =====
     @FXML private ComboBox<String> cbSort;
     @FXML private TextField tfSearch;
 
+    @FXML private Label lbQuote;
+    @FXML private Label lbQuoteAuthor;
+    @FXML private Label lbWeather;
+    @FXML private Label lbWeatherCoach;
     // ===== FORM =====
     @FXML private TextField tfNom;
     @FXML private TextField tfFrequence;
@@ -82,6 +91,7 @@ public class HabitudeController {
         }
 
         loadHabitudes();
+        loadQuoteAndWeather();
     }
 
     private void updateTargetUi() {
@@ -686,5 +696,47 @@ public class HabitudeController {
             this.values7 = values7;
             this.doneCount7 = doneCount7;
         }
+    }
+    private void loadQuoteAndWeather() {
+        // Quote
+        if (lbQuote != null) lbQuote.setText("Loading quote...");
+        if (lbQuoteAuthor != null) lbQuoteAuthor.setText("");
+
+        new Thread(() -> {
+            try {
+                var q = motivationService.fetchRandomQuote();
+                Platform.runLater(() -> {
+                    lbQuote.setText("Citation du jour : “" + q.text + "”");
+                    if (lbQuoteAuthor != null) lbQuoteAuthor.setText("— " + q.author);
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    if (lbQuote != null) lbQuote.setText("“Keep going. Small steps matter.”");
+                    if (lbQuoteAuthor != null) lbQuoteAuthor.setText("— MindTrack");
+                });
+            }
+        }, "Quote-Thread").start();
+
+        // Weather
+        if (lbWeather != null) lbWeather.setText("Loading weather...");
+        if (lbWeatherCoach != null) lbWeatherCoach.setText("");
+
+        new Thread(() -> {
+            try {
+                var w = weatherService.fetchCurrentWeather();
+                String line = String.format("%.0f°C • %s • Wind %.0f km/h", w.temperature, w.label, w.windSpeed);
+                String coach = weatherService.coachSuggestion(w);
+
+                Platform.runLater(() -> {
+                    if (lbWeather != null) lbWeather.setText(line);
+                    if (lbWeatherCoach != null) lbWeatherCoach.setText(coach);
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    if (lbWeather != null) lbWeather.setText("Weather unavailable");
+                    if (lbWeatherCoach != null) lbWeatherCoach.setText("");
+                });
+            }
+        }, "Weather-Thread").start();
     }
 }

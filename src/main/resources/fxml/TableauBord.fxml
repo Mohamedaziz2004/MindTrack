@@ -7,18 +7,21 @@
 <?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.effect.DropShadow?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.paint.Color?>
 
-<BorderPane stylesheets="@mission-shell.css" prefHeight="800.0" prefWidth="900.0" style="-fx-background-color: #F2F4F7;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.TableauBordController">
+<BorderPane stylesheets="@mission-shell.css" prefHeight="900.0" prefWidth="1100.0" style="-fx-background-color: #F2F4F7;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.TableauBordController">
+
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="70.0" style="-fx-background-color: #D1D9E6; -fx-border-color: #e9ecef; -fx-border-width: 0 0 1 0;">
             <children>
@@ -74,7 +77,7 @@
                             </VBox.margin>
                         </VBox>
 
-                        <!-- Ligne 1: Cartes de statistiques -->
+                        <!-- Ligne 1: Cartes de statistiques principales -->
                         <HBox alignment="CENTER" spacing="20.0">
                             <children>
                                 <VBox alignment="CENTER" prefWidth="250.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;">
@@ -108,6 +111,54 @@
                             </children>
                         </HBox>
 
+                        <!-- NOUVELLE SECTION IA RECOMMANDATIONS - ULTRA PREMIUM -->
+                        <VBox spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(6,224,240,0.2), 15, 0, 0, 5); -fx-border-color: #06E0F0; -fx-border-width: 2; -fx-border-radius: 20;">
+                            <children>
+                                <!-- En-tête de la section IA -->
+                                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                    <children>
+                                        <Label style="-fx-font-size: 28px;" text="🤖" />
+                                        <VBox>
+                                            <children>
+                                                <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #06E0F0;" text="IA Recommandations Avancées" />
+                                                <Label style="-fx-font-size: 12px; -fx-text-fill: #7F8C8D;" text="Analyses prédictives et recommandations personnalisées" />
+                                            </children>
+                                        </VBox>
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <ProgressIndicator fx:id="iaLoadingIndicator" prefWidth="30" prefHeight="30" visible="false"/>
+                                        <Button fx:id="btnGenererPlanIA" style="-fx-background-color: #06E0F0; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 10 25; -fx-cursor: hand;" text="🔄 Nouvelle analyse IA">
+                                            <tooltip>
+                                                <Tooltip text="Générer un nouveau plan personnalisé avec l'IA" />
+                                            </tooltip>
+                                        </Button>
+                                    </children>
+                                </HBox>
+
+                                <!-- Conteneur des recommandations IA (rempli dynamiquement) -->
+                                <VBox fx:id="iaRecommandationsBox" spacing="15.0">
+                                    <!-- Le contenu sera généré dynamiquement par le contrôleur -->
+                                </VBox>
+
+                                <!-- Mini statistiques pour l'IA -->
+                                <HBox spacing="20.0" alignment="CENTER" style="-fx-background-color: #F8F9F9; -fx-background-radius: 15; -fx-padding: 15;">
+                                    <children>
+                                        <VBox alignment="CENTER" spacing="5.0" HBox.hgrow="ALWAYS">
+                                            <Label style="-fx-font-size: 12px; -fx-text-fill: #7F8C8D;" text="Analyse globale" />
+                                            <Label fx:id="analyseGlobaleMessage" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Chargement..." wrapText="true" alignment="CENTER" />
+                                        </VBox>
+                                        <VBox alignment="CENTER" spacing="5.0" HBox.hgrow="ALWAYS">
+                                            <Label style="-fx-font-size: 12px; -fx-text-fill: #7F8C8D;" text="Temps total" />
+                                            <Label fx:id="totalHeuresLabel" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #3498DB;" text="0h" />
+                                        </VBox>
+                                        <VBox alignment="CENTER" spacing="5.0" HBox.hgrow="ALWAYS">
+                                            <Label style="-fx-font-size: 12px; -fx-text-fill: #7F8C8D;" text="Régularité" />
+                                            <Label fx:id="regulariteLabel" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #27AE60;" text="0%" />
+                                        </VBox>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+
                         <!-- Ligne 2: Graphiques -->
                         <HBox alignment="CENTER" spacing="20.0">
                             <children>
@@ -139,13 +190,15 @@
                                 <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;" HBox.hgrow="ALWAYS">
                                     <children>
                                         <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #27AE60;" text="🌍 Objectifs de Développement Durable" />
-                                        <TextArea fx:id="oddRapportArea" editable="false" prefRowCount="6" style="-fx-background-color: #F8F9F9; -fx-background-radius: 8; -fx-border-color: #e9ecef; -fx-border-radius: 8;" wrapText="true" />
+                                        <TextArea fx:id="oddRapportArea" editable="false" prefRowCount="8" style="-fx-background-color: #F8F9F9; -fx-background-radius: 8; -fx-border-color: #e9ecef; -fx-border-radius: 8;" wrapText="true" />
                                     </children>
                                 </VBox>
                                 <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;" HBox.hgrow="ALWAYS">
                                     <children>
                                         <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2980B9;" text="💡 Recommandations personnalisées" />
-                                        <VBox fx:id="recommandationsBox" spacing="15.0" />
+                                        <VBox fx:id="recommandationsBox" spacing="15.0" prefHeight="200.0">
+                                            <!-- Rempli dynamiquement -->
+                                        </VBox>
                                     </children>
                                 </VBox>
                             </children>
@@ -155,7 +208,9 @@
                         <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;">
                             <children>
                                 <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="🕒 Historique récent" />
-                                <VBox fx:id="recentHistoryBox" spacing="10.0" />
+                                <VBox fx:id="recentHistoryBox" spacing="10.0" prefHeight="150.0">
+                                    <!-- Rempli dynamiquement -->
+                                </VBox>
                                 <HBox alignment="CENTER_RIGHT" spacing="15.0">
                                     <children>
                                         <Button fx:id="btnVoirHistorique" mnemonicParsing="false" onAction="#handleVoirHistorique" style="-fx-background-color: #3498DB; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 25; -fx-cursor: hand;" text="Voir tout l'historique →" />
@@ -164,6 +219,13 @@
                                 </HBox>
                             </children>
                         </VBox>
+
+                        <!-- Bouton Export PDF -->
+                        <HBox alignment="CENTER" spacing="15.0">
+                            <children>
+                                <Button mnemonicParsing="false" onAction="#handleExporterPDF" style="-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 10 30; -fx-cursor: hand;" text="📄 Exporter en PDF" />
+                            </children>
+                        </HBox>
                     </children>
                     <padding>
                         <Insets bottom="30.0" left="30.0" right="30.0" top="10.0" />

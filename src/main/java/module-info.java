@@ -11,6 +11,9 @@ module org.mindtrack.mindtrackfxx {
     requires java.desktop;
     requires java.net.http;
 
+    // OpenCV for facial emotion detection
+    requires opencv;
+
     // Open packages to FXML reflection
     opens org.mindtrack.mindtrackfxx.controller to javafx.fxml;
     opens org.mindtrack.mindtrackfxx to javafx.fxml;

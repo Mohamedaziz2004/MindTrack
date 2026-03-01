@@ -243,6 +243,19 @@ public final class IconFactory {
         return p;
     }
 
+    /** Camera/Emotion — smiley face for emotion detection */
+    public static SVGPath emotionIcon() {
+        SVGPath p = new SVGPath();
+        p.setContent(
+            "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z "
+          + "M8 14s1.5 2 4 2 4-2 4-2 "
+          + "M9 9h.01 "
+          + "M15 9h.01"
+        );
+        style(p);
+        return p;
+    }
+
     public static SVGPath getIcon(String name) {
         switch (name.toLowerCase()) {
             case "journal":      return journalIcon();
@@ -265,6 +278,8 @@ public final class IconFactory {
             case "microphone":   return microphoneIcon();
             case "audio":        return microphoneIcon();
             case "transcription": return microphoneIcon();
+            case "emotion":      return emotionIcon();
+            case "camera":       return emotionIcon();
             default:             return journalIcon();
         }
     }

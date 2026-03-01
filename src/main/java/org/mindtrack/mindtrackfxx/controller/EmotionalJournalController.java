@@ -62,6 +62,7 @@ public class EmotionalJournalController {
     @FXML private Slider intensitySlider;
     @FXML private Label intensityValueLabel;
     @FXML private Button saveMoodButton;
+    @FXML private Button detectEmotionButton;  // NEW: Emotion detection button
 
     // Containers
     @FXML private FlowPane entriesContainer;
@@ -131,6 +132,9 @@ public class EmotionalJournalController {
     private final humeurService moodService = new humeurService();
     private final JournalAnalysisService analysisService = new JournalAnalysisService("sjoytIf9F6XMw9if9WPo4NprzzZqgStRBjyhmOhq");
     private final TranslationService translationService = new TranslationService();
+    private final services.EmotionDetectionService emotionDetectionService = new services.EmotionDetectionService();
+    private final services.PythonEmotionDetectionService pythonEmotionService = new services.PythonEmotionDetectionService();
+    private final services.SpeechToTextService speechToTextService = new services.SpeechToTextService();
 
     // ========================================
     // STATE
@@ -1311,6 +1315,309 @@ public class EmotionalJournalController {
         renderRecentEntries();
 
         showSuccess("Mood saved successfully! (" + mood + " - Intensity: " + intensity + ")");
+    }
+
+    /**
+     * Open camera and detect emotion from facial expression
+     */
+    @FXML
+    public void onDetectEmotion() {
+        // Create emotion detection dialog
+        Stage emotionStage = new Stage();
+        emotionStage.initModality(Modality.APPLICATION_MODAL);
+        emotionStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
+
+        VBox root = new VBox(18);
+        root.setPadding(new Insets(24));
+        root.setStyle("-fx-background-color: #0f172a; -fx-background-image: none; -fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 0 0 3 0;");
+
+        // Header
+        Label titleLabel = new Label("Emotion Detection");
+        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: 700; -fx-text-fill: #22d3ee;");
+
+        Label instructionLabel = new Label("Look at the camera and wait for emotion detection...");
+        instructionLabel.setStyle("-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 13px;");
+
+        // Camera preview
+        javafx.scene.image.ImageView cameraView = new javafx.scene.image.ImageView();
+        cameraView.setFitWidth(640);
+        cameraView.setFitHeight(480);
+        cameraView.setPreserveRatio(true);
+        cameraView.setStyle("-fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 2; -fx-border-radius: 8;");
+
+        // Emotion result labels
+        Label detectedEmotionLabel = new Label("Detected Emotion: Analyzing...");
+        detectedEmotionLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: 600; -fx-text-fill: #22d3ee;");
+
+        Label intensityLabel = new Label("Intensity: --");
+        intensityLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.85);");
+
+        Label confidenceLabel = new Label("Confidence: --");
+        confidenceLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.85);");
+
+        VBox resultsBox = new VBox(8);
+        resultsBox.getChildren().addAll(detectedEmotionLabel, intensityLabel, confidenceLabel);
+
+        // Buttons
+        HBox buttons = new HBox(12);
+        buttons.setAlignment(Pos.CENTER_RIGHT);
+
+        Button detectButton = new Button("Capture & Analyze");
+        detectButton.setStyle("-fx-padding: 10 20; -fx-font-size: 13px; -fx-background-color: #22d3ee; -fx-text-fill: #0f172a; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: 600;");
+
+        Button saveButton = new Button("Save to Mood");
+        saveButton.setStyle("-fx-padding: 10 20; -fx-font-size: 13px; -fx-background-color: rgba(34,211,238,0.15); -fx-text-fill: #22d3ee; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: 600; -fx-border-color: #22d3ee; -fx-border-width: 1.5; -fx-border-radius: 8;");
+        saveButton.setDisable(true);
+
+        Button closeButton = new Button("Close");
+        closeButton.setStyle("-fx-padding: 10 20; -fx-font-size: 13px; -fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: rgba(255,255,255,0.6); -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: 500;");
+
+        buttons.getChildren().addAll(detectButton, saveButton, closeButton);
+
+        root.getChildren().addAll(
+            createDialogTopBar(emotionStage),
+            titleLabel,
+            instructionLabel,
+            cameraView,
+            resultsBox,
+            buttons
+        );
+
+        ScrollPane scrollPane = new ScrollPane(root);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background-color: #0f172a; -fx-padding: 0;");
+
+        Scene scene = new Scene(scrollPane, 700, 850);
+        scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
+        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
+
+        emotionStage.setScene(scene);
+
+        // Initialize emotion detection in background
+        final services.EmotionDetectionService.EmotionResult[] detectedEmotion = {null};
+
+        javafx.animation.AnimationTimer cameraTimer = new javafx.animation.AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                if (emotionDetectionService.isInitialized()) {
+                    org.opencv.core.Mat frame = emotionDetectionService.captureFrame();
+                    if (frame != null) {
+                        javafx.scene.image.Image image = emotionDetectionService.matToImage(frame);
+                        if (image != null) {
+                            cameraView.setImage(image);
+                        }
+                    }
+                }
+            }
+        };
+
+        // Initialize camera on stage show
+        emotionStage.setOnShown(e -> {
+            new Thread(() -> {
+                boolean initialized = emotionDetectionService.initialize();
+                if (initialized) {
+                    javafx.application.Platform.runLater(() -> {
+                        instructionLabel.setText("Camera ready! Click 'Capture & Analyze' to detect your emotion.");
+                        cameraTimer.start();
+                    });
+                } else {
+                    javafx.application.Platform.runLater(() -> {
+                        instructionLabel.setText("❌ Failed to initialize camera. Please check camera permissions.");
+                        instructionLabel.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 13px;");
+                    });
+                }
+            }).start();
+        });
+
+        // Detect button action
+        detectButton.setOnAction(ev -> {
+            detectButton.setDisable(true);
+            detectButton.setText("Analyzing...");
+
+            // Show progress to user
+            javafx.application.Platform.runLater(() -> {
+                detectedEmotionLabel.setText("🔍 Capturing and analyzing...");
+                detectedEmotionLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: 600; -fx-text-fill: #22d3ee;");
+            });
+
+            // Use a separate thread with timeout
+            Thread analysisThread = new Thread(() -> {
+                try {
+                    long startTime = System.currentTimeMillis();
+                    System.out.println("Starting emotion analysis with Python DeepFace...");
+
+                    // Capture frame from camera
+                    org.opencv.core.Mat frame = emotionDetectionService.captureFrame();
+
+                    if (frame == null || frame.empty()) {
+                        javafx.application.Platform.runLater(() -> {
+                            detectedEmotionLabel.setText("❌ Failed to capture frame from camera");
+                            detectedEmotionLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: 600; -fx-text-fill: #ef4444;");
+                            detectButton.setDisable(false);
+                            detectButton.setText("Capture & Analyze");
+                        });
+                        return;
+                    }
+
+                    // Save frame to temporary file for Python script
+                    String tempImagePath = "temp_emotion_capture.jpg";
+                    org.opencv.imgcodecs.Imgcodecs.imwrite(tempImagePath, frame);
+                    System.out.println("Frame saved to: " + tempImagePath);
+
+                    // Use Python DeepFace for accurate emotion detection
+                    System.out.println("Analyzing emotion with Python DeepFace...");
+                    services.PythonEmotionDetectionService.EmotionResult pythonResult =
+                        pythonEmotionService.detectEmotion(tempImagePath);
+
+                    long endTime = System.currentTimeMillis();
+                    System.out.println("Emotion analysis completed in " + (endTime - startTime) + "ms");
+
+                    // Clean up temp file
+                    try {
+                        new java.io.File(tempImagePath).delete();
+                    } catch (Exception e) {
+                        // Ignore cleanup errors
+                    }
+
+                    javafx.application.Platform.runLater(() -> {
+                        // Map Python result to EmotionDetectionService.EmotionResult format
+                        services.EmotionDetectionService.EmotionResult result =
+                            new services.EmotionDetectionService.EmotionResult(
+                                pythonResult.emotion,
+                                pythonResult.intensity,
+                                pythonResult.confidence,
+                                pythonResult.faceDetected
+                            );
+
+                        detectedEmotion[0] = result;
+
+                        if (pythonResult.success && pythonResult.faceDetected) {
+                            detectedEmotionLabel.setText("Detected Emotion: " + pythonResult.emotion.toUpperCase());
+                            intensityLabel.setText(String.format("Intensity: %d/10", pythonResult.intensity));
+                            confidenceLabel.setText(String.format("Confidence: %.1f%%", pythonResult.confidence * 100));
+
+                            // Enable save button
+                            saveButton.setDisable(false);
+
+                            // Update mood selection to match detected emotion
+                            selectMoodByEmotion(pythonResult.emotion);
+                            if (intensitySlider != null) {
+                                intensitySlider.setValue(pythonResult.intensity);
+                            }
+
+                            System.out.println("✓ Emotion detected: " + pythonResult.emotion +
+                                             " (intensity: " + pythonResult.intensity +
+                                             ", confidence: " + String.format("%.1f%%", pythonResult.confidence * 100) + ")");
+                        } else {
+                            detectedEmotionLabel.setText("❌ No face detected. Please look directly at the camera.");
+                            detectedEmotionLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: 600; -fx-text-fill: #ef4444;");
+                            intensityLabel.setText("Tip: Ensure good lighting and face the camera");
+                            confidenceLabel.setText(pythonResult.error != null ? "Error: " + pythonResult.error : "");
+                        }
+
+                        detectButton.setDisable(false);
+                        detectButton.setText("Capture & Analyze");
+                    });
+
+                } catch (Exception e) {
+                    System.err.println("❌ Error during emotion analysis: " + e.getMessage());
+                    e.printStackTrace();
+
+                    javafx.application.Platform.runLater(() -> {
+                        detectedEmotionLabel.setText("❌ Error analyzing emotion: " + e.getMessage());
+                        detectedEmotionLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #ef4444;");
+                        detectButton.setDisable(false);
+                        detectButton.setText("Capture & Analyze");
+                    });
+                }
+            });
+
+            analysisThread.setDaemon(true); // Don't block JVM shutdown
+            analysisThread.start();
+
+            // Timeout protection (10 seconds)
+            new Thread(() -> {
+                try {
+                    Thread.sleep(10000); // Wait 10 seconds
+                    if (analysisThread.isAlive()) {
+                        System.err.println("⚠ Emotion analysis timed out after 10 seconds");
+                        analysisThread.interrupt();
+
+                        javafx.application.Platform.runLater(() -> {
+                            detectedEmotionLabel.setText("⏱ Analysis timed out. Please try again.");
+                            detectedEmotionLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: 600; -fx-text-fill: #f59e0b;");
+                            detectButton.setDisable(false);
+                            detectButton.setText("Capture & Analyze");
+                        });
+                    }
+                } catch (InterruptedException e) {
+                    // Timeout thread was interrupted, analysis completed in time
+                }
+            }).start();
+        });
+
+        // Save button action
+        saveButton.setOnAction(ev -> {
+            if (detectedEmotion[0] != null) {
+                String mood = detectedEmotion[0].emotion;
+                int intensity = detectedEmotion[0].intensity;
+
+                // Save mood to database
+                humeur h = new humeur(LocalDate.now(), mood, intensity, 1);
+                moodService.create(h);
+
+                // Stop camera and close
+                cameraTimer.stop();
+                emotionDetectionService.release();
+                emotionStage.close();
+
+                // Refresh display
+                renderRecentEntries();
+
+                showSuccess(String.format("Emotion saved! %s (Intensity: %d/10)",
+                    mood.toUpperCase(), intensity));
+            }
+        });
+
+        // Close button action
+        closeButton.setOnAction(ev -> {
+            cameraTimer.stop();
+            emotionDetectionService.release();
+            emotionStage.close();
+        });
+
+        // Cleanup on window close
+        emotionStage.setOnHidden(ev -> {
+            cameraTimer.stop();
+            emotionDetectionService.release();
+        });
+
+        emotionStage.show();
+    }
+
+    /**
+     * Select mood radio button based on detected emotion
+     */
+    private void selectMoodByEmotion(String emotion) {
+        if (emotion == null) return;
+
+        switch (emotion.toLowerCase()) {
+            case "happy":
+                if (moodHappy != null) moodHappy.setSelected(true);
+                break;
+            case "calm":
+                if (moodCalm != null) moodCalm.setSelected(true);
+                break;
+            case "sad":
+                if (moodSad != null) moodSad.setSelected(true);
+                break;
+            case "anxious":
+                if (moodAnxious != null) moodAnxious.setSelected(true);
+                break;
+            default:
+                if (moodNeutral != null) moodNeutral.setSelected(true);
+                break;
+        }
     }
 
     private String selectedMood() {

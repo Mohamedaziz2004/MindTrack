@@ -305,6 +305,14 @@
                                     </HBox>
                                 </graphic>
                             </Button>
+                            <Button fx:id="detectEmotionButton" onAction="#onDetectEmotion" styleClass="btn, btn-ai" HBox.hgrow="ALWAYS">
+                                <graphic>
+                                    <HBox spacing="6" alignment="CENTER">
+                                        <SVGPath fill="transparent" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M8 14s1.5 2 4 2 4-2 4-2 M9 9h.01 M15 9h.01" scaleX="0.6" scaleY="0.6"/>
+                                        <Label text="Detect Emotion" styleClass="btn-label" style="-fx-text-fill: #ffffff;"/>
+                                    </HBox>
+                                </graphic>
+                            </Button>
                             <Button fx:id="statisticsButton" onAction="#onShowStatistics" styleClass="btn, btn-stats">
                                 <graphic>
                                     <HBox spacing="6" alignment="CENTER">

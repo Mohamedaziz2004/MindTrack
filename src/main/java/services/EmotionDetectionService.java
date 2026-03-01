@@ -55,19 +55,54 @@ public class EmotionDetectionService {
             // Load face detector (Haar Cascade)
             faceDetector = new CascadeClassifier();
 
-            // Try to load from OpenCV data (embedded in the library)
-            String cascadePath = getClass().getClassLoader()
-                .getResource("haarcascade_frontalface_default.xml") != null
-                ? getClass().getClassLoader().getResource("haarcascade_frontalface_default.xml").getPath()
-                : "haarcascade_frontalface_default.xml";
+            // Extract Haar Cascade XML from resources to temp file
+            // Use ResourceLoader from main module for better module compatibility
+            java.io.InputStream cascadeStream = org.mindtrack.mindtrackfxx.util.ResourceLoader
+                .getResourceAsStream("opencv/data/haarcascade_frontalface_default.xml");
 
-            // If not found, use OpenCV's built-in data
-            if (!faceDetector.load(cascadePath)) {
-                // Try alternative path (OpenCV bundled)
-                cascadePath = Core.getBuildInformation();
-                System.err.println("⚠ Could not load face detector from resource, using fallback");
-                // We'll use a simplified detection approach
+            if (cascadeStream == null) {
+                System.err.println("❌ Could not find haarcascade_frontalface_default.xml in resources");
+                System.err.println("   Resource path: opencv/data/haarcascade_frontalface_default.xml");
+
+                // Debug: Try to list available resources
+                System.err.println("   Debug: Attempting alternative loading methods...");
+
+                // Last resort: try direct file system path (development only)
+                String devPath = "src/main/resources/opencv/data/haarcascade_frontalface_default.xml";
+                java.io.File devFile = new java.io.File(devPath);
+                if (devFile.exists()) {
+                    System.out.println("   Found file in development path: " + devPath);
+                    cascadeStream = new java.io.FileInputStream(devFile);
+                } else {
+                    return false;
+                }
             }
+
+            System.out.println("✓ Haar Cascade XML loaded from resources");
+
+            // Create temporary file
+            java.io.File cascadeFile = java.io.File.createTempFile("haarcascade_frontalface", ".xml");
+            cascadeFile.deleteOnExit();
+
+            // Write stream to temp file
+            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(cascadeFile)) {
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = cascadeStream.read(buffer)) != -1) {
+                    fos.write(buffer, 0, bytesRead);
+                }
+            }
+            cascadeStream.close();
+
+            // Load classifier from temp file
+            boolean loaded = faceDetector.load(cascadeFile.getAbsolutePath());
+
+            if (!loaded) {
+                System.err.println("❌ Failed to load Haar Cascade classifier");
+                return false;
+            }
+
+            System.out.println("✓ Face detector loaded successfully");
 
             // Initialize camera
             camera = new VideoCapture(0); // 0 = default camera
@@ -96,27 +131,62 @@ public class EmotionDetectionService {
      * Capture a frame from the camera
      */
     public Mat captureFrame() {
-        if (!isInitialized || camera == null || !camera.isOpened()) {
+        try {
+            if (!isInitialized || camera == null || !camera.isOpened()) {
+                return null;
+            }
+
+            Mat frame = new Mat();
+            if (camera.read(frame) && !frame.empty()) {
+                return frame;
+            }
+            return null;
+        } catch (Exception e) {
             return null;
         }
-
-        Mat frame = new Mat();
-        if (camera.read(frame)) {
-            return frame;
-        }
-        return null;
     }
 
     /**
-     * Convert OpenCV Mat to JavaFX Image
+     * Convert OpenCV Mat to JavaFX Image using WritableImage for direct pixel access
      */
     public Image matToImage(Mat mat) {
         try {
-            MatOfByte buffer = new MatOfByte();
-            org.opencv.imgcodecs.Imgcodecs.imencode(".png", mat, buffer);
-            return new Image(new ByteArrayInputStream(buffer.toArray()));
+            if (mat == null || mat.empty()) {
+                return null;
+            }
+
+            int width = mat.cols();
+            int height = mat.rows();
+
+            if (width == 0 || height == 0) {
+                return null;
+            }
+
+            // Create WritableImage with RGB color format
+            WritableImage image = new WritableImage(width, height);
+            PixelWriter pw = image.getPixelWriter();
+
+            // Get pixel data from Mat
+            byte[] data = new byte[width * height * 3];
+            mat.get(0, 0, data);
+
+            // OpenCV uses BGR format, JavaFX uses ARGB
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int idx = (y * width + x) * 3;
+
+                    int b = data[idx] & 0xFF;      // Blue
+                    int g = data[idx + 1] & 0xFF;  // Green
+                    int r = data[idx + 2] & 0xFF;  // Red
+
+                    // Convert BGR to ARGB
+                    int argb = (0xFF << 24) | (r << 16) | (g << 8) | b;
+                    pw.setArgb(x, y, argb);
+                }
+            }
+
+            return image;
         } catch (Exception e) {
-            System.err.println("Error converting Mat to Image: " + e.getMessage());
             return null;
         }
     }
@@ -125,18 +195,46 @@ public class EmotionDetectionService {
      * Detect faces in the frame
      */
     public Rect[] detectFaces(Mat frame) {
-        Mat grayFrame = new Mat();
-        Imgproc.cvtColor(frame, grayFrame, Imgproc.COLOR_BGR2GRAY);
-        Imgproc.equalizeHist(grayFrame, grayFrame);
+        try {
+            long startTime = System.currentTimeMillis();
 
-        MatOfRect faces = new MatOfRect();
+            // Check if frame is valid
+            if (frame == null || frame.empty()) {
+                System.err.println("⚠ Invalid frame for face detection");
+                return new Rect[0];
+            }
 
-        if (faceDetector != null && !faceDetector.empty()) {
-            faceDetector.detectMultiScale(grayFrame, faces, 1.1, 3,
-                0, new Size(30, 30), new Size());
+            Mat grayFrame = new Mat();
+            Imgproc.cvtColor(frame, grayFrame, Imgproc.COLOR_BGR2GRAY);
+            Imgproc.equalizeHist(grayFrame, grayFrame);
+
+            MatOfRect faces = new MatOfRect();
+
+            if (faceDetector != null && !faceDetector.empty()) {
+                // Optimized parameters for faster detection:
+                // - scaleFactor: 1.3 (larger = faster but less accurate)
+                // - minNeighbors: 2 (lower = faster but more false positives)
+                // - minSize: 80x80 (larger = faster, skip small faces)
+                faceDetector.detectMultiScale(
+                    grayFrame,
+                    faces,
+                    1.3,                    // Scale factor (was 1.1, now 1.3 for speed)
+                    2,                      // Min neighbors (was 3, now 2 for speed)
+                    0,
+                    new Size(80, 80),       // Min size (was 30x30, now 80x80 for speed)
+                    new Size()
+                );
+            }
+
+            long endTime = System.currentTimeMillis();
+            System.out.println("Face detection took: " + (endTime - startTime) + "ms, found " + faces.toArray().length + " face(s)");
+
+            return faces.toArray();
+        } catch (Exception e) {
+            System.err.println("❌ Error in face detection: " + e.getMessage());
+            e.printStackTrace();
+            return new Rect[0];
         }
-
-        return faces.toArray();
     }
 
     /**
@@ -144,25 +242,43 @@ public class EmotionDetectionService {
      * This is a simplified version - in production, you'd use a trained ML model
      */
     public EmotionResult analyzeEmotion(Mat frame) {
-        Rect[] faces = detectFaces(frame);
+        try {
+            long startTime = System.currentTimeMillis();
 
-        if (faces.length == 0) {
+            // Detect faces
+            System.out.println("Detecting faces...");
+            Rect[] faces = detectFaces(frame);
+
+            if (faces.length == 0) {
+                System.out.println("⚠ No faces detected in frame");
+                return new EmotionResult("neutral", 5, 0.0, false);
+            }
+
+            System.out.println("✓ Face detected, analyzing features...");
+
+            // Get the first detected face
+            Rect faceRect = faces[0];
+            Mat face = new Mat(frame, faceRect);
+
+            // Analyze facial features
+            EmotionAnalysis analysis = analyzeFacialFeatures(face);
+
+            // Determine emotion based on analysis
+            String emotion = determineEmotion(analysis);
+            int intensity = calculateIntensity(analysis);
+            double confidence = analysis.confidence;
+
+            long endTime = System.currentTimeMillis();
+            System.out.println("✓ Emotion analysis completed in " + (endTime - startTime) + "ms");
+            System.out.println("  Result: " + emotion + " (intensity: " + intensity + ", confidence: " + String.format("%.1f%%", confidence * 100) + ")");
+
+            return new EmotionResult(emotion, intensity, confidence, true);
+
+        } catch (Exception e) {
+            System.err.println("❌ Error in analyzeEmotion: " + e.getMessage());
+            e.printStackTrace();
             return new EmotionResult("neutral", 5, 0.0, false);
         }
-
-        // Get the first detected face
-        Rect faceRect = faces[0];
-        Mat face = new Mat(frame, faceRect);
-
-        // Analyze facial features
-        EmotionAnalysis analysis = analyzeFacialFeatures(face);
-
-        // Determine emotion based on analysis
-        String emotion = determineEmotion(analysis);
-        int intensity = calculateIntensity(analysis);
-        double confidence = analysis.confidence;
-
-        return new EmotionResult(emotion, intensity, confidence, true);
     }
 
     /**
@@ -179,8 +295,8 @@ public class EmotionDetectionService {
         double brightness = meanBrightness.val[0];
 
         // Calculate contrast (can indicate facial muscle activity)
-        Mat stdDev = new Mat();
-        Mat mean = new Mat();
+        MatOfDouble stdDev = new MatOfDouble();
+        MatOfDouble mean = new MatOfDouble();
         Core.meanStdDev(gray, mean, stdDev);
         double contrast = stdDev.get(0, 0)[0];
 
@@ -197,8 +313,8 @@ public class EmotionDetectionService {
      * Calculate image variance (measure of facial feature intensity)
      */
     private double calculateVariance(Mat image) {
-        Mat mean = new Mat();
-        Mat stdDev = new Mat();
+        MatOfDouble mean = new MatOfDouble();
+        MatOfDouble stdDev = new MatOfDouble();
         Core.meanStdDev(image, mean, stdDev);
         double variance = Math.pow(stdDev.get(0, 0)[0], 2);
         return Math.min(variance / 10000.0, 1.0); // Normalize
@@ -304,4 +420,5 @@ public class EmotionDetectionService {
         }
     }
 }
+
 

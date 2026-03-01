@@ -218,25 +218,54 @@ public final class IconFactory {
     //  DISPATCHER
     // ──────────────────────────────────────────────
 
+    /** Globe / Languages — globe with meridians for translation */
+    public static SVGPath translateIcon() {
+        SVGPath p = new SVGPath();
+        p.setContent(
+            "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z "
+          + "M2 12h20 "
+          + "M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+        );
+        style(p);
+        return p;
+    }
+
+    /** Microphone — classic mic icon for audio/transcription */
+    public static SVGPath microphoneIcon() {
+        SVGPath p = new SVGPath();
+        p.setContent(
+            "M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z "
+          + "M19 10v2a7 7 0 0 1-14 0v-2 "
+          + "M12 19v4 "
+          + "M8 23h8"
+        );
+        style(p);
+        return p;
+    }
+
     public static SVGPath getIcon(String name) {
         switch (name.toLowerCase()) {
-            case "journal":    return journalIcon();
-            case "goals":      return goalIcon();
-            case "exercise":   return exerciseIcon();
-            case "habits":     return habitsIcon();
-            case "profile":    return profileIcon();
-            case "statistics": return statisticsIcon();
-            case "admin":      return adminIcon();
-            case "settings":   return settingsIcon();
-            case "logout":     return logoutIcon();
-            case "edit":       return editIcon();
-            case "delete":     return deleteIcon();
-            case "read more":  return readMoreIcon();
-            case "save":       return saveIcon();
-            case "analyse":    return analyseIcon();
-            case "sort":       return sortIcon();
-            case "search":     return searchIcon();
-            default:           return journalIcon();
+            case "journal":      return journalIcon();
+            case "goals":        return goalIcon();
+            case "exercise":     return exerciseIcon();
+            case "habits":       return habitsIcon();
+            case "profile":      return profileIcon();
+            case "statistics":   return statisticsIcon();
+            case "admin":        return adminIcon();
+            case "settings":     return settingsIcon();
+            case "logout":       return logoutIcon();
+            case "edit":         return editIcon();
+            case "delete":       return deleteIcon();
+            case "read more":    return readMoreIcon();
+            case "save":         return saveIcon();
+            case "analyse":      return analyseIcon();
+            case "translate":    return translateIcon();
+            case "sort":         return sortIcon();
+            case "search":       return searchIcon();
+            case "microphone":   return microphoneIcon();
+            case "audio":        return microphoneIcon();
+            case "transcription": return microphoneIcon();
+            default:             return journalIcon();
         }
     }
 

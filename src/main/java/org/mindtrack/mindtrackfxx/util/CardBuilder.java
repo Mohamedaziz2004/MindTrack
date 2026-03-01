@@ -149,14 +149,25 @@ public final class CardBuilder {
         header.setAlignment(Pos.CENTER_LEFT);
 
         // Load emoji image for the mood
-        ImageView emojiIcon = DialogUtils.loadEmoji(EmotionUtils.getMoodEmojiFile(mood.getTypeHumeur()), 36);
-        if (emojiIcon != null) {
+        try {
+            String emojiFile = mood.getTypeHumeur().toLowerCase() + ".png";
+            javafx.scene.image.Image emojiImage = new javafx.scene.image.Image(
+                CardBuilder.class.getResourceAsStream("/org/mindtrack/mindtrackfxx/emojis/" + emojiFile)
+            );
+            ImageView emojiIcon = new ImageView(emojiImage);
+            emojiIcon.setFitWidth(36);
+            emojiIcon.setFitHeight(36);
+            emojiIcon.setPreserveRatio(true);
             header.getChildren().add(emojiIcon);
+        } catch (Exception e) {
+            // If emoji not found, continue without it
         }
 
         VBox moodInfo = new VBox(2);
         Label moodType = new Label(mood.getTypeHumeur());
-        moodType.getStyleClass().addAll("badge", EmotionUtils.getBadgeClass(mood.getTypeHumeur()));
+        // Get badge class based on mood type
+        String badgeClass = "badge-" + mood.getTypeHumeur().toLowerCase().replace(" ", "-");
+        moodType.getStyleClass().addAll("badge", badgeClass);
 
         Label dateLabel = new Label(mood.getDate().format(CARD_DATE_FORMATTER));
         dateLabel.getStyleClass().add("small-muted");

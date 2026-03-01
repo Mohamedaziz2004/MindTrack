@@ -19,8 +19,6 @@ module org.mindtrack.mindtrackfxx {
     exports org.mindtrack.mindtrackfxx;
     exports org.mindtrack.mindtrackfxx.controller;
     exports org.mindtrack.mindtrackfxx.util;
-    exports org.mindtrack.mindtrackfxx.model;
-    exports org.mindtrack.mindtrackfxx.service;
 
     // Entity and service packages
     exports entities;

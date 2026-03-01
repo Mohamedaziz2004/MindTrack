@@ -23,6 +23,7 @@ import org.mindtrack.mindtrackfxx.util.*;
 import services.JournalService;
 import services.humeurService;
 import services.JournalAnalysisService;
+import services.TranslationService;
 
 import javax.sound.sampled.*;
 import java.io.*;
@@ -46,6 +47,7 @@ public class EmotionalJournalController {
     // Journal Section
     @FXML private TextArea entryTextArea;
     @FXML private Button saveEntryButton;
+    @FXML private Button translateButton;
     @FXML private Button recordAudioButton;
 
     @FXML private Label currentDateTimeLabel;
@@ -128,6 +130,7 @@ public class EmotionalJournalController {
     private final JournalService journalService = new JournalService();
     private final humeurService moodService = new humeurService();
     private final JournalAnalysisService analysisService = new JournalAnalysisService("sjoytIf9F6XMw9if9WPo4NprzzZqgStRBjyhmOhq");
+    private final TranslationService translationService = new TranslationService();
 
     // ========================================
     // STATE
@@ -180,6 +183,14 @@ public class EmotionalJournalController {
         if (saveMoodButton != null) {
             javafx.scene.shape.SVGPath saveIcon = org.mindtrack.mindtrackfxx.util.IconFactory.saveIcon();
             saveMoodButton.setGraphic(saveIcon);
+        }
+
+        // Set Record Audio button styling and text
+        if (recordAudioButton != null) {
+            recordAudioButton.setText("Audio Transcription");
+            recordAudioButton.getStyleClass().addAll("btn", "btn-gray");
+            javafx.scene.shape.SVGPath micIcon = org.mindtrack.mindtrackfxx.util.IconFactory.microphoneIcon();
+            recordAudioButton.setGraphic(micIcon);
         }
     }
 
@@ -273,7 +284,7 @@ public class EmotionalJournalController {
                     }
                 });
                 recordingThread.start();
-                recordAudioButton.setText("Stop Recording");
+                recordAudioButton.setText("⏹ Stop Recording");
             } catch (Exception ex) {
                 showAlert("Could not start recording: " + ex.getMessage());
             }
@@ -282,7 +293,7 @@ public class EmotionalJournalController {
             line.stop();
             line.close();
             line = null;
-            recordAudioButton.setText("Record Audio");
+            recordAudioButton.setText("🎤 Audio Transcription");
             showSuccess("Audio recorded and saved!");
 
             // Transcribe audio in background
@@ -329,15 +340,218 @@ public class EmotionalJournalController {
             return;
         }
 
+        // Translate text if needed
+        String translatedNote = note;
+        try {
+            TranslationService.TranslationResult result = translationService.processText(note);
+            translatedNote = result.translatedText;
+
+            if (result.wasTranslated) {
+                System.out.println("Original language: " + result.detectedLanguage);
+                System.out.println("Original text: " + result.originalText);
+                System.out.println("Translated text: " + result.translatedText);
+                showSuccess("Language detected: " + result.detectedLanguage.toUpperCase() + "\nText translated to English!");
+            }
+        } catch (Exception e) {
+            System.err.println("Translation error: " + e.getMessage());
+            // Continue with original text if translation fails
+            showWarning("Could not translate text. Saving original text.");
+        }
+
         if (editingEntry != null) {
-            updateExistingEntry(note);
+            updateExistingEntry(translatedNote);
         } else {
-            createNewEntry(note);
+            createNewEntry(translatedNote);
         }
 
         clearEntryForm();
         renderRecentEntries();
     }
+
+    /**
+     * Translate the journal note to English
+     */
+    @FXML
+    private void onTranslateNote() {
+        String note = getEntryText();
+
+        // Validate that note is not empty
+        if (note == null || note.trim().isEmpty()) {
+            showAlert("Please enter some text to translate.");
+            return;
+        }
+
+        // Show loading dialog
+        Stage loadingStage = new Stage();
+        loadingStage.initModality(Modality.APPLICATION_MODAL);
+        loadingStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
+
+        VBox loadingRoot = new VBox(20);
+        loadingRoot.setAlignment(Pos.CENTER);
+        loadingRoot.setPadding(new Insets(40));
+        loadingRoot.setStyle("-fx-background-color: #0f172a; -fx-background-image: none; -fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 0 0 3 0;");
+
+        Label loadingIcon = new Label("🔄");
+        loadingIcon.setStyle("-fx-font-size: 42px;");
+
+        Label loadingText = new Label("Translating your note...");
+        loadingText.setStyle("-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 13px;");
+
+        loadingRoot.getChildren().addAll(loadingIcon, loadingText);
+
+        Scene loadingScene = new Scene(loadingRoot, 300, 180);
+        loadingScene.setFill(javafx.scene.paint.Color.web("#0f172a"));
+        loadingScene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
+
+        loadingStage.setScene(loadingScene);
+        loadingStage.setResizable(false);
+        loadingStage.show();
+
+        // Translate in background thread
+        new Thread(() -> {
+            try {
+                TranslationService.TranslationResult result = translationService.processText(note);
+
+                javafx.application.Platform.runLater(() -> {
+                    loadingStage.close();
+
+                    // Show translation result
+                    if (result.wasTranslated) {
+                        // Show translation result in a dialog
+                        showTranslationResult(result);
+                    } else if ("en".equalsIgnoreCase(result.detectedLanguage)) {
+                        showSuccess("Note is already in English! No translation needed.");
+                    } else {
+                        showAlert("Translation failed. Original text will be saved.");
+                    }
+                });
+            } catch (Exception e) {
+                javafx.application.Platform.runLater(() -> {
+                    loadingStage.close();
+                    System.err.println("Translation error: " + e.getMessage());
+                    showAlert("Translation failed: " + e.getMessage());
+                });
+            }
+        }).start();
+    }
+
+    /**
+     * Show translation result in a dialog
+     */
+    private void showTranslationResult(TranslationService.TranslationResult result) {
+        Stage resultStage = new Stage();
+        resultStage.initModality(Modality.APPLICATION_MODAL);
+        resultStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
+
+        VBox root = new VBox(18);
+        root.setStyle("-fx-background-color: #0f172a; -fx-background-image: none; -fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 0 0 3 0;");
+        root.setPadding(new Insets(24));
+
+        // Header
+        Label titleLabel = new Label("Translation Complete");
+        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #f9fafb;");
+
+        String langName = getLanguageName(result.detectedLanguage);
+        Label langLabel = new Label("Translated from " + langName + " to English");
+        langLabel.setStyle("-fx-text-fill: #22d3ee; -fx-font-size: 14px; -fx-font-weight: 600;");
+
+        // Original text
+        Label originalTitle = new Label("Original Text (" + langName + "):");
+        originalTitle.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 12px; -fx-font-weight: 600;");
+
+        TextArea originalArea = new TextArea(result.originalText);
+        originalArea.setWrapText(true);
+        originalArea.setPrefRowCount(4);
+        originalArea.setEditable(false);
+        originalArea.setStyle("-fx-control-inner-background: #1e293b; -fx-text-fill: #f9fafb; -fx-padding: 8;");
+
+        // Translated text
+        Label translatedTitle = new Label("Translated Text (English):");
+        translatedTitle.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 12px; -fx-font-weight: 600;");
+
+        TextArea translatedArea = new TextArea(result.translatedText);
+        translatedArea.setWrapText(true);
+        translatedArea.setPrefRowCount(4);
+        translatedArea.setEditable(false);
+        translatedArea.setStyle("-fx-control-inner-background: #1e293b; -fx-text-fill: #f9fafb; -fx-padding: 8;");
+
+        // Buttons
+        HBox buttons = new HBox(12);
+        buttons.setAlignment(Pos.CENTER_RIGHT);
+
+        Button useTranslatedBtn = new Button("Use Translated Text");
+        useTranslatedBtn.setStyle("-fx-padding: 10 20; -fx-font-size: 13px; -fx-background-color: #22d3ee; -fx-text-fill: #0f172a; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: 600;");
+        useTranslatedBtn.setOnMouseEntered(e -> useTranslatedBtn.setStyle("-fx-padding: 10 20; -fx-font-size: 13px; -fx-background-color: #06b6d4; -fx-text-fill: #0f172a; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: 600;"));
+        useTranslatedBtn.setOnMouseExited(e -> useTranslatedBtn.setStyle("-fx-padding: 10 20; -fx-font-size: 13px; -fx-background-color: #22d3ee; -fx-text-fill: #0f172a; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: 600;"));
+        useTranslatedBtn.setOnAction(ev -> {
+            entryTextArea.setText(result.translatedText);
+            resultStage.close();
+            showSuccess("Translated text loaded!");
+        });
+
+        Button useOriginalBtn = new Button("Keep Original");
+        useOriginalBtn.setStyle("-fx-padding: 10 20; -fx-font-size: 13px; -fx-background-color: rgba(34,211,238,0.15); -fx-text-fill: #22d3ee; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: 600; -fx-border-color: #22d3ee; -fx-border-width: 1.5; -fx-border-radius: 8;");
+        useOriginalBtn.setOnMouseEntered(e -> useOriginalBtn.setStyle("-fx-padding: 10 20; -fx-font-size: 13px; -fx-background-color: rgba(34,211,238,0.25); -fx-text-fill: #22d3ee; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: 600; -fx-border-color: #22d3ee; -fx-border-width: 1.5; -fx-border-radius: 8;"));
+        useOriginalBtn.setOnMouseExited(e -> useOriginalBtn.setStyle("-fx-padding: 10 20; -fx-font-size: 13px; -fx-background-color: rgba(34,211,238,0.15); -fx-text-fill: #22d3ee; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: 600; -fx-border-color: #22d3ee; -fx-border-width: 1.5; -fx-border-radius: 8;"));
+        useOriginalBtn.setOnAction(ev -> resultStage.close());
+
+        Button closeBtn = new Button("Close");
+        closeBtn.setStyle("-fx-padding: 10 20; -fx-font-size: 13px; -fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: rgba(255,255,255,0.6); -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: 500;");
+        closeBtn.setOnMouseEntered(e -> closeBtn.setStyle("-fx-padding: 10 20; -fx-font-size: 13px; -fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: rgba(255,255,255,0.9); -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: 500;"));
+        closeBtn.setOnMouseExited(e -> closeBtn.setStyle("-fx-padding: 10 20; -fx-font-size: 13px; -fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: rgba(255,255,255,0.6); -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: 500;"));
+        closeBtn.setOnAction(ev -> resultStage.close());
+
+        buttons.getChildren().addAll(useTranslatedBtn, useOriginalBtn, closeBtn);
+
+        // Content box
+        VBox contentBox = new VBox(12);
+        contentBox.getChildren().addAll(
+                originalTitle, originalArea,
+                translatedTitle, translatedArea
+        );
+
+        root.getChildren().addAll(
+                createDialogTopBar(resultStage),
+                titleLabel,
+                langLabel,
+                contentBox,
+                buttons
+        );
+
+        ScrollPane scrollPane = new ScrollPane(root);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background-color: #0f172a; -fx-padding: 0;");
+
+        Scene scene = new Scene(scrollPane, 550, 650);
+        scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
+        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
+
+        resultStage.setScene(scene);
+        resultStage.show();
+    }
+
+    /**
+     * Helper method to get language name from code
+     */
+    private String getLanguageName(String langCode) {
+        switch (langCode.toLowerCase()) {
+            case "en": return "English";
+            case "ar": return "Arabic";
+            case "fr": return "French";
+            case "es": return "Spanish";
+            case "zh": return "Chinese";
+            case "ja": return "Japanese";
+            case "de": return "German";
+            case "it": return "Italian";
+            case "pt": return "Portuguese";
+            case "ru": return "Russian";
+            default: return "Unknown";
+        }
+    }
+
+    // ========================================
+    // JOURNAL ENTRY VALIDATION
+    // ========================================
 
     /**
      * Validates journal note content.
@@ -420,7 +634,7 @@ public class EmotionalJournalController {
         root.setPadding(new Insets(28));
         root.setAlignment(Pos.CENTER);
         root.setPrefWidth(420);
-        root.setStyle("-fx-background-color: #111827; -fx-border-color: rgba(239,68,68,0.3); -fx-border-width: 0 0 3 0;");
+        root.setStyle("-fx-background-color: #0f172a; -fx-background-image: none; -fx-border-color: rgba(239,68,68,0.3); -fx-border-width: 0 0 3 0;");
 
         Label iconLabel = new Label("⚠️");
         iconLabel.setStyle("-fx-font-size: 42px;");
@@ -444,7 +658,7 @@ public class EmotionalJournalController {
         root.getChildren().addAll(createDialogTopBar(errorStage), iconLabel, titleLabel, messageLabel, charCountLabel, okBtn);
 
         Scene scene = new Scene(root);
-        scene.setFill(javafx.scene.paint.Color.web("#111827"));
+        scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
         scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
         errorStage.setScene(scene);
@@ -523,7 +737,7 @@ public class EmotionalJournalController {
         optionsStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
 
         VBox root = new VBox(18);
-        root.setStyle("-fx-background-color: #111827; -fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 0 0 3 0;");
+        root.setStyle("-fx-background-color: #0f172a; -fx-background-image: none; -fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 0 0 3 0;");
         root.setPadding(new Insets(24));
 
         // ── Drag bar + Close X ──
@@ -675,7 +889,7 @@ public class EmotionalJournalController {
         root.getChildren().addAll(topBar, header, option1, divider, option2, footer);
 
         Scene scene = new Scene(root, 500, 580);
-        scene.setFill(javafx.scene.paint.Color.web("#111827"));
+        scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
         scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
         optionsStage.setScene(scene);
@@ -697,7 +911,7 @@ public class EmotionalJournalController {
         VBox loadingRoot = new VBox(20);
         loadingRoot.setAlignment(Pos.CENTER);
         loadingRoot.setPadding(new Insets(40));
-        loadingRoot.setStyle("-fx-background-color: #111827; -fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 0 0 3 0;");
+        loadingRoot.setStyle("-fx-background-color: #0f172a; -fx-background-image: none; -fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 0 0 3 0;");
 
         Label loadingIcon = new Label("🔍");
         loadingIcon.setStyle("-fx-font-size: 42px;");
@@ -711,7 +925,7 @@ public class EmotionalJournalController {
         loadingRoot.getChildren().addAll(loadingIcon, loadingText, progress);
 
         Scene loadingScene = new Scene(loadingRoot, 350, 220);
-        loadingScene.setFill(javafx.scene.paint.Color.web("#111827"));
+        loadingScene.setFill(javafx.scene.paint.Color.web("#0f172a"));
         loadingScene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
         loadingStage.setScene(loadingScene);
         loadingStage.setResizable(false);
@@ -742,7 +956,7 @@ public class EmotionalJournalController {
         resultStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
 
         VBox root = new VBox(18);
-        root.setStyle("-fx-background-color: #111827; -fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 0 0 3 0;");
+        root.setStyle("-fx-background-color: #0f172a; -fx-background-image: none; -fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 0 0 3 0;");
         root.setPadding(new Insets(24));
 
         // ── Drag bar + Close X ──
@@ -831,7 +1045,7 @@ public class EmotionalJournalController {
 
         // Results container
         VBox resultsContainer = new VBox(16);
-        resultsContainer.setStyle("-fx-background-color: #111827;");
+        resultsContainer.setStyle("-fx-background-color: #0f172a; -fx-background-image: none;");
         resultsContainer.setPadding(new Insets(4));
 
         // Emotion Card
@@ -884,12 +1098,12 @@ public class EmotionalJournalController {
 
         ScrollPane scrollPane = new ScrollPane(resultsContainer);
         scrollPane.setFitToWidth(true);
-        scrollPane.setStyle("-fx-background-color: #111827; -fx-background: #111827;");
+        scrollPane.setStyle("-fx-background-color: #0f172a; -fx-background: #0f172a; -fx-background-image: none;");
         // Force viewport dark
         scrollPane.skinProperty().addListener((obs, oldSkin, newSkin) -> {
             if (newSkin != null) {
                 javafx.scene.Node viewport = scrollPane.lookup(".viewport");
-                if (viewport != null) viewport.setStyle("-fx-background-color: #111827;");
+                if (viewport != null) viewport.setStyle("-fx-background-color: #0f172a; -fx-background-image: none;");
             }
         });
         VBox.setVgrow(scrollPane, Priority.ALWAYS);
@@ -909,7 +1123,7 @@ public class EmotionalJournalController {
         root.getChildren().addAll(topBar, header, journalCard, scrollPane, footer);
 
         Scene scene = new Scene(root, 580, 650);
-        scene.setFill(javafx.scene.paint.Color.web("#111827"));
+        scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
         scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
         resultStage.setScene(scene);
@@ -1437,12 +1651,12 @@ public class EmotionalJournalController {
 
             // Wrap in a container with close button
             VBox wrapper = new VBox();
-            wrapper.setStyle("-fx-background-color: #111827;");
+            wrapper.setStyle("-fx-background-color: #0f172a; -fx-background-image: none;");
             wrapper.getChildren().addAll(createDialogTopBar(statsStage), root);
             VBox.setVgrow(root, Priority.ALWAYS);
 
             Scene scene = new Scene(wrapper, 900, 700);
-            scene.setFill(javafx.scene.paint.Color.web("#111827"));
+            scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
             scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
             statsStage.setScene(scene);
@@ -1502,7 +1716,7 @@ public class EmotionalJournalController {
             VBox root = new VBox(20);
             root.getStyleClass().add("read-more-root");
             root.setPadding(new Insets(28));
-            root.setStyle("-fx-background-color: #111827; -fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 0 0 3 0;");
+            root.setStyle("-fx-background-color: #0f172a; -fx-background-image: none; -fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 0 0 3 0;");
 
             // ── Top bar with drag + close ──
             HBox topBar = createDialogTopBar(readMoreStage);
@@ -1555,7 +1769,7 @@ public class EmotionalJournalController {
             root.getChildren().addAll(topBar, header, contentCard, footer);
 
             Scene scene = new Scene(root, 560, 460);
-            scene.setFill(javafx.scene.paint.Color.web("#111827"));
+            scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
             scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
             readMoreStage.setScene(scene);
@@ -1657,6 +1871,7 @@ public class EmotionalJournalController {
         root.setPadding(new Insets(28));
         root.setAlignment(Pos.CENTER);
         root.getStyleClass().add("edit-mood-root");
+        root.setStyle("-fx-background-color: #0f172a; -fx-background-image: none;");
 
         // Header
         VBox header = new VBox(4);
@@ -1759,7 +1974,7 @@ public class EmotionalJournalController {
         root.getChildren().addAll(createDialogTopBar(editStage), header, moodBox, intensityBox, buttons);
 
         Scene scene = new Scene(root, 400, 520);
-        scene.setFill(javafx.scene.paint.Color.web("#111827"));
+        scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
         scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
         editStage.setScene(scene);
@@ -1776,13 +1991,13 @@ public class EmotionalJournalController {
         VBox root = new VBox(18);
         root.setPadding(new Insets(28));
         root.setAlignment(Pos.CENTER);
-        root.setStyle("-fx-background-color: #111827; -fx-border-color: rgba(239,68,68,0.3); -fx-border-width: 0 0 3 0;");
+        root.setStyle("-fx-background-color: #0f172a; -fx-background-image: none; -fx-border-color: rgba(239,68,68,0.3); -fx-border-width: 0 0 3 0;");
 
         Label warningIcon = new Label("⚠️");
         warningIcon.setStyle("-fx-font-size: 42px;");
 
         Label title = new Label("Delete Mood Entry?");
-        title.setStyle("-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #f9fafb;");
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #ffffff;");
 
         HBox moodInfo = new HBox(10);
         moodInfo.setAlignment(Pos.CENTER);
@@ -1793,14 +2008,14 @@ public class EmotionalJournalController {
             moodInfo.getChildren().add(emojiIcon);
         } catch (Exception ex) { /* fallback */ }
         Label moodLabel = new Label(m.getTypeHumeur() + " — Intensity: " + m.getIntensite() + "/10");
-        moodLabel.setStyle("-fx-text-fill: rgba(255,255,255,0.6); -fx-font-size: 13px;");
+        moodLabel.setStyle("-fx-text-fill: #d1d5db; -fx-font-size: 13px; -fx-font-weight: 600;");
         moodInfo.getChildren().add(moodLabel);
 
         Label message = new Label("Recorded on " + m.getDate().format(CARD_DATE_FORMATTER));
-        message.setStyle("-fx-text-fill: rgba(255,255,255,0.4); -fx-font-size: 12px;");
+        message.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 12px;");
 
         Label warning = new Label("This action cannot be undone.");
-        warning.setStyle("-fx-text-fill: #fca5a5; -fx-font-size: 11px;");
+        warning.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-font-weight: 600;");
 
         HBox buttons = new HBox(12);
         buttons.setAlignment(Pos.CENTER);
@@ -1824,7 +2039,7 @@ public class EmotionalJournalController {
         root.getChildren().addAll(createDialogTopBar(confirmStage), warningIcon, title, moodInfo, message, warning, buttons);
 
         Scene scene = new Scene(root, 400, 340);
-        scene.setFill(javafx.scene.paint.Color.web("#111827"));
+        scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
         scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
         confirmStage.setScene(scene);
@@ -1841,23 +2056,24 @@ public class EmotionalJournalController {
         VBox root = new VBox(18);
         root.setPadding(new Insets(28));
         root.setAlignment(Pos.CENTER);
-        root.setStyle("-fx-background-color: #111827; -fx-border-color: rgba(239,68,68,0.3); -fx-border-width: 0 0 3 0;");
+        root.setStyle("-fx-background-color: #0f172a; -fx-background-image: none; -fx-border-color: rgba(239,68,68,0.3); -fx-border-width: 0 0 3 0;");
 
         Label warningIcon = new Label("⚠️");
         warningIcon.setStyle("-fx-font-size: 42px;");
 
         Label title = new Label("Delete Journal Entry?");
-        title.setStyle("-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #f9fafb;");
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #ffffff;");
 
         Label message = new Label("Are you sure you want to delete this entry from\n" +
                 e.getDateCreation().format(CARD_DATE_FORMATTER) + " at " +
                 e.getDateCreation().format(CARD_TIME_FORMATTER) + "?");
-        message.setStyle("-fx-text-fill: rgba(255,255,255,0.6); -fx-font-size: 13px; -fx-text-alignment: center;");
+        message.setStyle("-fx-text-fill: #d1d5db; -fx-font-size: 13px; -fx-text-alignment: center;");
         message.setWrapText(true);
         message.setAlignment(Pos.CENTER);
+        message.setMaxWidth(350);
 
         Label warning = new Label("This action cannot be undone.");
-        warning.setStyle("-fx-text-fill: #fca5a5; -fx-font-size: 11px;");
+        warning.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-font-weight: 600;");
 
         HBox buttons = new HBox(12);
         buttons.setAlignment(Pos.CENTER);
@@ -1881,7 +2097,7 @@ public class EmotionalJournalController {
         root.getChildren().addAll(createDialogTopBar(confirmStage), warningIcon, title, message, warning, buttons);
 
         Scene scene = new Scene(root, 400, 280);
-        scene.setFill(javafx.scene.paint.Color.web("#111827"));
+        scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
         scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
         confirmStage.setScene(scene);
@@ -1911,6 +2127,10 @@ public class EmotionalJournalController {
         showNotification("Warning", message, "⚠️", "warning");
     }
 
+    private void showWarning(String message) {
+        showNotification("Warning", message, "⚠️", "warning");
+    }
+
     private void showSuccess(String message) {
         showSuccessNotification("Success", message);
     }
@@ -1929,7 +2149,7 @@ public class EmotionalJournalController {
         root.setAlignment(Pos.CENTER);
 
         String borderColor = type.equals("success") ? "rgba(34,197,94,0.3)" : type.equals("error") ? "rgba(239,68,68,0.3)" : "rgba(6,182,212,0.3)";
-        root.setStyle("-fx-background-color: #111827; -fx-border-color: " + borderColor + "; -fx-border-width: 0 0 3 0;");
+        root.setStyle("-fx-background-color: #0f172a; -fx-background-image: none; -fx-border-color: " + borderColor + "; -fx-border-width: 0 0 3 0;");
 
         Label iconLabel = new Label(icon);
         iconLabel.setStyle("-fx-font-size: 42px;");
@@ -1951,7 +2171,7 @@ public class EmotionalJournalController {
         root.getChildren().addAll(createDialogTopBar(notifStage), iconLabel, titleLabel, messageLabel, okBtn);
 
         Scene scene = new Scene(root, 380, 250);
-        scene.setFill(javafx.scene.paint.Color.web("#111827"));
+        scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
         scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
 
         notifStage.setScene(scene);

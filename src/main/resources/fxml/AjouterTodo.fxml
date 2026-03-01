@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ColorPicker?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane stylesheets="@mission-shell.css" prefHeight="700.0" prefWidth="600.0" style="-fx-background-color: #F2F4F7;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AjouterTodoController">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" prefHeight="70.0" style="-fx-background-color: #D1D9E6; -fx-border-color: #e9ecef; -fx-border-width: 0 0 1 0;">
+            <padding>
+                <Insets left="20.0" right="20.0"/>
+            </padding>
+            <children>
+                <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="📋 Ajouter une tâche" />
+            </children>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="20.0" alignment="TOP_CENTER">
+            <padding>
+                <Insets top="30.0" left="40.0" right="40.0" bottom="30.0"/>
+            </padding>
+            <children>
+                <!-- Titre -->
+                <VBox spacing="5.0">
+                    <Label style="-fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Titre *" />
+                    <TextField fx:id="txtTitre" promptText="Ex: Méditation du matin" />
+                    <Label fx:id="errorTitre" style="-fx-text-fill: #E74C3C; -fx-font-size: 11;" text=" " visible="false" />
+                </VBox>
+
+                <!-- Description -->
+                <VBox spacing="5.0">
+                    <Label style="-fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Description" />
+                    <TextArea fx:id="txtDescription" prefRowCount="3" promptText="Description de la tâche..." wrapText="true" />
+                </VBox>
+
+                <!-- Priorité et Statut -->
+                <HBox spacing="20.0">
+                    <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                        <Label style="-fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Priorité" />
+                        <ComboBox fx:id="comboPriorite" prefWidth="200.0" />
+                    </VBox>
+                    <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                        <Label style="-fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Date d'échéance" />
+                        <DatePicker fx:id="dateEcheancePicker" prefWidth="200.0" />
+                    </VBox>
+                </HBox>
+
+                <!-- Exercice associé -->
+                <VBox spacing="5.0">
+                    <Label style="-fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Exercice associé (optionnel)" />
+                    <ComboBox fx:id="comboExercice" prefWidth="400.0" promptText="Sélectionner un exercice..." />
+                </VBox>
+
+                <!-- Temps estimé et Couleur -->
+                <HBox spacing="20.0">
+                    <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                        <Label style="-fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Temps estimé (minutes)" />
+                        <Spinner fx:id="spinnerTempsEstime" prefWidth="150.0" />
+                    </VBox>
+                    <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                        <Label style="-fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Couleur" />
+                        <HBox spacing="10.0" alignment="CENTER_LEFT">
+                            <ColorPicker fx:id="colorPicker" />
+                            <TextField fx:id="txtCouleur" prefWidth="80.0" editable="false" />
+                        </HBox>
+                    </VBox>
+                </HBox>
+
+                <!-- Notes -->
+                <VBox spacing="5.0">
+                    <Label style="-fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Notes" />
+                    <TextArea fx:id="txtNotes" prefRowCount="3" promptText="Notes supplémentaires..." wrapText="true" />
+                </VBox>
+
+                <!-- Champ requis -->
+                <Label style="-fx-text-fill: #7F8C8D; -fx-font-size: 11px;" text="* Champs requis" />
+            </children>
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER" spacing="15.0" prefHeight="70.0">
+            <padding>
+                <Insets bottom="20.0"/>
+            </padding>
+            <children>
+                <Button fx:id="btnReset" onAction="#handleReset" style="-fx-background-color: #95A5A6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 10 30;" text="Réinitialiser" />
+                <Button fx:id="btnAnnuler" onAction="#handleAnnuler" style="-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 10 30;" text="Annuler" />
+                <Button fx:id="btnAjouter" onAction="#handleAjouter" style="-fx-background-color: #27AE60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 10 40;" text="Ajouter" />
+            </children>
+        </HBox>
+    </bottom>
+
+</BorderPane>

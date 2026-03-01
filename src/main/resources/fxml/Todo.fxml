@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane stylesheets="@mission-shell.css" prefHeight="800.0" prefWidth="900.0" style="-fx-background-color: #F2F4F7;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.TodoController">
+
+    <top>
+        <VBox spacing="15.0">
+            <padding>
+                <Insets top="20.0" left="30.0" right="30.0" bottom="10.0"/>
+            </padding>
+            <children>
+                <!-- En-tête -->
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="📋 Todo List" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label style="-fx-font-size: 14px; -fx-text-fill: #7F8C8D;" text="Gérez vos tâches quotidiennes" />
+                    </children>
+                </HBox>
+
+                <!-- Barre de recherche et filtres -->
+                <HBox spacing="15.0" alignment="CENTER_LEFT">
+                    <children>
+                        <TextField fx:id="searchField" promptText="Rechercher une tâche..." prefWidth="300.0" style="-fx-background-radius: 20; -fx-padding: 10 15; -fx-border-color: #e9ecef; -fx-border-radius: 20;" />
+                        <ComboBox fx:id="filterPrioriteCombo" prefWidth="150.0" promptText="Filtrer par priorité" style="-fx-background-radius: 20; -fx-border-color: #e9ecef; -fx-border-radius: 20;" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnRafraichir" onAction="#handleRafraichir" style="-fx-background-color: #3498DB; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand;" text="🔄 Rafraîchir" />
+                    </children>
+                </HBox>
+
+                <!-- Statistiques rapides -->
+                <HBox spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 15; -fx-border-color: #e9ecef; -fx-border-radius: 15;">
+                    <children>
+                        <VBox alignment="CENTER" spacing="5.0">
+                            <Label style="-fx-font-size: 12px; -fx-text-fill: #7F8C8D;" text="Total" />
+                            <Label fx:id="totalCountLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #3498DB;" text="0" />
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="5.0">
+                            <Label style="-fx-font-size: 12px; -fx-text-fill: #7F8C8D;" text="À faire" />
+                            <Label fx:id="todoCountLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #F39C12;" text="0" />
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="5.0">
+                            <Label style="-fx-font-size: 12px; -fx-text-fill: #7F8C8D;" text="En cours" />
+                            <Label fx:id="enCoursCountLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2980B9;" text="0" />
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="5.0">
+                            <Label style="-fx-font-size: 12px; -fx-text-fill: #7F8C8D;" text="Terminées" />
+                            <Label fx:id="doneCountLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #27AE60;" text="0" />
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="5.0">
+                            <Label style="-fx-font-size: 12px; -fx-text-fill: #7F8C8D;" text="En retard" />
+                            <Label fx:id="enRetardCountLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #E74C3C;" text="0" />
+                        </VBox>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+            <content>
+                <HBox spacing="20.0" alignment="TOP_CENTER">
+                    <padding>
+                        <Insets bottom="30.0" left="30.0" right="30.0" top="10.0" />
+                    </padding>
+                    <children>
+                        <!-- Colonne TODO -->
+                        <VBox fx:id="todoContainer" spacing="10.0" HBox.hgrow="ALWAYS" prefWidth="280" />
+
+                        <!-- Colonne EN COURS -->
+                        <VBox fx:id="enCoursContainer" spacing="10.0" HBox.hgrow="ALWAYS" prefWidth="280" />
+
+                        <!-- Colonne DONE -->
+                        <VBox fx:id="doneContainer" spacing="10.0" HBox.hgrow="ALWAYS" prefWidth="280" />
+                    </children>
+                </HBox>
+            </content>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER" prefHeight="40.0" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-width: 1 0 0 0;">
+            <children>
+                <Label style="-fx-text-fill: #7f8c8d; -fx-font-size: 11px;" text="© 2026 MindTrack - Votre compagnon de bien-être mental" />
+            </children>
+        </HBox>
+    </bottom>
+</BorderPane>

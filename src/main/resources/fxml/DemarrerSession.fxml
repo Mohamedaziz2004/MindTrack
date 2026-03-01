@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+
+<BorderPane stylesheets="@mission-shell.css" prefHeight="700.0" prefWidth="800.0" style="-fx-background-color: #F2F4F7;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.DemarrerSessionController">
+    <top>
+        <HBox alignment="CENTER_LEFT" prefHeight="70.0" style="-fx-background-color: #D1D9E6; -fx-border-color: #e9ecef; -fx-border-width: 0 0 1 0;">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <padding>
+                        <Insets left="30.0" />
+                    </padding>
+                    <children>
+                        <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="MindTrack" />
+                    </children>
+                </HBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Label style="-fx-font-size: 14px; -fx-text-fill: #2C3E50;" text="Nouvelle session">
+                    <HBox.margin>
+                        <Insets right="20.0" />
+                    </HBox.margin>
+                </Label>
+                <Button mnemonicParsing="false" onAction="#handleAnnuler" style="-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;" text="Fermer">
+                    <HBox.margin>
+                        <Insets left="10.0" right="30.0" />
+                    </HBox.margin>
+                </Button>
+            </children>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER" spacing="20.0" BorderPane.alignment="CENTER">
+            <children>
+                <!-- En-tête de la section -->
+                <VBox alignment="CENTER" spacing="5.0">
+                    <children>
+                        <Label style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="▶ Nouvelle Session">
+                            <effect>
+                                <DropShadow>
+                                    <color>
+                                        <Color red="0.8" green="0.8" blue="0.8" />
+                                    </color>
+                                </DropShadow>
+                            </effect>
+                        </Label>
+                        <Label style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" text="Choisir l'exercice à pratiquer" />
+                    </children>
+                    <VBox.margin>
+                        <Insets />
+                    </VBox.margin>
+                </VBox>
+
+                <!-- Carte formulaire -->
+                <VBox maxWidth="500.0" spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 30; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;">
+                    <children>
+                        <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Exercice à pratiquer" />
+
+                        <ComboBox fx:id="comboExercice" prefHeight="43.0" prefWidth="450.0" promptText="Sélectionner un exercice..." style="-fx-background-radius: 8; -fx-padding: 8; -fx-border-color: #e9ecef; -fx-border-radius: 8;" />
+
+                        <VBox fx:id="detailsBox" spacing="12.0" style="-fx-background-color: #F8F9F9; -fx-background-radius: 10; -fx-padding: 15;" visible="false">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label style="-fx-font-weight: bold; -fx-min-width: 100; -fx-text-fill: #2C3E50;" text="📌 Type :" />
+                                        <Label fx:id="lblType" style="-fx-text-fill: #7f8c8d;" text="-" />
+                                    </children>
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label style="-fx-font-weight: bold; -fx-min-width: 100; -fx-text-fill: #2C3E50;" text="⏱️ Durée :" />
+                                        <Label fx:id="lblDuree" style="-fx-text-fill: #7f8c8d;" text="-" />
+                                    </children>
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label style="-fx-font-weight: bold; -fx-min-width: 100; -fx-text-fill: #2C3E50;" text="📊 Difficulté :" />
+                                        <Label fx:id="lblDifficulte" style="-fx-text-fill: #7f8c8d;" text="-" />
+                                    </children>
+                                </HBox>
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="📝 Description :" />
+                                <TextArea fx:id="txtDescription" editable="false" prefRowCount="3" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #e9ecef; -fx-border-radius: 8;" wrapText="true" />
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+
+
+
+                <!-- Boutons d'action -->
+                <HBox alignment="CENTER" spacing="15.0">
+                    <children>
+                        <Button fx:id="btnActualiser" mnemonicParsing="false" onAction="#handleActualiser" style="-fx-background-color: #3498DB; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 10 25; -fx-cursor: hand;" text="🔄 Actualiser" />
+                        <Button fx:id="btnDemarrer" mnemonicParsing="false" onAction="#handleDemarrer" style="-fx-background-color: #27AE60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 10 35; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(39,174,96,0.3), 10, 0, 0, 5);" text="Démarrer" />
+                    </children>
+                    <VBox.margin>
+                        <Insets />
+                    </VBox.margin>
+                </HBox>
+            </children>
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER" prefHeight="40.0" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-width: 1 0 0 0;">
+            <children>
+                <Label style="-fx-text-fill: #7f8c8d; -fx-font-size: 11px;" text="© 2026 MindTrack - Votre compagnon de bien-être mental" />
+            </children>
+        </HBox>
+    </bottom>
+</BorderPane>

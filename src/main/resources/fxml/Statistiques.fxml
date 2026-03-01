@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+
+<BorderPane stylesheets="@mission-shell.css" prefHeight="800.0" prefWidth="900.0" style="-fx-background-color: #F2F4F7;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.StatistiquesController">
+    <top>
+        <HBox alignment="CENTER_LEFT" prefHeight="70.0" style="-fx-background-color: #D1D9E6; -fx-border-color: #e9ecef; -fx-border-width: 0 0 1 0;">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <padding>
+                        <Insets left="30.0" />
+                    </padding>
+                    <children>
+                        <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="MindTrack" />
+                    </children>
+                </HBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Label style="-fx-font-size: 14px; -fx-text-fill: #2C3E50;" text="Statistiques">
+                    <HBox.margin>
+                        <Insets right="20.0" />
+                    </HBox.margin>
+                </Label>
+                <Button mnemonicParsing="false" onAction="#handleRetour" style="-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;" text="← Retour">
+                    <HBox.margin>
+                        <Insets left="10.0" right="30.0" />
+                    </HBox.margin>
+                </Button>
+            </children>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="25.0" BorderPane.alignment="CENTER">
+            <children>
+                <!-- En-tête de la section -->
+                <VBox alignment="CENTER" spacing="5.0">
+                    <children>
+                        <Label style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="📊 Analyses et Statistiques">
+                            <effect>
+                                <DropShadow>
+                                    <color>
+                                        <Color red="0.8" green="0.8" blue="0.8" />
+                                    </color>
+                                </DropShadow>
+                            </effect>
+                     <padding>
+                        <Insets top="-20.0" />
+                     </padding>
+                        </Label>
+                        <Label style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" text="Visualiser les progrès et analyser les performances" />
+                    </children>
+                    <VBox.margin>
+                        <Insets top="20.0" />
+                    </VBox.margin>
+                </VBox>
+
+                <!-- Barre de filtres et actions -->
+                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                    <children>
+                        <DatePicker fx:id="dateDebutPicker" prefWidth="150.0" promptText="Date début" style="-fx-background-radius: 20; -fx-border-color: #e9ecef; -fx-border-radius: 20; -fx-padding: 5;" />
+                        <DatePicker fx:id="dateFinPicker" prefWidth="150.0" promptText="Date fin" style="-fx-background-radius: 20; -fx-border-color: #e9ecef; -fx-border-radius: 20; -fx-padding: 5;" />
+                        <Button fx:id="btnAppliquerPeriode" mnemonicParsing="false" onAction="#handleAppliquerPeriode" style="-fx-background-color: #3498DB; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand;" text="Appliquer" />
+                        <Button fx:id="btnActualiser" mnemonicParsing="false" onAction="#handleActualiser" style="-fx-background-color: #27AE60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand;" text="🔄 Actualiser" />
+                        <Button fx:id="btnExporter" mnemonicParsing="false" onAction="#handleExporter" style="-fx-background-color: #F39C12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand;" text="📊 Exporter" />
+                    </children>
+                    <VBox.margin>
+                        <Insets left="30.0" right="30.0" />
+                    </VBox.margin>
+                </HBox>
+
+                <!-- TabPane avec les graphiques -->
+                <TabPane fx:id="tabPane" style="-fx-background-color: transparent; -fx-tab-min-height: 40;" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+                    <tabs>
+                        <!-- Onglet Évolution -->
+                        <Tab fx:id="evolutionTab" text="📈 Évolution">
+                            <content>
+                                <VBox spacing="20.0" style="-fx-padding: 20;">
+                                    <children>
+                                        <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;">
+                                            <children>
+                                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="📈 Évolution des scores" />
+                                                <LineChart fx:id="evolutionScoreChart" prefHeight="280.0" style="-fx-background-color: transparent;">
+                                                    <xAxis>
+                                                        <CategoryAxis fx:id="evolutionScoreXAxis" label="Date" />
+                                                    </xAxis>
+                                                    <yAxis>
+                                                        <NumberAxis fx:id="evolutionScoreYAxis" label="Score (%)" />
+                                                    </yAxis>
+                                                </LineChart>
+                                            </children>
+                                        </VBox>
+
+                                        <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;">
+                                            <children>
+                                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="😊 Évolution du bien-être" />
+                                                <LineChart fx:id="evolutionBienEtreChart" prefHeight="280.0" style="-fx-background-color: transparent;">
+                                                    <xAxis>
+                                                        <CategoryAxis fx:id="evolutionBienEtreXAxis" label="Date" />
+                                                    </xAxis>
+                                                    <yAxis>
+                                                        <NumberAxis fx:id="evolutionBienEtreYAxis" label="Niveau de bien-être" />
+                                                    </yAxis>
+                                                </LineChart>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </VBox>
+                            </content>
+                        </Tab>
+
+                        <!-- Onglet Comparaisons -->
+                        <Tab fx:id="comparaisonTab" text="📊 Comparaisons">
+                            <content>
+                                <VBox spacing="20.0" style="-fx-padding: 20;">
+                                    <children>
+                                        <HBox spacing="20.0">
+                                            <children>
+                                                <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;" HBox.hgrow="ALWAYS">
+                                                    <children>
+                                                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="📊 Moyennes par type" />
+                                                        <BarChart fx:id="comparaisonBarChart" prefHeight="250.0" style="-fx-background-color: transparent;">
+                                                            <xAxis>
+                                                                <CategoryAxis fx:id="comparaisonXAxis" label="Type" />
+                                                            </xAxis>
+                                                            <yAxis>
+                                                                <NumberAxis fx:id="comparaisonYAxis" label="Score moyen (%)" />
+                                                            </yAxis>
+                                                        </BarChart>
+                                                    </children>
+                                                </VBox>
+
+                                                <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;" HBox.hgrow="ALWAYS">
+                                                    <children>
+                                                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="🥧 Répartition des séances" />
+                                                        <PieChart fx:id="repartitionPieChart" prefHeight="250.0" style="-fx-background-color: transparent;" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </HBox>
+
+                                        <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;">
+                                            <children>
+                                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="📈 Performance par difficulté" />
+                                                <BarChart fx:id="difficulteBarChart" prefHeight="250.0" style="-fx-background-color: transparent;">
+                                                    <xAxis>
+                                                        <CategoryAxis fx:id="difficulteXAxis" label="Difficulté" />
+                                                    </xAxis>
+                                                    <yAxis>
+                                                        <NumberAxis fx:id="difficulteYAxis" label="Score moyen (%)" />
+                                                    </yAxis>
+                                                </BarChart>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </VBox>
+                            </content>
+                        </Tab>
+
+                        <!-- Onglet Détails et ODD -->
+                        <Tab fx:id="detailsTab" text="🌍 Détails et ODD">
+                            <content>
+                                <VBox spacing="20.0" style="-fx-padding: 20;">
+                                    <children>
+                                        <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;">
+                                            <children>
+                                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="📋 Statistiques détaillées" />
+                                                <GridPane fx:id="statsGrid" hgap="30.0" vgap="15.0">
+                                                    <columnConstraints>
+                                                        <ColumnConstraints halignment="RIGHT" minWidth="100.0" />
+                                                        <ColumnConstraints minWidth="150.0" />
+                                                        <ColumnConstraints halignment="RIGHT" minWidth="100.0" />
+                                                        <ColumnConstraints minWidth="150.0" />
+                                                    </columnConstraints>
+                                                </GridPane>
+                                            </children>
+                                        </VBox>
+
+                                        <HBox spacing="20.0">
+                                            <children>
+                                                <VBox fx:id="odd3Container" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;" HBox.hgrow="ALWAYS">
+                                                    <children>
+                                                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #27AE60;" text="🌍 ODD 3 - Bien-être" />
+                                                    </children>
+                                                </VBox>
+
+                                                <VBox fx:id="odd4Container" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;" HBox.hgrow="ALWAYS">
+                                                    <children>
+                                                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2980B9;" text="📚 ODD 4 - Éducation de qualité" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                            </content>
+                        </Tab>
+                    </tabs>
+                </TabPane>
+            </children>
+            <padding>
+                <Insets bottom="30.0" left="30.0" right="30.0" top="10.0" />
+            </padding>
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER" prefHeight="40.0" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-width: 1 0 0 0;">
+            <children>
+                <Label style="-fx-text-fill: #7f8c8d; -fx-font-size: 11px;" text="© 2026 MindTrack - Votre compagnon de bien-être mental" />
+            </children>
+        </HBox>
+    </bottom>
+</BorderPane>

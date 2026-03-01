@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+
+<BorderPane prefHeight="560.0" prefWidth="900.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MenuPrincipalController">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" prefHeight="70.0" style="-fx-background-color: #D1D9E6; -fx-border-color: #e9ecef; -fx-border-width: 0 0 1 0;">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <padding>
+                        <Insets left="30.0" />
+                    </padding>
+                    <children>
+                        <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="MindTrack" />
+                    </children>
+                </HBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="welcomeLabel" style="-fx-font-size: 14px; -fx-text-fill: #2C3E50;" text="Bonjour, Utilisateur !">
+                    <HBox.margin>
+                        <Insets right="20.0" />
+                    </HBox.margin>
+                </Label>
+                <Button mnemonicParsing="false" onAction="#handleQuitter" style="-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;" text="Quitter">
+                    <HBox.margin>
+                        <Insets left="10.0" right="30.0" />
+                    </HBox.margin>
+                </Button>
+            </children>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER" spacing="40.0">
+            <children>
+                <!-- Logo et titre -->
+                <VBox alignment="CENTER" spacing="5.0">
+                    <children>
+                        <Label style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="MindTrack">
+                            <effect>
+                                <DropShadow>
+                                    <color>
+                                        <Color red="0.8" green="0.8" blue="0.8" />
+                                    </color>
+                                    <radius>10.0</radius>
+                                </DropShadow>
+                            </effect>
+                        </Label>
+                        <Label style="-fx-font-size: 16px; -fx-text-fill: #7f8c8d;" text="Votre compagnon de bien-être mental" />
+                    </children>
+                </VBox>
+
+                <!-- Cartes menu -->
+                <GridPane alignment="CENTER" hgap="30.0" vgap="30.0">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="280.0" prefWidth="280.0" />
+                        <ColumnConstraints minWidth="280.0" prefWidth="280.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="280.0" prefHeight="280.0" />
+                        <RowConstraints minHeight="280.0" prefHeight="280.0" />
+                    </rowConstraints>
+
+                    <children>
+                        <!-- Carte Exercices -->
+                        <VBox fx:id="exercicesCard" alignment="CENTER" prefHeight="280.0" prefWidth="280.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <children>
+                                <Label style="-fx-font-size: 48px;" text="🏋️" />
+                                <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #27AE60;" text="Exercices" />
+                                <Label alignment="CENTER" maxWidth="220" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" text="Gérez vos exercices de bien-être mental" textAlignment="CENTER" wrapText="true" />
+                                <Button mnemonicParsing="false" onAction="#handleExercices" style="-fx-background-color: #27AE60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 25; -fx-cursor: hand;" text="Accéder" />
+                            </children>
+                        </VBox>
+
+                        <!-- Carte Sessions -->
+                        <VBox fx:id="sessionsCard" alignment="CENTER" prefHeight="280.0" prefWidth="280.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <children>
+                                <Label style="-fx-font-size: 48px;" text="⏱️" />
+                                <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #F39C12;" text="Sessions" />
+                                <Label alignment="CENTER" maxWidth="220" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" text="Démarrez et suivez vos sessions d'entraînement" textAlignment="CENTER" wrapText="true" />
+                                <Button mnemonicParsing="false" onAction="#handleSessions" style="-fx-background-color: #F39C12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 25; -fx-cursor: hand;" text="Accéder" />
+                            </children>
+                        </VBox>
+
+                        <!-- Carte Progression -->
+                        <VBox fx:id="progressionCard" alignment="CENTER" prefHeight="280.0" prefWidth="280.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                            <children>
+                                <Label style="-fx-font-size: 48px;" text="📊" />
+                                <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2980B9;" text="Progression" />
+                                <Label alignment="CENTER" maxWidth="220" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" text="Visualisez vos progrès et statistiques" textAlignment="CENTER" wrapText="true" />
+                                <Button mnemonicParsing="false" onAction="#handleProgression" style="-fx-background-color: #2980B9; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 25; -fx-cursor: hand;" text="Accéder" />
+                            </children>
+                        </VBox>
+
+                        <!-- Carte ODD -->
+                        <VBox fx:id="statsCard" alignment="CENTER" prefHeight="280.0" prefWidth="280.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: #e9ecef; -fx-border-radius: 15;" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                            <children>
+                                <Label style="-fx-font-size: 48px;" text="🌍" />
+                                <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #8E44AD;" text="ODD" />
+                                <Label alignment="CENTER" maxWidth="220" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" text="Objectifs de Développement Durable" textAlignment="CENTER" wrapText="true" />
+                                <Button mnemonicParsing="false" onAction="#handleODD" style="-fx-background-color: #8E44AD; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 25; -fx-cursor: hand;" text="Accéder" />
+                            </children>
+                        </VBox>
+                    </children>
+                </GridPane>
+            </children>
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER" prefHeight="50.0" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-width: 1 0 0 0;">
+            <children>
+                <Label style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;" text="© 2026 MindTrack - Votre compagnon de bien-être mental" />
+            </children>
+        </HBox>
+    </bottom>
+</BorderPane>

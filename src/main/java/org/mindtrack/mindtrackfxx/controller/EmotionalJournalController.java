@@ -69,7 +69,6 @@ public class EmotionalJournalController {
     @FXML private FlowPane moodEntriesContainer;
     @FXML private Button showMoreJournalsBtn;
     @FXML private Button showMoreMoodsBtn;
-    @FXML private Button analyseButton;
     @FXML private Button sortJournalsBtn;
     @FXML private Button sortMoodsBtn;
     @FXML private Label sortJournalLabel;
@@ -731,179 +730,6 @@ public class EmotionalJournalController {
                 saveEntryButton.getStyleClass().add("btn-primary");
             }
         }
-    }
-
-    @FXML
-    public void onAnalyseEntry() {
-        // Show analysis options window
-        Stage optionsStage = new Stage();
-        optionsStage.initModality(Modality.APPLICATION_MODAL);
-        optionsStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
-
-        VBox root = new VBox(18);
-        root.setStyle("-fx-background-color: #0f172a; -fx-background-image: none; -fx-border-color: rgba(6,182,212,0.3); -fx-border-width: 0 0 3 0;");
-        root.setPadding(new Insets(24));
-
-        // ── Drag bar + Close X ──
-        HBox topBar = new HBox();
-        topBar.setAlignment(Pos.CENTER_RIGHT);
-        Region dragRegion2 = new Region();
-        HBox.setHgrow(dragRegion2, Priority.ALWAYS);
-        final double[] dragOff = new double[2];
-        topBar.setOnMousePressed(ev -> { dragOff[0] = ev.getScreenX() - optionsStage.getX(); dragOff[1] = ev.getScreenY() - optionsStage.getY(); });
-        topBar.setOnMouseDragged(ev -> { optionsStage.setX(ev.getScreenX() - dragOff[0]); optionsStage.setY(ev.getScreenY() - dragOff[1]); });
-
-        Button closeXBtn = new Button();
-        closeXBtn.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4;");
-        SVGPath closeXIcon = new SVGPath();
-        closeXIcon.setContent("M18 6L6 18M6 6l12 12");
-        closeXIcon.setFill(javafx.scene.paint.Color.TRANSPARENT);
-        closeXIcon.setStroke(javafx.scene.paint.Color.web("#22d3ee"));
-        closeXIcon.setStrokeWidth(1.8);
-        closeXIcon.setScaleX(0.55);
-        closeXIcon.setScaleY(0.55);
-        closeXBtn.setGraphic(closeXIcon);
-        closeXBtn.setOnAction(ev -> optionsStage.close());
-        topBar.getChildren().addAll(dragRegion2, closeXBtn);
-
-        // Header
-        HBox header = new HBox(14);
-        header.setAlignment(Pos.CENTER_LEFT);
-
-        try {
-            ImageView aiIcon = new ImageView(new Image(getClass().getResourceAsStream("/org/mindtrack/mindtrackfxx/icons/analysing.png")));
-            aiIcon.setFitWidth(36);
-            aiIcon.setFitHeight(36);
-            header.getChildren().add(aiIcon);
-        } catch (Exception ex) { /* fallback */ }
-
-        VBox titleBox = new VBox(2);
-        Label title = new Label("AI Journal Analysis");
-        title.setStyle("-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #f9fafb;");
-        Label subtitle = new Label("Choose how you want to analyse");
-        subtitle.setStyle("-fx-text-fill: rgba(255,255,255,0.4); -fx-font-size: 12px;");
-        titleBox.getChildren().addAll(title, subtitle);
-        header.getChildren().add(titleBox);
-
-        // Option 1: Analyse by ID
-        VBox option1 = new VBox(12);
-        option1.setStyle("-fx-background-color: #0d1117; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: rgba(6,182,212,0.08); -fx-border-radius: 14; -fx-border-width: 1;");
-
-        HBox option1Header = new HBox(10);
-        option1Header.setAlignment(Pos.CENTER_LEFT);
-        Label option1Icon = new Label("🔢");
-        option1Icon.setStyle("-fx-font-size: 22px;");
-        Label option1Title = new Label("Analyse by Journal ID");
-        option1Title.setStyle("-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #e5e7eb;");
-        option1Header.getChildren().addAll(option1Icon, option1Title);
-
-        Label option1Desc = new Label("Enter the ID of an existing journal entry to analyse");
-        option1Desc.setStyle("-fx-text-fill: rgba(255,255,255,0.4); -fx-font-size: 12px;");
-
-        HBox idInputRow = new HBox(12);
-        idInputRow.setAlignment(Pos.CENTER_LEFT);
-        TextField idField = new TextField();
-        idField.setPromptText("Enter Journal ID...");
-        idField.getStyleClass().add("analysis-input");
-        idField.setPrefWidth(200);
-
-        Button analyseByIdBtn = new Button("Analyse");
-        analyseByIdBtn.getStyleClass().addAll("btn", "btn-ai");
-        analyseByIdBtn.setOnAction(ev -> {
-            String idText = idField.getText().trim();
-            if (idText.isEmpty()) {
-                showAlert("Please enter a journal ID.");
-                return;
-            }
-            try {
-                int journalId = Integer.parseInt(idText);
-                JournalEmotionnel journal = journalService.read(journalId);
-                if (journal == null) {
-                    showAlert("Journal entry not found with ID: " + journalId);
-                    return;
-                }
-                optionsStage.close();
-                runAnalysis(journal.getNotePersonnelle());
-            } catch (NumberFormatException ex) {
-                showAlert("Please enter a valid number for the ID.");
-            }
-        });
-
-        idInputRow.getChildren().addAll(idField, analyseByIdBtn);
-        option1.getChildren().addAll(option1Header, option1Desc, idInputRow);
-
-        // Divider with "OR"
-        HBox divider = new HBox(16);
-        divider.setAlignment(Pos.CENTER);
-        Region line1 = new Region();
-        line1.setStyle("-fx-border-color: rgba(255,255,255,0.08); -fx-border-width: 0 0 1 0;");
-        line1.setPrefHeight(1);
-        HBox.setHgrow(line1, Priority.ALWAYS);
-        Label orLabel = new Label("OR");
-        orLabel.setStyle("-fx-text-fill: rgba(255,255,255,0.3); -fx-font-size: 11px; -fx-font-weight: 700;");
-        Region line2 = new Region();
-        line2.setStyle("-fx-border-color: rgba(255,255,255,0.08); -fx-border-width: 0 0 1 0;");
-        line2.setPrefHeight(1);
-        HBox.setHgrow(line2, Priority.ALWAYS);
-        divider.getChildren().addAll(line1, orLabel, line2);
-
-        // Option 2: Analyse custom text
-        VBox option2 = new VBox(12);
-        option2.setStyle("-fx-background-color: #0d1117; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: rgba(6,182,212,0.08); -fx-border-radius: 14; -fx-border-width: 1;");
-
-        HBox option2Header = new HBox(10);
-        option2Header.setAlignment(Pos.CENTER_LEFT);
-        Label option2Icon = new Label("✏️");
-        option2Icon.setStyle("-fx-font-size: 22px;");
-        Label option2Title = new Label("Analyse Custom Text");
-        option2Title.setStyle("-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #e5e7eb;");
-        option2Header.getChildren().addAll(option2Icon, option2Title);
-
-        Label option2Desc = new Label("Write or paste text to analyse without saving it");
-        option2Desc.setStyle("-fx-text-fill: rgba(255,255,255,0.4); -fx-font-size: 12px;");
-
-        TextArea customTextArea = new TextArea();
-        customTextArea.setPromptText("Write your thoughts here to analyse...");
-        customTextArea.getStyleClass().add("analysis-textarea");
-        customTextArea.setPrefRowCount(4);
-        customTextArea.setWrapText(true);
-
-        Button analyseCustomBtn = new Button("Analyse Text");
-        analyseCustomBtn.getStyleClass().addAll("btn", "btn-ai");
-        analyseCustomBtn.setOnAction(ev -> {
-            String text = customTextArea.getText().trim();
-            if (text.isEmpty()) {
-                showAlert("Please enter some text to analyse.");
-                return;
-            }
-            optionsStage.close();
-            runAnalysis(text);
-        });
-
-        option2.getChildren().addAll(option2Header, option2Desc, customTextArea, analyseCustomBtn);
-
-        // Cancel button
-        HBox footer = new HBox();
-        footer.setAlignment(Pos.CENTER_RIGHT);
-        Button cancelBtn = new Button("Cancel");
-        cancelBtn.getStyleClass().addAll("btn", "btn-light");
-        cancelBtn.setOnAction(ev -> optionsStage.close());
-        footer.getChildren().add(cancelBtn);
-
-        root.getChildren().addAll(topBar, header, option1, divider, option2, footer);
-
-        Scene scene = new Scene(root, 500, 580);
-        scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
-        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
-
-        optionsStage.setScene(scene);
-        optionsStage.setResizable(false);
-
-        animateFadeIn(root, 300);
-        animateSlideUp(option1, 400, 30);
-        animateSlideUp(option2, 500, 30);
-
-        optionsStage.show();
     }
 
     private void runAnalysis(String text) {
@@ -2064,14 +1890,30 @@ public class EmotionalJournalController {
             VBox.setVgrow(contentCard, Priority.ALWAYS);
 
             // ── Footer ──
-            HBox footer = new HBox();
+            HBox footer = new HBox(12);
             footer.setAlignment(Pos.CENTER_RIGHT);
+
+            // AI Analyze button
+            Button analyzeBtn = new Button("AI Analyze");
+            analyzeBtn.getStyleClass().addAll("btn", "btn-ai");
+            SVGPath analyzeIcon = IconFactory.getIcon("Analyse");
+            analyzeIcon.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            analyzeIcon.setStroke(javafx.scene.paint.Color.WHITE);
+            analyzeIcon.setStrokeWidth(1.8);
+            analyzeIcon.setStrokeLineCap(javafx.scene.shape.StrokeLineCap.ROUND);
+            analyzeIcon.setScaleX(0.7);
+            analyzeIcon.setScaleY(0.7);
+            analyzeBtn.setGraphic(analyzeIcon);
+            analyzeBtn.setOnAction(ev -> {
+                readMoreStage.close();
+                runAnalysis(e.getNotePersonnelle());
+            });
 
             Button closeBtn = new Button("Close");
             closeBtn.getStyleClass().addAll("btn", "btn-primary");
             closeBtn.setOnAction(ev -> readMoreStage.close());
 
-            footer.getChildren().add(closeBtn);
+            footer.getChildren().addAll(analyzeBtn, closeBtn);
 
             root.getChildren().addAll(topBar, header, contentCard, footer);
 

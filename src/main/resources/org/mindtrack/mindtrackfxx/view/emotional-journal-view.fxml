@@ -174,14 +174,6 @@
                                     </HBox>
                                 </graphic>
                             </Button>
-                            <Button fx:id="analyseButton" onAction="#onAnalyseEntry" styleClass="btn, btn-ai">
-                                <graphic>
-                                    <HBox spacing="6" alignment="CENTER">
-                                        <SVGPath fill="transparent" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLineCap="ROUND" strokeLineJoin="ROUND" content="M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z M21 21l-4.35-4.35 M11 8v6 M8 11h6" scaleX="0.6" scaleY="0.6"/>
-                                        <Label text="AI Analyze" styleClass="btn-label" style="-fx-text-fill: #ffffff;"/>
-                                    </HBox>
-                                </graphic>
-                            </Button>
                         </HBox>
                     </VBox>
 

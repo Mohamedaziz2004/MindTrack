@@ -63,7 +63,7 @@
                         maxWidth="Infinity">
                     <graphic>
                         <HBox spacing="15" alignment="CENTER_LEFT">
-                            <Label text="🏋️" styleClass="nav-icon"/>
+                            <Label text="🏋" styleClass="nav-icon"/>
                         </HBox>
                     </graphic>
                 </Button>
@@ -75,7 +75,7 @@
                         maxWidth="Infinity">
                     <graphic>
                         <HBox spacing="15" alignment="CENTER_LEFT">
-                            <Label text="⏱️" styleClass="nav-icon"/>
+                            <Label text="⏱" styleClass="nav-icon"/>
                         </HBox>
                     </graphic>
                 </Button>

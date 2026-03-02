@@ -9,7 +9,7 @@
            xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="controllers.MainController"
            prefWidth="1200" prefHeight="720"
-           stylesheets="@/css/hab.css"
+           stylesheets="@../css/hab.css"
            styleClass="app-root">
 
     <!-- ✅ Ton layout principal (inchangé) -->

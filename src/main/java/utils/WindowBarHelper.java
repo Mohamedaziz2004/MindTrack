@@ -12,7 +12,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.geometry.Rectangle2D;
 
 /**
  * Overlays floating minimize / close buttons on the top-right of the window,
@@ -20,6 +22,9 @@ import javafx.stage.Stage;
  * drag region so the user can move the undecorated window.
  */
 public final class WindowBarHelper {
+
+    private static final double LOGIN_WIDTH = 1120;
+    private static final double LOGIN_HEIGHT = 700;
 
     private static double xOffset = 0;
     private static double yOffset = 0;
@@ -139,5 +144,30 @@ public final class WindowBarHelper {
              + "-fx-min-width: 32;"
              + "-fx-min-height: 26;";
     }
-}
 
+    public static void applyFixedLoginWindow(Stage stage) {
+        if (stage == null) {
+            return;
+        }
+        stage.setFullScreen(false);
+        stage.setMaximized(false);
+        stage.setResizable(false);
+        stage.setWidth(LOGIN_WIDTH);
+        stage.setHeight(LOGIN_HEIGHT);
+        stage.centerOnScreen();
+    }
+
+    public static void applyFullScreenWindow(Stage stage) {
+        if (stage == null) {
+            return;
+        }
+        Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+        stage.setFullScreen(false);
+        stage.setMaximized(false);
+        stage.setResizable(false);
+        stage.setX(bounds.getMinX());
+        stage.setY(bounds.getMinY());
+        stage.setWidth(bounds.getWidth());
+        stage.setHeight(bounds.getHeight());
+    }
+}

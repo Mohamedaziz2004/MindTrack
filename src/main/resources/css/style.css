@@ -140,6 +140,60 @@
     -fx-background-color: #f5f7fc;
 }
 
+.top-bar {
+    -fx-background-color: #f5f7fc;
+    -fx-padding: 46 20 10 20;
+}
+
+.profile-grid {
+    -fx-hgap: 24;
+    -fx-vgap: 24;
+}
+
+.card {
+    -fx-background-color: white;
+    -fx-padding: 22;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: #eaedf3;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.07), 10, 0, 0, 3);
+    -fx-max-width: Infinity;
+}
+
+.profile-shortcut {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: #eaedf3;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+}
+
+.profile-shortcut:hover {
+    -fx-border-color: #4a7cff;
+}
+
+.profile-email {
+    -fx-text-fill: #2c3e50;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.admin-table {
+    -fx-background-color: white;
+    -fx-border-color: #eaedf3;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+.admin-table .column-header-background {
+    -fx-background-color: #f0f4ff;
+}
+
+.admin-table .column-header, .admin-table .filler {
+    -fx-border-color: #eaedf3;
+}
+
 .main-content {
     -fx-padding: 30;
 }
@@ -174,16 +228,6 @@
     -fx-text-fill: #34495e;
 }
 
-/* ================= CARD ================= */
-.card {
-    -fx-background-color: white;
-    -fx-padding: 22;
-    -fx-background-radius: 14;
-    -fx-border-radius: 14;
-    -fx-border-color: #eaedf3;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.07), 10, 0, 0, 3);
-}
-
 /* ================= INPUTS (dashboard) ================= */
 .input, .auth-field {
     -fx-pref-height: 40;
@@ -195,8 +239,8 @@
     -fx-font-size: 13px;
 }
 
-.input:focused, .auth-field:focused {
-    -fx-border-color: #4a7cff;
+.editable-field .input {
+    -fx-padding: 10 32 10 14;
 }
 
 .textarea {
@@ -208,8 +252,27 @@
     -fx-font-size: 13px;
 }
 
-.textarea:focused {
-    -fx-border-color: #4a7cff;
+.editable-field .textarea {
+    -fx-padding: 10 32 10 14;
+}
+
+.edit-button {
+    -fx-background-color: rgba(240, 244, 255, 0.9);
+    -fx-text-fill: #4a7cff;
+    -fx-background-radius: 10;
+    -fx-padding: 2 6;
+    -fx-font-size: 11px;
+    -fx-cursor: hand;
+    -fx-opacity: 0;
+}
+
+.editable-field:hover .edit-button {
+    -fx-opacity: 1;
+}
+
+.edit-button:hover {
+    -fx-background-color: #4a7cff;
+    -fx-text-fill: white;
 }
 
 /* ================= BUTTONS (dashboard) ================= */
@@ -413,6 +476,9 @@
     -fx-text-fill: #ff6b6b;
     -fx-font-size: 11px;
     -fx-font-weight: bold;
+    -fx-min-height: 16px;
+    -fx-pref-height: 16px;
+    -fx-max-height: 16px;
 }
 
 .input-success {

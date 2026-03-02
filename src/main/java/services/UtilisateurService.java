@@ -140,6 +140,15 @@ public class UtilisateurService implements IService<Utilisateur> {
         }
     }
 
+    public void updateRole(int userId, String newRole) throws SQLException {
+        String sql = "UPDATE utilisateur SET roleU = ? WHERE idU = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, newRole);
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+        }
+    }
+
     //login
     public Utilisateur login(String email, String password) throws SQLException {
         String sql = "SELECT * FROM utilisateur WHERE emailU = ?";

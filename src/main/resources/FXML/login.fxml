@@ -48,7 +48,7 @@
                        style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: rgba(255,255,255,0.9);"/>
                 <TextField fx:id="emailField" promptText="you@example.com"
                            styleClass="login-input"/>
-                <Label fx:id="emailErrorLabel" text="" visible="false" managed="false"
+                <Label fx:id="emailErrorLabel" text="" visible="false" managed="true"
                        styleClass="input-error-label"/>
             </VBox>
 
@@ -58,7 +58,7 @@
                        style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: rgba(255,255,255,0.9);"/>
                 <PasswordField fx:id="passwordField" promptText="••••••••"
                                styleClass="login-input"/>
-                <Label fx:id="passwordErrorLabel" text="" visible="false" managed="false"
+                <Label fx:id="passwordErrorLabel" text="" visible="false" managed="true"
                        styleClass="input-error-label"/>
             </VBox>
 
@@ -75,7 +75,7 @@
                 </HBox>
                 <TextField fx:id="captchaInput" promptText="Enter the text above"
                            styleClass="login-input"/>
-                <Label fx:id="captchaErrorLabel" text="" visible="false" managed="false"
+                <Label fx:id="captchaErrorLabel" text="" visible="false" managed="true"
                        styleClass="input-error-label"/>
             </VBox>
         </VBox>
@@ -128,10 +128,9 @@
     </VBox>
 
     <!-- RIGHT SIDE - VIDEO BACKGROUND -->
-    <VBox prefWidth="620" prefHeight="700" spacing="0">
-        <MediaView fx:id="bgMediaView" fitWidth="620" fitHeight="700" preserveRatio="false"/>
+    <VBox prefWidth="620" prefHeight="720" spacing="0">
+        <MediaView fx:id="bgMediaView" fitWidth="620" fitHeight="730" preserveRatio="false"/>
     </VBox>
 </HBox>
-
 
 

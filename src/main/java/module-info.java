@@ -22,7 +22,6 @@ module com.example.mindtrack {
     requires jakarta.mail;
     requires jakarta.activation;
 
-
     opens controllers to javafx.fxml;
     opens main to javafx.fxml;
     opens entities to javafx.base;

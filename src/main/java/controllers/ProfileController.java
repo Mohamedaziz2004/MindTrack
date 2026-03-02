@@ -14,6 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import services.ProfilPsychologiqueService;
 import services.UtilisateurService;
 import utils.TotpUtil;
@@ -41,8 +42,21 @@ public class ProfileController {
     @FXML private TextField stressField;
     @FXML private TextField motivationField;
     @FXML private TextArea descriptionArea;
+    @FXML private TextArea aboutMeArea;
+
+    @FXML private Button editNomButton;
+    @FXML private Button editPrenomButton;
+    @FXML private Button editEmailButton;
+    @FXML private Button editAgeButton;
+    @FXML private Button editStressButton;
+    @FXML private Button editMotivationButton;
+    @FXML private Button editDescriptionButton;
+    @FXML private Button editAboutMeButton;
 
     @FXML private ImageView profileImageView;
+    @FXML private ImageView headerProfileImageView;
+    @FXML private Label headerEmailLabel;
+    @FXML private ScrollPane mainScroll;
     @FXML private Label totpStatusLabel;
     @FXML private Button totpToggleButton;
 
@@ -54,6 +68,7 @@ public class ProfileController {
     private ProfilPsychologiqueService profileService = new ProfilPsychologiqueService();
 
     private Utilisateur currentUser;
+    private Utilisateur targetUser;
     private ProfilPsychologique profile;
 
     @FXML
@@ -65,27 +80,78 @@ public class ProfileController {
             return;
         }
 
-        profile = profileService.findByUserId(currentUser.getIdU());
+        Utilisateur viewedUser = UserSession.getViewedUser();
+        if (isAdminUser(currentUser) && viewedUser != null) {
+            targetUser = viewedUser;
+        } else {
+            targetUser = currentUser;
+            UserSession.clearViewedUser();
+        }
+
+        profile = profileService.findByUserId(targetUser.getIdU());
+        if (profile == null) {
+            profileService.createDefaultProfile(targetUser.getIdU());
+            profile = profileService.findByUserId(targetUser.getIdU());
+        }
 
         loadUserData();
         loadProfileData();
         loadProfilePicture();
+        loadHeaderProfilePicture();
         applyRoundedClip();
         refreshTotpStatus();
+        configureEditableFields();
+    }
+
+    private void configureEditableFields() {
+        configureEditableField(nomField, editNomButton);
+        configureEditableField(prenomField, editPrenomButton);
+        configureEditableField(emailField, editEmailButton);
+        configureEditableField(ageField, editAgeButton);
+        configureEditableField(stressField, editStressButton);
+        configureEditableField(motivationField, editMotivationButton);
+        configureEditableField(descriptionArea, editDescriptionButton);
+        configureEditableField(aboutMeArea, editAboutMeButton);
+    }
+
+    private void configureEditableField(TextInputControl field, Button editButton) {
+        if (field == null || editButton == null) {
+            return;
+        }
+        field.setEditable(false);
+        editButton.setFocusTraversable(false);
+        editButton.setOnAction(event -> {
+            field.setEditable(true);
+            field.requestFocus();
+            field.positionCaret(field.getText() != null ? field.getText().length() : 0);
+        });
+        field.focusedProperty().addListener((obs, oldV, newV) -> {
+            if (!newV) {
+                field.setEditable(false);
+            }
+        });
     }
 
 
 
     private void loadUserData() {
-        nomField.setText(currentUser.getNomU());
-        prenomField.setText(currentUser.getPrenomU());
-        emailField.setText(currentUser.getEmailU());
-        ageField.setText(String.valueOf(currentUser.getAgeU()));
+        nomField.setText(targetUser.getNomU());
+        prenomField.setText(targetUser.getPrenomU());
+        emailField.setText(targetUser.getEmailU());
+        ageField.setText(String.valueOf(targetUser.getAgeU()));
+        if (headerEmailLabel != null) {
+            Utilisateur headerUser = getHeaderUser();
+            headerEmailLabel.setText(headerUser != null ? headerUser.getEmailU() : "");
+        }
+    }
+
+    private Utilisateur getHeaderUser() {
+        return currentUser;
     }
 
     private void loadProfileData() {
         try {
-            profile = profileService.findByUserId(currentUser.getIdU());
+            profile = profileService.findByUserId(targetUser.getIdU());
             if (profile != null) {
                 stressField.setText(String.valueOf(profile.getNiveauStress()));
                 motivationField.setText(String.valueOf(profile.getNiveauMotivation()));
@@ -97,12 +163,12 @@ public class ProfileController {
     }
 
     private void loadProfilePicture() {
-        if (profileImageView == null || currentUser == null) {
+        if (targetUser == null || profileImageView == null) {
             return;
         }
 
         Image image = null;
-        String path = currentUser.getProfilePicturePath();
+        String path = targetUser.getProfilePicturePath();
         if (path != null && !path.isBlank()) {
             Path filePath = Paths.get(path);
             if (Files.exists(filePath)) {
@@ -122,32 +188,68 @@ public class ProfileController {
         }
     }
 
-    private void applyRoundedClip() {
-        if (profileImageView == null) {
+    private void loadHeaderProfilePicture() {
+        Utilisateur headerUser = getHeaderUser();
+        if (headerUser == null || headerProfileImageView == null) {
             return;
         }
-        profileImageView.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
+
+        Image image = null;
+        String path = headerUser.getProfilePicturePath();
+        if (path != null && !path.isBlank()) {
+            Path filePath = Paths.get(path);
+            if (Files.exists(filePath)) {
+                image = new Image(filePath.toUri().toString(), true);
+            }
+        }
+
+        if (image == null) {
+            var resource = getClass().getResource(DEFAULT_PROFILE_PICTURE);
+            if (resource != null) {
+                image = new Image(resource.toExternalForm(), true);
+            }
+        }
+
+        if (image != null) {
+            headerProfileImageView.setImage(image);
+        }
+    }
+
+    private void applyRoundedClip() {
+        applyCircularClip(profileImageView);
+        applyCircularClip(headerProfileImageView);
+    }
+
+    private void applyCircularClip(ImageView target) {
+        if (target == null) {
+            return;
+        }
+        target.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
             double radius = Math.min(newBounds.getWidth(), newBounds.getHeight()) / 2.0;
             javafx.scene.shape.Circle clip = new javafx.scene.shape.Circle(
                     newBounds.getMinX() + newBounds.getWidth() / 2.0,
                     newBounds.getMinY() + newBounds.getHeight() / 2.0,
                     radius
             );
-            profileImageView.setClip(clip);
+            target.setClip(clip);
         });
     }
 
     private void refreshTotpStatus() {
-        if (totpStatusLabel == null || totpToggleButton == null || currentUser == null) {
+        if (totpStatusLabel == null || totpToggleButton == null || targetUser == null) {
             return;
         }
-        if (currentUser.isTotpEnabled()) {
+        if (targetUser.isTotpEnabled()) {
             totpStatusLabel.setText("Enabled");
             totpToggleButton.setText("Disable 2FA");
         } else {
             totpStatusLabel.setText("Disabled");
             totpToggleButton.setText("Enable 2FA");
         }
+    }
+
+    private boolean isAdminUser(Utilisateur user) {
+        return user != null && user.getRole() != null && user.getRole().equalsIgnoreCase("admin");
     }
 
     private Optional<String> promptForTotpCode(String header, String contentText) {
@@ -162,7 +264,7 @@ public class ProfileController {
     public void handleUploadPicture() {
         messageLabel.setStyle("-fx-text-fill: red;");
 
-        if (currentUser == null) {
+        if (targetUser == null) {
             messageLabel.setText("No user session found.");
             return;
         }
@@ -183,12 +285,12 @@ public class ProfileController {
             Files.createDirectories(targetDir);
 
             String extension = getFileExtension(selected.getName());
-            String fileName = "user_" + currentUser.getIdU() + (extension.isEmpty() ? ".png" : extension);
+            String fileName = "user_" + targetUser.getIdU() + (extension.isEmpty() ? ".png" : extension);
             Path targetFile = targetDir.resolve(fileName);
 
             Files.copy(selected.toPath(), targetFile, StandardCopyOption.REPLACE_EXISTING);
-            currentUser.setProfilePicturePath(targetFile.toString());
-            userService.update(currentUser);
+            targetUser.setProfilePicturePath(targetFile.toString());
+            userService.update(targetUser);
 
             loadProfilePicture();
             messageLabel.setStyle("-fx-text-fill: green;");
@@ -221,6 +323,11 @@ public class ProfileController {
         String description = descriptionArea.getText() != null ? descriptionArea.getText().trim() : "";
 
         messageLabel.setStyle("-fx-text-fill: red;");
+
+        if (targetUser == null) {
+            messageLabel.setText("No user session found.");
+            return;
+        }
 
         // 🔹 Empty check
         if (nom.isEmpty() || prenom.isEmpty() || email.isEmpty() || ageText.isEmpty()
@@ -286,12 +393,12 @@ public class ProfileController {
         try {
 
             // 🔹 Update user entity
-            currentUser.setNomU(nom);
-            currentUser.setPrenomU(prenom);
-            currentUser.setEmailU(email);
-            currentUser.setAgeU(age);
+            targetUser.setNomU(nom);
+            targetUser.setPrenomU(prenom);
+            targetUser.setEmailU(email);
+            targetUser.setAgeU(age);
 
-            userService.update(currentUser);
+            userService.update(targetUser);
 
             // 🔹 Update profile entity (1–1 relation safe)
             profile.setNiveauStress(stress);
@@ -314,7 +421,7 @@ public class ProfileController {
 
         try {
 
-            if (currentUser == null) {
+            if (targetUser == null) {
                 messageLabel.setText("No user session found.");
                 return;
             }
@@ -327,9 +434,13 @@ public class ProfileController {
                 return;
             }
 
-            userService.supprimer(currentUser.getIdU());
+            userService.supprimer(targetUser.getIdU());
 
-            UserSession.clear();
+            if (currentUser != null && currentUser.getIdU() == targetUser.getIdU()) {
+                UserSession.clear();
+            } else {
+                UserSession.clearViewedUser();
+            }
 
             messageLabel.setStyle("-fx-text-fill: green;");
             messageLabel.setText("Account deleted successfully.");
@@ -348,29 +459,29 @@ public class ProfileController {
     public void handleTotpToggle() {
         messageLabel.setStyle("-fx-text-fill: red;");
 
-        if (currentUser == null) {
+        if (targetUser == null) {
             messageLabel.setText("No user session found.");
             return;
         }
 
         try {
-            if (currentUser.isTotpEnabled()) {
+            if (targetUser.isTotpEnabled()) {
                 Optional<String> code = promptForTotpCode("Disable two-factor authentication", "Enter your current six-digit code.");
                 if (code.isEmpty()) {
                     return;
                 }
-                if (!TotpUtil.verify(currentUser.getTotpSecret(), code.get())) {
+                if (!TotpUtil.verify(targetUser.getTotpSecret(), code.get())) {
                     messageLabel.setText("Invalid code. Try again.");
                     return;
                 }
-                currentUser.setTotpEnabled(false);
-                currentUser.setTotpSecret(null);
-                userService.update(currentUser);
+                targetUser.setTotpEnabled(false);
+                targetUser.setTotpSecret(null);
+                userService.update(targetUser);
                 messageLabel.setStyle("-fx-text-fill: green;");
                 messageLabel.setText("Two-factor authentication disabled.");
             } else {
                 String secret = TotpUtil.generateSecret();
-                String provisioningUri = TotpUtil.getTotpUri("MindTrack", currentUser.getEmailU(), secret);
+                String provisioningUri = TotpUtil.getTotpUri("MindTrack", targetUser.getEmailU(), secret);
 
                 // Generate QR code for scanning
                 java.awt.image.BufferedImage qrImage = TotpUtil.generateQrCode(provisioningUri, 300);
@@ -406,9 +517,9 @@ public class ProfileController {
                     messageLabel.setText("Invalid code. Please try enabling 2FA again.");
                     return;
                 }
-                currentUser.setTotpSecret(secret);
-                currentUser.setTotpEnabled(true);
-                userService.update(currentUser);
+                targetUser.setTotpSecret(secret);
+                targetUser.setTotpEnabled(true);
+                userService.update(targetUser);
                 messageLabel.setStyle("-fx-text-fill: green;");
                 messageLabel.setText("Two-factor authentication enabled.");
             }
@@ -420,25 +531,77 @@ public class ProfileController {
     }
 
     @FXML
+    public void handleAdminDashboard() {
+        if (!isAdminUser(currentUser)) {
+            return;
+        }
+        try {
+            UserSession.clearViewedUser();
+
+            Stage profileStage = (Stage) messageLabel.getScene().getWindow();
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/admin_dashboard.fxml"));
+            Parent root = loader.load();
+
+            Stage adminStage = new Stage();
+            adminStage.initStyle(StageStyle.UNDECORATED);
+            adminStage.getIcons().setAll(
+                    new Image(Objects.requireNonNull(getClass().getResourceAsStream("/logo.png")))
+            );
+
+            Parent wrapped = WindowBarHelper.wrap(root, adminStage, false, false);
+            Scene scene = new Scene(wrapped);
+            scene.getStylesheets().add(
+                    Objects.requireNonNull(getClass().getResource("/css/style.css")).toExternalForm());
+            adminStage.setScene(scene);
+            WindowBarHelper.applyFullScreenWindow(adminStage);
+            adminStage.show();
+
+            profileStage.close();
+        } catch (IOException e) {
+            messageLabel.setText("Navigation error.");
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     public void handleLogout() {
         try {
             UserSession.clear();
 
-            Stage stage = (Stage) messageLabel.getScene().getWindow();
+            Stage profileStage = (Stage) messageLabel.getScene().getWindow();
+
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/fxml/login.fxml"));
             Parent root = loader.load();
-            Parent wrapped = WindowBarHelper.wrap(root, stage, true, false);
+
+            Stage loginStage = new Stage();
+            loginStage.initStyle(StageStyle.UNDECORATED);
+            loginStage.getIcons().setAll(
+                    new Image(Objects.requireNonNull(getClass().getResourceAsStream("/logo.png")))
+            );
+
+            Parent wrapped = WindowBarHelper.wrap(root, loginStage, true, false);
             Scene scene = new Scene(wrapped);
             scene.getStylesheets().add(
                     Objects.requireNonNull(getClass().getResource("/css/style.css")).toExternalForm());
 
-            stage.setWidth(1120);
-            stage.setHeight(700);
-            stage.setScene(scene);
+            loginStage.setScene(scene);
+            WindowBarHelper.applyFixedLoginWindow(loginStage);
+            loginStage.show();
+
+            profileStage.close();
         } catch (IOException e) {
             messageLabel.setText("Logout error.");
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void handleHeaderProfileClick() {
+        if (mainScroll != null) {
+            mainScroll.setVvalue(0);
+            mainScroll.requestFocus();
         }
     }
 

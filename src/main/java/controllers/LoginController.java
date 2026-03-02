@@ -26,6 +26,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.scene.image.Image;
 
 import services.ComprefaceClient;
 import utils.ComprefaceConfig;
@@ -333,9 +335,7 @@ public class LoginController {
                 messageLabel.setStyle("-fx-text-fill: green;");
                 messageLabel.setText("Welcome " + user.getPrenomU());
 
-                System.out.println("Logged in user: " + user.getEmailU());
-
-                openProfile();
+                openNextScreen(user);
 
             } else {
                 // Database mismatch — show error under the button and mark all fields red
@@ -409,7 +409,7 @@ public class LoginController {
             messageLabel.setStyle("-fx-text-fill: green;");
             messageLabel.setText("Welcome " + user.getPrenomU());
 
-            openProfile();
+            openNextScreen(user);
 
         } catch (IOException e) {
             messageLabel.setText("Face login failed. Check camera/API key.");
@@ -435,6 +435,7 @@ public class LoginController {
         scene.getStylesheets().add(
                 Objects.requireNonNull(getClass().getResource("/css/style.css")).toExternalForm());
         stage.setScene(scene);
+        WindowBarHelper.applyFixedLoginWindow(stage);
     }
 
     @FXML
@@ -448,18 +449,63 @@ public class LoginController {
         scene.getStylesheets().add(
                 Objects.requireNonNull(getClass().getResource("/css/style.css")).toExternalForm());
         stage.setScene(scene);
+        WindowBarHelper.applyFixedLoginWindow(stage);
     }
 
     private void openProfile() throws IOException {
         stopVideo();
-        Stage stage = (Stage) emailField.getScene().getWindow();
+        Stage loginStage = (Stage) emailField.getScene().getWindow();
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/profile.fxml"));
         Parent root = loader.load();
-        Parent wrapped = WindowBarHelper.wrap(root, stage, false, false);
+
+        Stage profileStage = new Stage();
+        profileStage.initStyle(StageStyle.UNDECORATED);
+        profileStage.getIcons().setAll(
+                new Image(Objects.requireNonNull(getClass().getResourceAsStream("/logo.png")))
+        );
+
+        Parent wrapped = WindowBarHelper.wrap(root, profileStage, false, false);
         Scene scene = new Scene(wrapped);
         scene.getStylesheets().add(
                 Objects.requireNonNull(getClass().getResource("/css/style.css")).toExternalForm());
-        stage.setScene(scene);
+        profileStage.setScene(scene);
+        WindowBarHelper.applyFullScreenWindow(profileStage);
+        profileStage.show();
+
+        loginStage.close();
+    }
+
+    private void openAdminDashboard() throws IOException {
+        stopVideo();
+        Stage loginStage = (Stage) emailField.getScene().getWindow();
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/admin_dashboard.fxml"));
+        Parent root = loader.load();
+
+        Stage adminStage = new Stage();
+        adminStage.initStyle(StageStyle.UNDECORATED);
+        adminStage.getIcons().setAll(
+                new Image(Objects.requireNonNull(getClass().getResourceAsStream("/logo.png")))
+        );
+
+        Parent wrapped = WindowBarHelper.wrap(root, adminStage, false, false);
+        Scene scene = new Scene(wrapped);
+        scene.getStylesheets().add(
+                Objects.requireNonNull(getClass().getResource("/css/style.css")).toExternalForm());
+        adminStage.setScene(scene);
+        WindowBarHelper.applyFullScreenWindow(adminStage);
+        adminStage.show();
+
+        loginStage.close();
+    }
+
+    private void openNextScreen(Utilisateur user) throws IOException {
+        if (user != null && user.getRole() != null && user.getRole().equalsIgnoreCase("admin")) {
+            openAdminDashboard();
+        } else {
+            openProfile();
+        }
     }
 
     private void stopVideo() {
@@ -539,7 +585,7 @@ public class LoginController {
             UserSession.setCurrentUser(user);
             messageLabel.setStyle("-fx-text-fill: green;");
             messageLabel.setText("Welcome " + user.getPrenomU());
-            openProfile();
+            openNextScreen(user);
 
         } catch (SQLException e) {
             messageLabel.setStyle("-fx-text-fill: red;");

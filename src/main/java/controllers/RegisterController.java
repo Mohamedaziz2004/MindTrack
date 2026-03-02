@@ -520,5 +520,6 @@ public class RegisterController {
         scene.getStylesheets().add(
                 Objects.requireNonNull(getClass().getResource("/css/style.css")).toExternalForm());
         stage.setScene(scene);
+        WindowBarHelper.applyFixedLoginWindow(stage);
     }
 }

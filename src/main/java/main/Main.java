@@ -32,9 +32,7 @@ public class Main extends Application {
         stage.getIcons().setAll(
                 new Image(Objects.requireNonNull(getClass().getResourceAsStream("/logo.png")))
         );
-        stage.setWidth(1120);
-        stage.setHeight(700);
-        stage.setResizable(false);
+        WindowBarHelper.applyFixedLoginWindow(stage);
         stage.setScene(scene);
         stage.show();
     }

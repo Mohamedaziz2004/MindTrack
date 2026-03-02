@@ -13,7 +13,11 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.RowConstraints?>
 
 <BorderPane prefHeight="700" prefWidth="1100" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ProfileController">
 
@@ -39,7 +43,7 @@
             <Button styleClass="sidebar-button" text="Habits" />
             <Button styleClass="sidebar-button-active" text="Profile" />
             <Button styleClass="sidebar-button" text="Statistics" />
-            <Button styleClass="sidebar-button" text="Admin" />
+            <Button styleClass="sidebar-button" text="Admin" onAction="#handleAdminDashboard" />
             <Button styleClass="sidebar-button" text="Settings" />
             <Button styleClass="sidebar-button" text="Log Out" onAction="#handleLogout" />
 
@@ -50,9 +54,24 @@
     </VBox>
 </left>
 
+<!-- TOP BAR -->
+<top>
+    <HBox alignment="CENTER_RIGHT" styleClass="top-bar">
+        <children>
+            <HBox alignment="CENTER_RIGHT" spacing="10" styleClass="profile-shortcut" onMouseClicked="#handleHeaderProfileClick">
+                <ImageView fx:id="headerProfileImageView" fitHeight="32" fitWidth="32" pickOnBounds="true" preserveRatio="true" />
+                <Label fx:id="headerEmailLabel" styleClass="profile-email" text="user@email.com" />
+            </HBox>
+        </children>
+        <padding>
+            <Insets top="10" right="20" bottom="10" left="20" />
+        </padding>
+    </HBox>
+</top>
+
 <!-- MAIN CONTENT -->
 <center>
-    <ScrollPane fitToWidth="true" styleClass="main-scroll">
+    <ScrollPane fx:id="mainScroll" fitToWidth="true" styleClass="main-scroll">
         <content>
 
             <VBox spacing="20" styleClass="main-content">
@@ -60,124 +79,125 @@
                 <!-- TITLE -->
                 <Label styleClass="page-title" text="Psychological Profile Manager" />
 
-                <!-- ================= PROFILE CARD ================= -->
-                <VBox spacing="15" styleClass="card">
+                <GridPane styleClass="profile-grid">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50" />
+                        <ColumnConstraints percentWidth="50" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints vgrow="ALWAYS" />
+                        <RowConstraints vgrow="ALWAYS" />
+                    </rowConstraints>
 
-                    <Label styleClass="section-title" text="Your Profile" />
+                    <!-- ================= PROFILE CARD ================= -->
+                    <VBox GridPane.columnIndex="0" GridPane.rowIndex="0" spacing="15" styleClass="card">
 
-                    <!-- EXISTING FIELDS (DO NOT CHANGE IDS) -->
-                    <TextField fx:id="nomField" promptText="Last Name" styleClass="input" />
-                    <TextField fx:id="prenomField" promptText="First Name" styleClass="input" />
-                    <TextField fx:id="emailField" promptText="Email" styleClass="input" />
-                    <TextField fx:id="ageField" promptText="Age" styleClass="input" />
+                        <Label styleClass="section-title" text="Your Profile" />
 
-                    <!-- PLACEHOLDER UI (NO fx:id) -->
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <ImageView fx:id="profileImageView" fitHeight="54.0" fitWidth="62.0" pickOnBounds="true" preserveRatio="true" />
-                        <Button onAction="#handleUploadPicture" styleClass="secondary-button" text="Upload New Picture" />
-                    </HBox>
+                        <!-- EXISTING FIELDS (DO NOT CHANGE IDS) -->
+                        <StackPane styleClass="editable-field">
+                            <TextField fx:id="nomField" promptText="Last Name" styleClass="input" />
+                            <Button fx:id="editNomButton" text="✎" styleClass="edit-button" StackPane.alignment="TOP_RIGHT" />
+                        </StackPane>
+                        <StackPane styleClass="editable-field">
+                            <TextField fx:id="prenomField" promptText="First Name" styleClass="input" />
+                            <Button fx:id="editPrenomButton" text="✎" styleClass="edit-button" StackPane.alignment="TOP_RIGHT" />
+                        </StackPane>
+                        <StackPane styleClass="editable-field">
+                            <TextField fx:id="emailField" promptText="Email" styleClass="input" />
+                            <Button fx:id="editEmailButton" text="✎" styleClass="edit-button" StackPane.alignment="TOP_RIGHT" />
+                        </StackPane>
+                        <StackPane styleClass="editable-field">
+                            <TextField fx:id="ageField" promptText="Age" styleClass="input" />
+                            <Button fx:id="editAgeButton" text="✎" styleClass="edit-button" StackPane.alignment="TOP_RIGHT" />
+                        </StackPane>
 
-                    <TextArea prefHeight="80" promptText="About Me" styleClass="textarea" />
+                        <!-- PLACEHOLDER UI (NO fx:id) -->
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <ImageView fx:id="profileImageView" fitHeight="54.0" fitWidth="62.0" pickOnBounds="true" preserveRatio="true" />
+                            <Button onAction="#handleUploadPicture" styleClass="secondary-button" text="Upload New Picture" />
+                        </HBox>
 
-                </VBox>
+                    </VBox>
 
-                <!-- ================= PSYCHOLOGICAL DATA (WORKING) ================= -->
-                <VBox spacing="12" styleClass="card">
+                    <!-- ================= PSYCHOLOGICAL DATA ================= -->
+                    <VBox GridPane.columnIndex="1" GridPane.rowIndex="0" spacing="12" styleClass="card">
 
-                    <Label styleClass="section-title" text="Psychological Data" />
+                        <Label styleClass="section-title" text="Psychological Data" />
 
-                    <!-- EXISTING FIELDS (DO NOT CHANGE IDS) -->
-                    <TextField fx:id="stressField" promptText="Stress Level" styleClass="input" />
-                    <TextField fx:id="motivationField" promptText="Motivation Level" styleClass="input" />
-                    <TextArea fx:id="descriptionArea" prefHeight="80" promptText="Description" styleClass="textarea" />
+                        <!-- EXISTING FIELDS (DO NOT CHANGE IDS) -->
+                        <StackPane styleClass="editable-field">
+                            <TextField fx:id="stressField" promptText="Stress Level" styleClass="input" />
+                            <Button fx:id="editStressButton" text="✎" styleClass="edit-button" StackPane.alignment="TOP_RIGHT" />
+                        </StackPane>
+                        <StackPane styleClass="editable-field">
+                            <TextField fx:id="motivationField" promptText="Motivation Level" styleClass="input" />
+                            <Button fx:id="editMotivationButton" text="✎" styleClass="edit-button" StackPane.alignment="TOP_RIGHT" />
+                        </StackPane>
+                        <StackPane styleClass="editable-field">
+                            <TextArea fx:id="descriptionArea" prefHeight="80" promptText="Description" styleClass="textarea" />
+                            <Button fx:id="editDescriptionButton" text="✎" styleClass="edit-button" StackPane.alignment="TOP_RIGHT" />
+                        </StackPane>
 
-                </VBox>
+                    </VBox>
 
-                <!-- ================= ASSESSMENTS (PLACEHOLDER) ================= -->
-                <VBox spacing="12" styleClass="card">
+                    <!-- ================= APPLICATION PREFERENCES ================= -->
+                    <VBox GridPane.columnIndex="0" GridPane.rowIndex="1" spacing="12" styleClass="card">
 
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label styleClass="section-title" text="Your Assessments" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button styleClass="secondary-button" text="Take New Assessment" />
-                    </HBox>
+                        <Label styleClass="section-title" text="Application Preferences" />
 
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <VBox>
-                            <Label text="Mindfulness &amp; Stress Resilience" />
-                            <Label style="-fx-text-fill: #777; -fx-font-size: 11;" text="Completed 2023-10-26" />
-                        </VBox>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button styleClass="small-button" text="View Report" />
-                    </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="Mood Tracking Frequency" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <ComboBox />
+                        </HBox>
 
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <VBox>
-                            <Label text="Emotional Intelligence Profile" />
-                            <Label style="-fx-text-fill: #777; -fx-font-size: 11;" text="Pending 2024-01-15" />
-                        </VBox>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button styleClass="small-button" text="Continue Assessment" />
-                    </HBox>
+                        <CheckBox text="Receive daily prompts to write in your journal" />
+                        <CheckBox text="Get notified about your goal progress and milestones" />
 
-                </VBox>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="Display Theme" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <ComboBox />
+                        </HBox>
 
-                <!-- ================= PREFERENCES (PLACEHOLDER) ================= -->
-                <VBox spacing="12" styleClass="card">
+                    </VBox>
 
-                    <Label styleClass="section-title" text="Application Preferences" />
+                    <!-- ================= ACCOUNT & SECURITY ================= -->
+                    <VBox GridPane.columnIndex="1" GridPane.rowIndex="1" spacing="12" styleClass="card">
 
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="Mood Tracking Frequency" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <ComboBox />
-                    </HBox>
+                        <Label styleClass="section-title" text="Account &amp; Security" />
 
-                    <CheckBox text="Receive daily prompts to write in your journal" />
-                    <CheckBox text="Get notified about your goal progress and milestones" />
+                        <!-- KEEP EXISTING DELETE LOGIC BUTTON -->
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="Password" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Button styleClass="secondary-button" text="Change Password" />
+                        </HBox>
 
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="Display Theme" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <ComboBox />
-                    </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="Export Data" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Button styleClass="secondary-button" text="Export My Data" />
+                        </HBox>
 
-                </VBox>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="Delete Account" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Button onAction="#handleDelete" styleClass="danger-button" text="Delete Account" />
+                        </HBox>
 
-                <!-- ================= ACCOUNT & SECURITY ================= -->
-                <VBox spacing="12" styleClass="card">
+                        <!-- ================= TWO-FACTOR AUTHENTICATION ================= -->
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="Two-Factor" />
+                            <Label fx:id="totpStatusLabel" text="Disabled" styleClass="tag-label" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Button fx:id="totpToggleButton" onAction="#handleTotpToggle" styleClass="secondary-button" text="Enable 2FA" />
+                        </HBox>
+                        <Label styleClass="muted-text" text="Use Google Authenticator, Authy, or any TOTP app." />
 
-                    <Label styleClass="section-title" text="Account &amp; Security" />
-
-                    <!-- KEEP EXISTING DELETE LOGIC BUTTON -->
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="Password" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button styleClass="secondary-button" text="Change Password" />
-                    </HBox>
-
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="Export Data" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button styleClass="secondary-button" text="Export My Data" />
-                    </HBox>
-
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="Delete Account" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button onAction="#handleDelete" styleClass="danger-button" text="Delete Account" />
-                    </HBox>
-
-                    <!-- ================= TWO-FACTOR AUTHENTICATION ================= -->
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="Two-Factor" />
-                        <Label fx:id="totpStatusLabel" text="Disabled" styleClass="tag-label" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button fx:id="totpToggleButton" onAction="#handleTotpToggle" styleClass="secondary-button" text="Enable 2FA" />
-                    </HBox>
-                    <Label styleClass="muted-text" text="Use Google Authenticator, Authy, or any TOTP app." />
-
-                </VBox>
+                    </VBox>
+                </GridPane>
 
                 <!-- ================= ACTION BUTTONS (WORKING) ================= -->
                 <HBox alignment="CENTER_RIGHT" spacing="10">

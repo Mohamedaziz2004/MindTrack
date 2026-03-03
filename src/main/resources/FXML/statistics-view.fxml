@@ -8,7 +8,7 @@
 <?import javafx.scene.chart.*?>
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.mindtrack.mindtrackfxx.controller.StatisticsController"
+      fx:controller="controllers.StatisticsController"
       stylesheets="@../styles/modern-style.css"
       styleClass="stats-root" spacing="24" prefWidth="800" prefHeight="600">
 

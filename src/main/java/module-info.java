@@ -15,16 +15,15 @@ module org.mindtrack.mindtrackfxx {
     requires opencv;
 
     // Open packages to FXML reflection
-    opens org.mindtrack.mindtrackfxx.controller to javafx.fxml;
-    opens org.mindtrack.mindtrackfxx to javafx.fxml;
+    opens controllers to javafx.fxml;
+    opens main to javafx.fxml;
 
     // Export packages
-    exports org.mindtrack.mindtrackfxx;
-    exports org.mindtrack.mindtrackfxx.controller;
-    exports org.mindtrack.mindtrackfxx.util;
+    exports main;
+    exports controllers;
+    exports utils;
 
     // Entity and service packages
     exports entities;
     exports services;
-    exports utils;
 }

@@ -57,7 +57,7 @@ public class EmotionDetectionService {
 
             // Extract Haar Cascade XML from resources to temp file
             // Use ResourceLoader from main module for better module compatibility
-            java.io.InputStream cascadeStream = org.mindtrack.mindtrackfxx.util.ResourceLoader
+            java.io.InputStream cascadeStream = utils.ResourceLoader
                 .getResourceAsStream("opencv/data/haarcascade_frontalface_default.xml");
 
             if (cascadeStream == null) {

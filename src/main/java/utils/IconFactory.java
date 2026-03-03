@@ -1,4 +1,4 @@
-package org.mindtrack.mindtrackfxx.util;
+package utils;
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;

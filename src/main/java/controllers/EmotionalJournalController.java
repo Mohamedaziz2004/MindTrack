@@ -1,4 +1,4 @@
-package org.mindtrack.mindtrackfxx.controller;
+package controllers;
 
 import javafx.scene.shape.SVGPath;
 import entities.JournalEmotionnel;
@@ -19,7 +19,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import services.SpeechToTextService;
-import org.mindtrack.mindtrackfxx.util.*;
+import utils.*;
 import services.JournalService;
 import services.humeurService;
 import services.JournalAnalysisService;
@@ -32,7 +32,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.mindtrack.mindtrackfxx.util.AppConstants.*;
+import static utils.AppConstants.*;
 
 /**
  * Main controller for the Emotional Journal view.
@@ -184,7 +184,7 @@ public class EmotionalJournalController {
 
         // Set Save Mood button icon using IconFactory
         if (saveMoodButton != null) {
-            javafx.scene.shape.SVGPath saveIcon = org.mindtrack.mindtrackfxx.util.IconFactory.saveIcon();
+            javafx.scene.shape.SVGPath saveIcon = utils.IconFactory.saveIcon();
             saveMoodButton.setGraphic(saveIcon);
         }
 
@@ -192,7 +192,7 @@ public class EmotionalJournalController {
         if (recordAudioButton != null) {
             recordAudioButton.setText("Audio Transcription");
             recordAudioButton.getStyleClass().addAll("btn", "btn-gray");
-            javafx.scene.shape.SVGPath micIcon = org.mindtrack.mindtrackfxx.util.IconFactory.microphoneIcon();
+            javafx.scene.shape.SVGPath micIcon = utils.IconFactory.microphoneIcon();
             recordAudioButton.setGraphic(micIcon);
         }
     }
@@ -404,7 +404,7 @@ public class EmotionalJournalController {
 
         Scene loadingScene = new Scene(loadingRoot, 300, 180);
         loadingScene.setFill(javafx.scene.paint.Color.web("#0f172a"));
-        loadingScene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
+        loadingScene.getStylesheets().add(getClass().getResource("/styles/modern-style.css").toExternalForm());
 
         loadingStage.setScene(loadingScene);
         loadingStage.setResizable(false);
@@ -527,7 +527,7 @@ public class EmotionalJournalController {
 
         Scene scene = new Scene(scrollPane, 550, 650);
         scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
-        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/styles/modern-style.css").toExternalForm());
 
         resultStage.setScene(scene);
         resultStage.show();
@@ -662,7 +662,7 @@ public class EmotionalJournalController {
 
         Scene scene = new Scene(root);
         scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
-        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/styles/modern-style.css").toExternalForm());
 
         errorStage.setScene(scene);
         errorStage.setResizable(false);
@@ -756,7 +756,7 @@ public class EmotionalJournalController {
 
         Scene loadingScene = new Scene(loadingRoot, 350, 220);
         loadingScene.setFill(javafx.scene.paint.Color.web("#0f172a"));
-        loadingScene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
+        loadingScene.getStylesheets().add(getClass().getResource("/styles/modern-style.css").toExternalForm());
         loadingStage.setScene(loadingScene);
         loadingStage.setResizable(false);
         loadingStage.show();
@@ -816,7 +816,7 @@ public class EmotionalJournalController {
         header.setAlignment(Pos.CENTER_LEFT);
 
         try {
-            ImageView aiIcon = new ImageView(new Image(getClass().getResourceAsStream("/org/mindtrack/mindtrackfxx/icons/analysing.png")));
+            ImageView aiIcon = new ImageView(new Image(getClass().getResourceAsStream("/icons/analysing.png")));
             aiIcon.setFitWidth(36);
             aiIcon.setFitHeight(36);
             header.getChildren().add(aiIcon);
@@ -954,7 +954,7 @@ public class EmotionalJournalController {
 
         Scene scene = new Scene(root, 580, 650);
         scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
-        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/styles/modern-style.css").toExternalForm());
 
         resultStage.setScene(scene);
         resultStage.setMinWidth(480);
@@ -1215,7 +1215,7 @@ public class EmotionalJournalController {
 
         Scene scene = new Scene(scrollPane, 700, 850);
         scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
-        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/styles/modern-style.css").toExternalForm());
 
         emotionStage.setScene(scene);
 
@@ -1679,7 +1679,7 @@ public class EmotionalJournalController {
         item.getStyleClass().add("search-result-item");
 
         // Journal icon
-        SVGPath icon = org.mindtrack.mindtrackfxx.util.IconFactory.getIcon("journal");
+        SVGPath icon = utils.IconFactory.getIcon("journal");
         icon.setScaleX(0.55);
         icon.setScaleY(0.55);
         icon.setStroke(javafx.scene.paint.Color.web("#22d3ee"));
@@ -1746,7 +1746,7 @@ public class EmotionalJournalController {
 
         try {
             String iconName = showingAll ? "show-more.png" : "show-more.png";
-            ImageView icon = new ImageView(new Image(getClass().getResourceAsStream("/org/mindtrack/mindtrackfxx/icons/" + iconName)));
+            ImageView icon = new ImageView(new Image(getClass().getResourceAsStream("/icons/" + iconName)));
             icon.setFitWidth(16);
             icon.setFitHeight(16);
             graphic.getChildren().add(icon);
@@ -1775,7 +1775,7 @@ public class EmotionalJournalController {
     @FXML
     public void onShowStatistics() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/mindtrack/mindtrackfxx/view/statistics-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/statistics-view.fxml"));
             Parent root = loader.load();
 
             Stage statsStage = new Stage();
@@ -1790,7 +1790,7 @@ public class EmotionalJournalController {
 
             Scene scene = new Scene(wrapper, 900, 700);
             scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
-            scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/modern-style.css").toExternalForm());
 
             statsStage.setScene(scene);
             statsStage.setMinWidth(800);
@@ -1919,7 +1919,7 @@ public class EmotionalJournalController {
 
             Scene scene = new Scene(root, 560, 460);
             scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
-            scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/modern-style.css").toExternalForm());
 
             readMoreStage.setScene(scene);
             readMoreStage.setMinWidth(450);
@@ -2055,7 +2055,7 @@ public class EmotionalJournalController {
             HBox graphic = new HBox(10);
             graphic.setAlignment(Pos.CENTER_LEFT);
             try {
-                ImageView emojiIcon = new ImageView(new Image(getClass().getResourceAsStream("/org/mindtrack/mindtrackfxx/emojis/" + moods[i].toLowerCase() + ".png")));
+                ImageView emojiIcon = new ImageView(new Image(getClass().getResourceAsStream("/emojis/" + moods[i].toLowerCase() + ".png")));
                 emojiIcon.setFitWidth(24);
                 emojiIcon.setFitHeight(24);
                 graphic.getChildren().add(emojiIcon);
@@ -2099,7 +2099,7 @@ public class EmotionalJournalController {
         cancelBtn.setPrefWidth(100);
         cancelBtn.setOnAction(ev -> editStage.close());
 
-        Button saveBtn = createIconButton("Save", org.mindtrack.mindtrackfxx.util.IconFactory.saveIcon());
+        Button saveBtn = createIconButton("Save", utils.IconFactory.saveIcon());
         saveBtn.getStyleClass().addAll("btn", "btn-primary");
         saveBtn.setPrefWidth(100);
         saveBtn.setOnAction(ev -> {
@@ -2124,7 +2124,7 @@ public class EmotionalJournalController {
 
         Scene scene = new Scene(root, 400, 520);
         scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
-        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/styles/modern-style.css").toExternalForm());
 
         editStage.setScene(scene);
         editStage.setResizable(false);
@@ -2151,7 +2151,7 @@ public class EmotionalJournalController {
         HBox moodInfo = new HBox(10);
         moodInfo.setAlignment(Pos.CENTER);
         try {
-            ImageView emojiIcon = new ImageView(new Image(getClass().getResourceAsStream("/org/mindtrack/mindtrackfxx/emojis/" + m.getTypeHumeur().toLowerCase() + ".png")));
+            ImageView emojiIcon = new ImageView(new Image(getClass().getResourceAsStream("/emojis/" + m.getTypeHumeur().toLowerCase() + ".png")));
             emojiIcon.setFitWidth(28);
             emojiIcon.setFitHeight(28);
             moodInfo.getChildren().add(emojiIcon);
@@ -2174,7 +2174,7 @@ public class EmotionalJournalController {
         cancelBtn.setPrefWidth(110);
         cancelBtn.setOnAction(ev -> confirmStage.close());
 
-        Button deleteBtn = createIconButton("Delete", org.mindtrack.mindtrackfxx.util.IconFactory.deleteIcon());
+        Button deleteBtn = createIconButton("Delete", utils.IconFactory.deleteIcon());
         deleteBtn.getStyleClass().addAll("btn", "btn-danger");
         deleteBtn.setPrefWidth(110);
         deleteBtn.setOnAction(ev -> {
@@ -2189,7 +2189,7 @@ public class EmotionalJournalController {
 
         Scene scene = new Scene(root, 400, 340);
         scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
-        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/styles/modern-style.css").toExternalForm());
 
         confirmStage.setScene(scene);
         confirmStage.setResizable(false);
@@ -2232,7 +2232,7 @@ public class EmotionalJournalController {
         cancelBtn.setPrefWidth(110);
         cancelBtn.setOnAction(ev -> confirmStage.close());
 
-        Button deleteBtn = createIconButton("Delete", org.mindtrack.mindtrackfxx.util.IconFactory.deleteIcon());
+        Button deleteBtn = createIconButton("Delete", utils.IconFactory.deleteIcon());
         deleteBtn.getStyleClass().addAll("btn", "btn-danger");
         deleteBtn.setPrefWidth(110);
         deleteBtn.setOnAction(ev -> {
@@ -2247,7 +2247,7 @@ public class EmotionalJournalController {
 
         Scene scene = new Scene(root, 400, 280);
         scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
-        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/styles/modern-style.css").toExternalForm());
 
         confirmStage.setScene(scene);
         confirmStage.setResizable(false);
@@ -2321,7 +2321,7 @@ public class EmotionalJournalController {
 
         Scene scene = new Scene(root, 380, 250);
         scene.setFill(javafx.scene.paint.Color.web("#0f172a"));
-        scene.getStylesheets().add(getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/styles/modern-style.css").toExternalForm());
 
         notifStage.setScene(scene);
         notifStage.setResizable(false);

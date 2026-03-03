@@ -1,4 +1,4 @@
-package org.mindtrack.mindtrackfxx;
+package main;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
@@ -15,7 +15,7 @@ public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         // Load the emotional journal view directly
-        URL fxmlUrl = getClass().getResource("/org/mindtrack/mindtrackfxx/view/emotional-journal-view.fxml");
+        URL fxmlUrl = getClass().getResource("/FXML/emotional-journal-view.fxml");
         if (fxmlUrl == null) {
             throw new IOException("Cannot find emotional-journal-view.fxml");
         }
@@ -26,7 +26,7 @@ public class HelloApplication extends Application {
         Scene scene = new Scene(root, 1100, 750);
 
         // Load stylesheet
-        URL cssUrl = getClass().getResource("/org/mindtrack/mindtrackfxx/styles/modern-style.css");
+        URL cssUrl = getClass().getResource("/styles/modern-style.css");
         if (cssUrl != null) {
             scene.getStylesheets().add(cssUrl.toExternalForm());
         }

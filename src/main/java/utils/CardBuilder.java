@@ -1,4 +1,4 @@
-package org.mindtrack.mindtrackfxx.util;
+package utils;
 
 import entities.JournalEmotionnel;
 import entities.humeur;
@@ -10,7 +10,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 
-import static org.mindtrack.mindtrackfxx.util.AppConstants.*;
+import static utils.AppConstants.*;
 
 
 public final class CardBuilder {
@@ -152,7 +152,7 @@ public final class CardBuilder {
         try {
             String emojiFile = mood.getTypeHumeur().toLowerCase() + ".png";
             javafx.scene.image.Image emojiImage = new javafx.scene.image.Image(
-                CardBuilder.class.getResourceAsStream("/org/mindtrack/mindtrackfxx/emojis/" + emojiFile)
+                CardBuilder.class.getResourceAsStream("/emojis/" + emojiFile)
             );
             ImageView emojiIcon = new ImageView(emojiImage);
             emojiIcon.setFitWidth(36);

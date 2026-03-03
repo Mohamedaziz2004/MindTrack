@@ -1,4 +1,4 @@
-package org.mindtrack.mindtrackfxx.controller;
+package controllers;
 
 import entities.humeur;
 import javafx.application.Platform;

@@ -1,0 +1,1395 @@
+================================================================================
+MINDTRACK — DESIGN SYSTEM PROMPT & ARCHITECTURE GUIDE
+================================================================================
+Version: 2.0 | Updated: March 2026
+For: Team collaboration on consistent UI/UX across all modules
+
+COMPREHENSIVE DESIGN DOCUMENTATION FOR EXACT REPLICATION
+
+================================================================================
+PROJECT STRUCTURE (REFACTORED 2026)
+================================================================================
+
+src/
+├── main/
+│   ├── java/
+│   │   ├── controllers/          → UI Controllers
+│   │   │   ├── EmotionalJournalController.java
+│   │   │   └── StatisticsController.java
+│   │   ├── entities/             → Data models
+│   │   │   ├── JournalEmotionnel.java
+│   │   │   └── humeur.java
+│   │   ├── main/                 → Application entry point
+│   │   │   └── HelloApplication.java
+│   │   ├── services/             → Business logic
+│   │   │   ├── JournalService.java
+│   │   │   ├── humeurService.java
+│   │   │   ├── JournalAnalysisService.java
+│   │   │   ├── TranslationService.java
+│   │   │   ├── SpeechToTextService.java
+│   │   │   ├── EmotionDetectionService.java
+│   │   │   ├── PythonEmotionDetectionService.java
+│   │   │   ├── CrudService.java
+│   │   │   └── TestPythonService.java
+│   │   ├── utils/                → Utility & UI Factory Classes
+│   │   │   ├── IconFactory.java  → ★ CORE: SVG Icon generation (20+ icons)
+│   │   │   ├── CardBuilder.java  → ★ CORE: Card component factory
+│   │   │   ├── AppConstants.java → Configuration constants
+│   │   │   └── ResourceLoader.java → Module resource loading
+│   │   └── module-info.java      → Java 9+ module descriptor
+│   └── resources/
+│       └── org/mindtrack/mindtrackfxx/
+│           ├── view/             → FXML layouts
+│           │   ├── emotional-journal-view.fxml
+│           │   └── statistics-view.fxml
+│           ├── styles/           → CSS stylesheets
+│           │   └── modern-style.css
+│           ├── images/           → PNG images (logo, user avatar, etc.)
+│           ├── icons/            → Icon assets (analysing.png, etc.)
+│           ├── emojis/           → Emoji PNGs (happy.png, calm.png, etc.)
+│           └── background/       → Background images
+└── test/
+    └── java/
+        ├── controllers/          → Controller tests
+        └── services/
+            └── MindTrackServiceTest.java
+
+================================================================================
+APPLICATION OVERVIEW
+================================================================================
+
+Application Name:        Mind Track — Emotional Journal & Mood Tracker
+Framework:              JavaFX 17+ (Desktop GUI)
+Build Tool:             Maven 3.8+
+Java Version:           Java 17+
+Target Resolution:      1100 x 750px (minimum, UNDECORATED window)
+Window Style:           UNDECORATED (custom titlebar with min/max/close buttons)
+Main Entry Point:       main.HelloApplication
+Main View:             emotional-journal-view.fxml (controllers.EmotionalJournalController)
+Secondary View:         statistics-view.fxml (controllers.StatisticsController)
+Stylesheet:            modern-style.css (1077 lines, comprehensive styling)
+Startup Animation:      FadeTransition (0 → 1 opacity, 600ms smooth fade-in)
+
+================================================================================
+MODULE CONFIGURATION (module-info.java)
+================================================================================
+
+module org.mindtrack.mindtrackfxx {
+    requires javafx.controls;
+    requires javafx.fxml;
+    requires java.sql;
+    requires okhttp3;
+    requires com.google.gson;
+    requires org.controlsfx.controls;
+    requires com.dlsc.formsfx;
+    requires net.synedra.validatorfx;
+    requires java.desktop;
+    requires java.net.http;
+    requires opencv;  // For facial emotion detection
+
+    // IMPORTANT: FXML reflection requires these opens
+    opens controllers to javafx.fxml;
+    opens main to javafx.fxml;
+
+    // Public API exports
+    exports main;
+    exports controllers;
+    exports utils;
+    exports entities;
+    exports services;
+}
+
+================================================================================
+1. TYPOGRAPHY & FONT FAMILY
+================================================================================
+
+Font Stack (fallback order):
+  'Inter', 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif
+
+TYPOGRAPHY HIERARCHY:
+  Page Title:           22px, weight 800, #f9fafb (sidebar brand, window title)
+  Section Title:        15px, weight 700, #e5e7eb (section headers like "Recent Journals")
+  Card Title:           14px, weight 600, #e5e7eb (card titles, headings)
+  Body Text:            13px, weight 500, #d1d5db (default text content)
+  Button Text:          13px, weight 500, white/accent (action buttons)
+  Label/Small:          12px, weight 500, #9ca3af (labels, captions)
+  Extra Small:          11px, weight 500, rgba(255,255,255,0.35) (metadata)
+  Label Muted:          13px, weight 500, rgba(255,255,255,0.45) (secondary labels)
+  Small Muted:          11px, weight 500, rgba(255,255,255,0.35) (very subtle text)
+
+================================================================================
+2. COLOR PALETTE & DARK THEME
+================================================================================
+
+BACKGROUND COLORS:
+  Root Background:      #0f1923 (with background image, offset dark navy)
+  Primary Dark (dark):  #111827 (main content background)
+  Secondary Dark:       #1e293b (card backgrounds, slight lighter)
+  Sidebar:              rgba(17,24,39,0.92) (translucent, 92% opacity)
+  Card Dark:            #0d1520, #0d1117 (card container backgrounds)
+  Modal/Dialog:         #111827
+
+TEXT COLORS:
+  Text Primary:         #f9fafb (near white, main text)
+  Text Secondary:       #e5e7eb, #d1d5db (slightly gray, secondary text)
+  Text Tertiary:        #9ca3af (gray, muted labels)
+  Text Quaternary:      rgba(255,255,255,0.45) (very muted)
+  Text Quinary:         rgba(255,255,255,0.35) (extra muted)
+
+ACCENT COLORS (CYAN — primary interactive):
+  Accent Primary:       #22d3ee (bright cyan, hover states, highlights)
+  Accent Secondary:     #06b6d4 (darker cyan, gradients, depth)
+  Accent Tertiary:      #0e7490 (darkest cyan, shadows)
+  Accent Background:    rgba(6,182,212,0.12) (very transparent cyan for backgrounds)
+
+SEMANTIC COLORS (Mood tracking):
+  Happy/Positive:       #22c55e (bright green)
+  Calm/Peaceful:        #0ea5e9 (sky blue)
+  Neutral/Balanced:     #64748b (slate gray)
+  Sad/Negative:         #f59e0b (amber/orange)
+  Anxious/Alert:        #ef4444 (red)
+
+BORDER & DIVIDER COLORS:
+  Border Primary:       rgba(255,255,255,0.06) (subtle dividers)
+  Border Secondary:     rgba(255,255,255,0.04) (even more subtle)
+  Border Accent:        rgba(6,182,212,0.25) (cyan borders on hover)
+
+================================================================================
+3. SPACING & LAYOUT METRICS
+================================================================================
+
+Base Spacing Unit:      8px (all spacing in multiples: 8, 16, 24, 32, 48, 64, 80)
+
+PADDING (Interior spacing within components):
+  Sidebar:              top 20, right 12, bottom 20, left 12
+  Cards:                10px (VBox spacing), 16px (HBox spacing)
+  Buttons:              y-padding 10px, x-padding 14px
+  Text Areas:           internal padding varies per control
+  Sections:             12px spacing (VBox, between title and content)
+
+MARGIN (Exterior spacing between components):
+  HBox spacing:         12px (major columns in journal layout)
+  VBox spacing:         10-12px (vertical sections)
+  Card gap:             10px (between cards in FlowPane)
+  Icon-text gap:        6-14px (button graphic-text-gap)
+
+COMPONENT SIZING:
+  Sidebar Width:        200px (min/max), no vertical constraints
+  Main Content:         HBox.hgrow="ALWAYS" (fills remaining space)
+  Journal Card:         360px wide, 330-400px (min-max), 180-220px tall
+  Mood Card:            200px wide, 200-220px (min-max), 160-190px tall
+  Avatar Circle:        radius 20px (sidebar), radius 18px (top bar)
+  Icon Size:            24×24px (SVG base), scaled via setScaleX/Y
+
+BORDER RADIUS (Rounded corners — modern look):
+  Sidebar Panel:        18px
+  Cards:                varies (typically 10-14px)
+  Buttons:              10px (default), 6px (small buttons)
+  Input Fields:         8-10px
+  Dialog/Modals:        14-18px
+
+SHADOWS & EFFECTS (Depth):
+  Sidebar:              dropshadow(gaussian, rgba(0,0,0,0.35), 20, 0, 2, 0)
+  Cards:                subtle shadows for depth
+  Top Bar:              none (flat design)
+  Modals:               dropshadow(gaussian, rgba(0,0,0,0.5), 24, 0, 0, 8)
+├─ Light Cyan:          #22d3ee
+├─ Light Cyan Text:     #67e8f9
+
+MOOD BADGE COLORS:
+├─ Happy:               Background: rgba(34,197,94,0.15), Text: #4ade80
+├─ Calm:                Background: rgba(6,182,212,0.15), Text: #22d3ee
+├─ Neutral:             Background: rgba(255,255,255,0.08), Text: rgba(255,255,255,0.5)
+├─ Sad:                 Background: rgba(239,68,68,0.15), Text: #fca5a5
+└─ Anxious:             Background: rgba(251,191,36,0.15), Text: #fbbf24
+
+ERROR/DANGER:           #ef4444 (red), rgba(239,68,68,0.15) background
+SUCCESS:                #4ade80 (green)
+WARNING:                #fbbf24 (amber)
+
+TEXT COLORS:
+├─ Primary Text:        #f9fafb (brightest white)
+├─ Secondary Text:      #e5e7eb (light gray)
+├─ Tertiary Text:       #d1d5db (gray)
+├─ Muted Text:          #9ca3af (darker gray)
+├─ Very Muted:          rgba(255,255,255,0.3-0.5) (semi-transparent white)
+
+TRANSPARENCY PATTERNS (Glassmorphism):
+├─ Strong Glass:        rgba(17,24,39,0.92)
+├─ Medium Glass:        rgba(17,24,39,0.75)
+├─ Light Glass:         rgba(255,255,255,0.05-0.08)
+├─ Hover Glass:         rgba(6,182,212,0.1-0.15)
+
+================================================================================
+                       4. LAYOUT STRUCTURE & SPACING
+================================================================================
+
+OVERALL LAYOUT:
+HBox (root)
+├─ Left: VBox Sidebar (200px fixed, 200px minWidth, 200px maxWidth)
+└─ Right: VBox Content Root (HBox.hgrow="ALWAYS")
+
+SPACING STANDARDS:
+├─ Padding Root:        top=12, right=12, bottom=12, left=12
+├─ Sidebar Padding:     top=20, right=12, bottom=20, left=12
+├─ Section Padding:     22px
+├─ Component Padding:   10-14px for inputs, 10px for buttons
+├─ Vertical Gap:        12px (sections), 5px (mood options), 4px (buttons)
+├─ Horizontal Gap:      8px (inline elements), 12px (major sections)
+
+================================================================================
+                           5. SIDEBAR DESIGN
+================================================================================
+
+SIDEBAR CONTAINER:
+├─ Background:          rgba(17,24,39,0.92)
+├─ Border:              1px rgba(255,255,255,0.06)
+├─ Border Radius:       18px
+├─ Drop Shadow:         gaussian blur 20, offset 0,2, color rgba(0,0,0,0.35)
+├─ VBox Alignment:      TOP_CENTER
+├─ Spacing:             0
+
+SIDEBAR BUTTON (sidebar-btn):
+├─ Background:          transparent (default)
+├─ Background Hover:    rgba(255,255,255,0.06)
+├─ Padding:             10 14
+├─ Border Radius:       10px
+├─ Text Color:          rgba(255,255,255,0.5)
+├─ Text Color Hover:    rgba(255,255,255,0.85)
+├─ Alignment:           center-left
+├─ Graphic-Text Gap:    14px
+├─ Cursor:              HAND
+
+SIDEBAR BUTTON SELECTED:
+├─ Background:          rgba(6,182,212,0.12)
+├─ Text Color:          #22d3ee
+├─ SVG Icon Stroke:     #22d3ee
+
+SIDEBAR DANGER BUTTON:
+├─ Text Color:          rgba(239,68,68,0.65)
+├─ Text Color Hover:    #ef4444
+├─ Background Hover:    rgba(239,68,68,0.08)
+├─ SVG Icon Stroke:     rgba(239,68,68,0.55)
+├─ SVG Icon Hover:      #ef4444
+
+SVG ICONS IN SIDEBAR:
+├─ Fill:                transparent
+├─ Stroke:              rgba(255,255,255,0.4)
+├─ Stroke Width:        1.8
+├─ Stroke Line Cap:     ROUND
+├─ Stroke Line Join:    ROUND
+├─ Hover Stroke:        rgba(255,255,255,0.8)
+
+SIDEBAR SEPARATOR:
+├─ Padding:             6 0
+├─ Border:              0 0 1 0
+├─ Border Color:        rgba(255,255,255,0.06)
+
+AVATAR CONTAINER (bottom):
+├─ Background:          transparent
+├─ Alignment:           CENTER
+├─ Padding:             top=8, bottom=4
+
+AVATAR CIRCLE:
+├─ Radius:              20px
+├─ Fill:                linear-gradient(to bottom right, #06b6d4, #0e7490)
+├─ Stroke:              rgba(6,182,212,0.25)
+├─ Stroke Width:        2
+├─ Drop Shadow:         gaussian blur 8, color rgba(6,182,212,0.2)
+├─ Cursor:              HAND
+
+AVATAR TEXT:
+├─ Font Size:           14px
+├─ Font Weight:         700
+├─ Color:               white
+
+SIDEBAR BUTTONS LIST (in order):
+1. btnJournal  (iconJournal)
+2. btnGoals    (iconGoal)
+3. btnExercise (iconExercise)
+4. btnHabits   (iconHabits)
+5. btnProfile  (iconProfile)
+6. btnAdmin    (iconAdmin)
+[SPACER - Region VBox.vgrow="ALWAYS"]
+7. btnSettings (iconSettings)
+8. btnLogout   (iconLogout, danger class)
+
+SIDEBAR INDICATOR:
+├─ Hidden by default: managed="false", visible="false"
+├─ Used by controller for animated selection highlighting
+
+================================================================================
+                     6. WINDOW CONTROLS (TOP RIGHT)
+================================================================================
+
+CUSTOM WINDOW BAR:
+├─ Background:          transparent
+├─ Alignment:           TOP_RIGHT
+├─ Padding:             top=10, right=18
+├─ Spacing:             12px (between buttons)
+
+WINDOW BUTTONS (3 buttons):
+1. Minimize Button (minimizeBtn)
+   ├─ Background:       transparent
+   ├─ Padding:          0
+   ├─ Cursor:           HAND
+   ├─ Icon:             SVGPath "M2 12h20" (horizontal line)
+   ├─ Icon Stroke:      #1e3a5f
+   └─ Scale:            0.6
+
+2. Maximize Button (maximizeBtn)
+   ├─ Background:       transparent
+   ├─ Padding:          0
+   ├─ Icon:             SVGPath "M4 4h16v16h-16z" (square outline)
+   ├─ Icon Stroke:      #1e3a5f
+   ├─ Icon Fill:        transparent
+   └─ Scale:            0.6
+
+3. Close Button (closeBtn)
+   ├─ Background:       transparent
+   ├─ Padding:          0
+   ├─ Icon:             SVGPath "M6 6l12 12M6 18L18 6" (X shape)
+   ├─ Icon Stroke:      #1e3a5f
+   └─ Scale:            0.6
+
+================================================================================
+                         7. TOP BAR & BRANDING
+================================================================================
+
+TOP BAR (topBar):
+├─ Alignment:           CENTER_LEFT
+├─ Spacing:             12px
+├─ Style Class:         top-bar
+├─ Padding:             8 24
+├─ Background:          transparent
+
+LOGO:
+├─ ImageView (36x36px)
+├─ Source:              images/logo.png
+
+SPACER:
+├─ Region HBox.hgrow="ALWAYS" (flexes to fill space)
+
+SEARCH TOGGLE BUTTON:
+├─ Background:          rgba(255,255,255,0.05)
+├─ Background Hover:    rgba(6,182,212,0.1)
+├─ Border:              1px rgba(255,255,255,0.06)
+├─ Border Hover:        1px rgba(6,182,212,0.25)
+├─ Border Radius:       10px
+├─ Padding:             8px
+├─ Cursor:              HAND
+├─ Icon Stroke:         #9ca3af
+├─ Icon Hover:          #22d3ee
+├─ Icon Content:        "M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z M21 21l-4.35-4.35"
+├─ Icon Scale:          0.65
+
+AVATAR CONTAINER (top right):
+├─ Style Class:         avatar-container
+├─ Padding:             0 0 0 4
+├─ Alignment:           CENTER
+├─ Avatar Circle:       radius=18px, style class "avatar-circle"
+├─ User Avatar Image:   36x36px, images/user-avatar.png
+
+================================================================================
+                        8. SEARCH OVERLAY & RESULTS
+================================================================================
+
+SEARCH OVERLAY (searchOverlay):
+├─ Visibility:          hidden by default (managed="false", visible="false")
+├─ Style Class:         search-overlay
+├─ Background:          #111827
+├─ Border:              1px rgba(6,182,212,0.12)
+├─ Border Radius:       14px
+├─ Padding:             0
+├─ Drop Shadow:         gaussian blur 24, offset 0,8, color rgba(0,0,0,0.5)
+
+SEARCH BAR CONTAINER:
+├─ Style Class:         search-bar-container
+├─ Alignment:           CENTER_LEFT
+├─ Spacing:             10px
+├─ Padding:             12 16
+├─ Background:          #111827
+├─ Bottom Border:       1px rgba(255,255,255,0.04)
+├─ Border Radius:       14 14 0 0
+
+SEARCH ICON (in bar):
+├─ Stroke:              #22d3ee
+├─ Stroke Width:        1.8
+├─ Scale:               0.6
+├─ Content:             "M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z M21 21l-4.35-4.35"
+
+SEARCH INPUT FIELD (searchField):
+├─ Background:          transparent
+├─ Text Color:          #e5e7eb
+├─ Prompt Text:         rgba(255,255,255,0.25)
+├─ Font Size:           14px
+├─ Padding:             6 8
+├─ Border:              0
+├─ Focus Color:         transparent
+├─ Control Inner Bg:    transparent
+├─ HBox.hgrow:          ALWAYS
+
+SEARCH CLOSE BUTTON:
+├─ Background:          transparent
+├─ Padding:             6px
+├─ Border Radius:       6px
+├─ Cursor:              HAND
+├─ Icon Content:        "M18 6L6 18M6 6l12 12"
+├─ Icon Stroke:         #9ca3af
+├─ Icon Scale:          0.45
+
+SEARCH RESULTS CONTAINER:
+├─ Style Class:         search-results
+├─ Padding:             4 0
+├─ Max Height:          320px
+├─ Spacing:             0
+
+SEARCH RESULT ITEM:
+├─ Padding:             10 16
+├─ Background:          transparent
+├─ Background Hover:    rgba(6,182,212,0.06)
+├─ Border Radius:       0 (flat list items)
+├─ Cursor:              HAND
+
+================================================================================
+                     9. CONTENT SECTIONS & PANELS
+================================================================================
+
+SECTION (generic panel):
+├─ Background:          rgba(17,24,39,0.75) (glassmorphism)
+├─ Border:              1px rgba(255,255,255,0.06)
+├─ Border Radius:       16px
+├─ Padding:             22px
+├─ Drop Shadow:         gaussian blur 20, offset 0,6, color rgba(0,0,0,0.35)
+
+SECTION HEADER (HBox):
+├─ Alignment:           CENTER_LEFT
+├─ Spacing:             8px
+├─ Icon:                SVGPath (specific per section)
+
+SECTION TITLE:
+├─ Font Size:           15px
+├─ Font Weight:         700
+├─ Color:               #e5e7eb
+
+SECTION ICON:
+├─ Stroke:              rgba(255,255,255,0.5)
+├─ Stroke Width:        2
+├─ Scale:               0.7
+├─ Fill:                transparent
+
+SCROLLABLE CONTENT (ScrollPane):
+├─ Style Class:         content-scroll
+├─ Fit To Width:        true
+├─ VBar Policy:         NEVER
+├─ HBar Policy:         NEVER
+├─ VBox.vgrow:          ALWAYS
+
+SCROLLBAR STYLING (for content-scroll):
+├─ Background:          transparent
+├─ Track:               transparent
+├─ Thumb Color:         rgba(255,255,255,0.12)
+├─ Thumb Hover:         rgba(255,255,255,0.2)
+├─ Thumb Radius:        3px
+├─ Pref Width:          6px
+
+================================================================================
+                    10. JOURNAL INPUT SECTION (LEFT COLUMN)
+================================================================================
+
+SECTION: "Write your thoughts"
+
+HEADER:
+├─ Icon: SVGPath pencil outline (M17 3a2.828... for edit icon)
+├─ Title: "Write your thoughts" (section-title)
+├─ Right aligned: currentDateTimeLabel
+
+TEXT AREA (entryTextArea):
+├─ Rows:                3 (prefRowCount)
+├─ Wrap Text:           true
+├─ Prompt Text:         "What's on your mind today? Express your thoughts and feelings..."
+├─ Style Class:         entry-textarea
+├─ Background:          rgba(255,255,255,0.05)
+├─ Border:              1px rgba(255,255,255,0.08)
+├─ Border Radius:       12px
+├─ Padding:             14px
+├─ Text Color:          #e5e7eb
+├─ Prompt Color:        rgba(255,255,255,0.3)
+├─ Font Size:           14px
+├─ Inner Background:    rgba(17,24,39,0.6)
+├─ Focus Border:        #06b6d4
+├─ Focus Shadow:        gaussian blur 8, color rgba(6,182,212,0.15)
+
+TEXTAREA INNER CONTENT:
+├─ Background:          #111827
+
+VALIDATION STATES:
+├─ input-valid:         Border: rgba(34,197,94,0.5)
+├─ input-warning:       Border: rgba(251,191,36,0.5)
+├─ input-invalid:       Border: rgba(239,68,68,0.5)
+
+BUTTON ROW (HBox spacing=8):
+All buttons follow btn styling below
+
+Button 1: Save Journal (saveEntryButton)
+├─ Classes:             btn, btn-primary
+├─ Graphic:             SVGPath (save/floppy icon)
+├─ Label:               "Save Journal"
+
+Button 2: Translate (translateButton)
+├─ Classes:             btn, btn-secondary
+├─ Graphic:             SVGPath (globe/translate icon)
+├─ Label:               "Translate"
+
+Button 3: Record Audio (recordAudioButton)
+├─ Classes:             btn, btn-secondary
+├─ Graphic:             SVGPath (microphone icon)
+├─ Label:               "Audio Transcription"
+
+================================================================================
+                       11. BUTTON STYLES (COMPREHENSIVE)
+================================================================================
+
+GENERIC BUTTON (.btn):
+├─ Padding:             10 22
+├─ Border Radius:       10px
+├─ Font Weight:         600
+├─ Font Size:           13px
+├─ Cursor:              HAND
+├─ Border Width:        0
+
+PRIMARY BUTTON (.btn-primary):
+├─ Background:          #06b6d4
+├─ Text Color:          #ffffff
+├─ Background Hover:    #22d3ee
+
+SECONDARY BUTTON (.btn-secondary):
+├─ Background:          rgba(6,182,212,0.08)
+├─ Text Color:          rgba(255,255,255,0.85)
+├─ Border:              1px rgba(6,182,212,0.2)
+├─ Background Hover:    rgba(6,182,212,0.15)
+├─ Text Hover:          #ffffff
+├─ Border Hover:        1px rgba(6,182,212,0.35)
+
+AI BUTTON (.btn-ai):
+├─ Background:          rgba(6,182,212,0.12)
+├─ Text Color:          #67e8f9
+├─ Border:              1px rgba(6,182,212,0.25)
+├─ Background Hover:    rgba(6,182,212,0.2)
+
+MOOD BUTTON (.btn-mood):
+├─ Background:          #06b6d4
+├─ Text Color:          #ffffff
+├─ Background Hover:    #22d3ee
+
+STATS BUTTON (.btn-stats):
+├─ Background:          rgba(6,182,212,0.1)
+├─ Text Color:          #67e8f9
+├─ Border:              1px rgba(6,182,212,0.2)
+├─ Background Hover:    rgba(6,182,212,0.18)
+
+DANGER BUTTON (.btn-danger):
+├─ Background:          rgba(239,68,68,0.15)
+├─ Text Color:          #fca5a5
+├─ Border:              1px rgba(239,68,68,0.25)
+├─ Background Hover:    rgba(239,68,68,0.25)
+├─ Text Hover:          #fecaca
+
+LIGHT BUTTON (.btn-light):
+├─ Background:          rgba(255,255,255,0.06)
+├─ Text Color:          #d1d5db
+├─ Border:              1px rgba(255,255,255,0.1)
+├─ Background Hover:    rgba(255,255,255,0.1)
+
+GRAY BUTTON (.btn-gray):
+├─ Background:          rgba(255,255,255,0.06)
+├─ Text Color:          #d1d5db
+├─ Border:              1px rgba(255,255,255,0.1)
+├─ Background Hover:    rgba(255,255,255,0.1)
+
+SHOW MORE BUTTON (.btn-show-more):
+├─ Background:          transparent
+├─ Border:              1px rgba(255,255,255,0.1)
+├─ Border Radius:       8px
+├─ Padding:             6 16
+├─ Background Hover:    rgba(255,255,255,0.05)
+├─ Border Hover:        1px rgba(6,182,212,0.3)
+
+SMALL BUTTON (.btn-small):
+├─ Padding:             6 12
+├─ Font Size:           12px
+
+BUTTON LABEL:
+├─ Text Color:          #ffffff
+├─ Font Weight:         600
+├─ Style Class:         btn-label
+
+BUTTON LABEL DARK:
+├─ Text Color:          #67e8f9
+├─ Font Weight:         600
+├─ Style Class:         btn-label-dark
+
+SHOW MORE LABEL:
+├─ Color:               rgba(255,255,255,0.45)
+├─ Font Size:           12px
+├─ Font Weight:         500
+
+================================================================================
+                    12. SORT BUTTON (SPECIALIZED)
+================================================================================
+
+SORT BUTTON (.btn-sort):
+├─ Background:          #0d1117
+├─ Background Hover:    #1e293b
+├─ Background Pressed:  #0a1929
+├─ Border:              1px #1e293b
+├─ Border Hover:        1px #374151
+├─ Border Pressed:      1px #06b6d4
+├─ Border Radius:       8px
+├─ Padding:             4 12
+├─ Cursor:              HAND
+
+SORT BUTTON INTERIOR (HBox):
+├─ Spacing:             5px
+├─ Alignment:           CENTER
+
+SORT ICON:
+├─ Content:             "M3 6h18 M3 12h12 M3 18h6 M19 15l-3 3-3-3 M16 18V9"
+├─ Stroke:              #9ca3af
+├─ Stroke Width:        1.8
+├─ Scale:               0.55
+
+SORT LABEL:
+├─ Text Color:          #9ca3af
+├─ Font Size:           11px
+├─ Font Weight:         600
+├─ Default Text:        "Newest" or "Oldest" (dynamically set)
+
+================================================================================
+                  13. RECENT JOURNALS SECTION (LEFT COLUMN)
+================================================================================
+
+SECTION: "Recent Journals"
+
+HEADER:
+├─ Icon: SVGPath document outline (M14 2H6a2 2 0...)
+├─ Title: "Recent Journals"
+├─ Spacer Region (HBox.hgrow="ALWAYS")
+├─ Sort Button (sortJournalsBtn) - see section 12
+
+ENTRIES CONTAINER:
+├─ Element Type:        FlowPane (entriesContainer)
+├─ Horizontal Gap:      10px
+├─ Vertical Gap:        10px
+├─ Min Height:          0
+├─ Pref Height:         -1
+
+JOURNAL CARD (.card):
+├─ Background:          #0d1520
+├─ Border:              1px rgba(6,182,212,0.2)
+├─ Border Radius:       14px
+├─ Padding:             20px
+├─ Spacing:             10px
+├─ Drop Shadow:         gaussian blur 12, offset 0,4, color rgba(0,0,0,0.3)
+
+CARD HOVER STATE:
+├─ Border Color:        rgba(6,182,212,0.45)
+├─ Background:          rgba(17,24,39,0.92)
+├─ Drop Shadow:         gaussian blur 18, offset 0,6, color rgba(6,182,212,0.12)
+
+CARD HEADER:
+├─ Alignment:           center-left
+├─ VBox Spacing:        8px
+
+CARD TITLE:
+├─ Font Size:           14px
+├─ Font Weight:         600
+├─ Color:               #e5e7eb
+
+CARD DATE:
+├─ Font Size:           11px
+├─ Color:               rgba(255,255,255,0.35)
+
+CARD NOTE:
+├─ Font Size:           13px
+├─ Color:               rgba(255,255,255,0.55)
+├─ Line Spacing:        3px
+
+CARD TIME:
+├─ Font Size:           11px
+├─ Color:               rgba(255,255,255,0.25)
+
+CARD FOOTER (HBox):
+├─ Spacing:             8px
+├─ Alignment:           center-right
+
+CARD ACTION BUTTONS (.btn-edit):
+├─ Background:          rgba(255,255,255,0.04)
+├─ Background Hover:    rgba(6,182,212,0.12)
+├─ Border Radius:       8px
+├─ Padding:             6 10
+├─ Icon Stroke:         rgba(255,255,255,0.4)
+├─ Icon Hover:          #22d3ee
+
+"SHOW MORE JOURNALS" BUTTON:
+├─ Classes:             btn, btn-show-more
+├─ Graphic Icon:        arrow down
+├─ Label:               "Show more"
+
+================================================================================
+                   14. MOOD SELECTION SECTION (RIGHT COLUMN)
+================================================================================
+
+SECTION: "How are you feeling?"
+
+HEADER:
+├─ Icon: SVGPath smiley face (M12 22c5.523...)
+├─ Title: "How are you feeling?"
+
+MOOD SELECTION CONTAINER (.mood-selection):
+├─ Spacing:             5px
+├─ Style Class:         mood-selection
+
+MOOD RADIO BUTTON (.mood-radio):
+├─ Background:          #0d1117
+├─ Background Hover:    #1e293b
+├─ Background Selected: #0a1929
+├─ Border:              1px #1e293b
+├─ Border Hover:        1px #374151
+├─ Border Selected:     1px #06b6d4
+├─ Border Radius:       10px
+├─ Padding:             9 14
+├─ Cursor:              HAND
+
+MOOD RADIO INNER ELEMENTS:
+├─ Radio (dot):         invisible (.radio { background: transparent })
+├─ Dot (selector):      invisible (.dot { background: transparent })
+
+MOOD LABEL:
+├─ Classes:             mood-label-large
+├─ Font Size:           13px
+├─ Font Weight:         500
+├─ Color:               #d1d5db
+
+MOOD OPTIONS (5 total):
+1. moodHappy
+   ├─ Icon: ImageView images/emojis/happy.png (24x24)
+   ├─ Label: "Happy"
+
+2. moodCalm
+   ├─ Icon: ImageView images/emojis/calm.png (24x24)
+   ├─ Label: "Calm"
+
+3. moodNeutral (default selected)
+   ├─ Icon: ImageView images/emojis/neutral.png (24x24)
+   ├─ Label: "Neutral"
+
+4. moodSad
+   ├─ Icon: ImageView images/emojis/sad.png (24x24)
+   ├─ Label: "Sad"
+
+5. moodAnxious
+   ├─ Icon: ImageView images/emojis/anxious.png (24x24)
+   ├─ Label: "Anxious"
+
+================================================================================
+                       15. INTENSITY SLIDER (RIGHT COLUMN)
+================================================================================
+
+SLIDER CONTAINER (VBox):
+├─ Spacing:             10px
+
+SLIDER LABEL ROW (HBox):
+├─ Alignment:           center-left
+├─ Spacing:             8px
+
+SLIDER LABEL:
+├─ Font Size:           13px
+├─ Font Weight:         600
+├─ Color:               #d1d5db
+├─ Text:                "Intensity Level"
+
+INTENSITY VALUE (right aligned):
+├─ Font Size:           15px
+├─ Font Weight:         700
+├─ Color:               #22d3ee
+├─ Classes:             intensity-value
+├─ Dynamic text:        "0" to "10" (based on slider)
+
+SLIDER ITSELF (intensitySlider):
+├─ Classes:             intensity-slider
+├─ Min:                 0
+├─ Max:                 10
+├─ Initial Value:       5
+
+SLIDER STYLING:
+Track:
+├─ Background:          #1e293b
+├─ Border Radius:       4px
+├─ Pref Height:         4px
+
+Thumb:
+├─ Background:          #06b6d4
+├─ Border Color:        #111827
+├─ Border Width:        2px
+├─ Border Radius:       10px
+├─ Drop Shadow:         gaussian blur 6, color rgba(6,182,212,0.4)
+
+Tick Labels:
+├─ Color:               #9ca3af
+
+Tick Marks:
+├─ Color:               #374151
+
+Minor Tick Marks:
+├─ Color:               #1e293b
+
+MIN/MAX LABELS (optional):
+├─ Classes:             intensity-min, intensity-max
+├─ Color:               rgba(255,255,255,0.3)
+├─ Font Size:           11px
+
+================================================================================
+                    16. SAVE MOOD BUTTON (RIGHT COLUMN)
+================================================================================
+
+BUTTON: saveMoodButton
+├─ Classes:             btn, btn-mood
+├─ Background:          #06b6d4
+├─ Text Color:          #ffffff
+├─ Background Hover:    #22d3ee
+├─ Icon:                SVGPath saveIcon() from IconFactory
+├─ Text:                (no text, icon only initially)
+
+SAVE MOOD ICON (created via IconFactory.saveIcon()):
+├─ Content:             "M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z M17 21v-8H7v8 M7 3v5h8"
+├─ Fill:                transparent
+├─ Stroke:              depends on context
+├─ Stroke Width:        1.8
+
+================================================================================
+                    17. RECENT MOODS SECTION (RIGHT COLUMN)
+================================================================================
+
+SECTION: "Recent Moods"
+
+HEADER:
+├─ Icon: SVGPath bar chart (M12 20V10 M18 20V4 M6 20v-4)
+├─ Title: "Recent Moods"
+├─ Spacer Region
+├─ Sort Button (sortMoodsBtn) - same as journals
+
+MOOD ENTRIES CONTAINER:
+├─ Element Type:        FlowPane (moodEntriesContainer)
+├─ Horizontal Gap:      10px
+├─ Vertical Gap:        10px
+
+MOOD CARD:
+Same .card styling as journal cards (see section 13)
+
+MOOD CARD CONTENT:
+├─ Header:              HBox with mood emoji/icon
+├─ Title:               mood name (Happy, Calm, etc.)
+├─ Date:                timestamp
+├─ Intensity:           "Level 7/10" or similar
+│  └─ Visual indicator: dots or bar (7 filled, 3 empty)
+├─ Notes:               optional text (if any)
+├─ Footer:              edit/delete buttons
+
+INTENSITY DOTS (inside mood card):
+├─ Filled Dots:         Background #06b6d4, Border Radius 6px
+├─ Empty Dots:          Background rgba(255,255,255,0.08), Border Radius 6px
+├─ Classes:             intensity-dot-filled, intensity-dot-empty
+├─ Size:                typically 6-8px per dot
+├─ Spacing:             small gap between dots
+
+INTENSITY CARD VALUE:
+├─ Font Size:           13px
+├─ Font Weight:         700
+├─ Color:               #22d3ee
+├─ Classes:             intensity-card-value
+
+"SHOW MORE MOODS" BUTTON:
+├─ Classes:             btn, btn-show-more
+├─ Graphic Icon:        arrow down
+├─ Label:               "Show more"
+
+================================================================================
+                  18. EMOTION DETECTION BUTTON (if applicable)
+================================================================================
+
+BUTTON: detectEmotionButton (may be hidden on initial view)
+├─ Classes:             btn, btn-ai
+├─ Background:          rgba(6,182,212,0.12)
+├─ Text Color:          #67e8f9
+├─ Border:              1px rgba(6,182,212,0.25)
+├─ Background Hover:    rgba(6,182,212,0.2)
+├─ Icon:                SVGPath emotionIcon() from IconFactory
+├─ Label:               "Detect Emotion" (or similar)
+
+EMOTION DETECTION ICON (from IconFactory.emotionIcon()):
+├─ Content:             "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M8 14s1.5 2 4 2 4-2 4-2 M9 9h.01 M15 9h.01"
+├─ Fill:                transparent
+├─ Stroke:              #67e8f9
+├─ Stroke Width:        1.8
+
+================================================================================
+                           19. CARD BADGES & LABELS
+================================================================================
+
+MOOD BADGE STYLING:
+├─ Padding:             3 10px
+├─ Border Radius:       6px
+├─ Font Size:           11px
+├─ Font Weight:         700
+├─ Letter Spacing:      0.3px
+
+BADGE VARIANTS:
+.badge-happy:
+├─ Background:          rgba(34,197,94,0.15)
+├─ Text:                #4ade80
+
+.badge-calm:
+├─ Background:          rgba(6,182,212,0.15)
+├─ Text:                #22d3ee
+
+.badge-neutral:
+├─ Background:          rgba(255,255,255,0.08)
+├─ Text:                rgba(255,255,255,0.5)
+
+.badge-sad:
+├─ Background:          rgba(239,68,68,0.15)
+├─ Text:                #fca5a5
+
+.badge-anxious:
+├─ Background:          rgba(251,191,36,0.15)
+├─ Text:                #fbbf24
+
+================================================================================
+                       20. ICON FACTORY SPECIFICATION
+================================================================================
+
+LIBRARY:          org.mindtrack.mindtrackfxx.util.IconFactory
+DESIGN SYSTEM:    Feather Icons Style (outlines, no fill)
+COORDINATE SYSTEM: 24×24
+DEFAULT STROKE:   1.8px (styled as 2px in concept)
+STROKE CAP:       ROUND
+STROKE JOIN:      ROUND
+DEFAULT SCALE:    0.75 (75% of original size)
+DEFAULT COLOR:    #9ca3af (gray)
+
+ICON FACTORY STATIC METHOD SIGNATURE:
+public static SVGPath iconName() { ... }
+
+SHARED STYLE METHOD:
+private static void style(SVGPath p) {
+    p.getStyleClass().add("svg-icon");
+    p.setFill(Color.TRANSPARENT);
+    p.setStroke(Color.web("#9ca3af"));
+    p.setStrokeWidth(1.8);
+    p.setStrokeLineCap(StrokeLineCap.ROUND);
+    p.setStrokeLineJoin(StrokeLineJoin.ROUND);
+    p.setScaleX(0.75);
+    p.setScaleY(0.75);
+}
+
+GETTER/DISPATCHER METHOD:
+public static SVGPath getIcon(String name) {
+    // Routes to appropriate icon method based on string
+    switch (name.toLowerCase()) {
+        case "journal":        return journalIcon();
+        case "goals":          return goalIcon();
+        case "exercise":       return exerciseIcon();
+        case "habits":         return habitsIcon();
+        case "profile":        return profileIcon();
+        case "statistics":     return statisticsIcon();
+        case "admin":          return adminIcon();
+        case "settings":       return settingsIcon();
+        case "logout":         return logoutIcon();
+        case "edit":           return editIcon();
+        case "delete":         return deleteIcon();
+        case "read more":      return readMoreIcon();
+        case "save":           return saveIcon();
+        case "analyse":        return analyseIcon();
+        case "translate":      return translateIcon();
+        case "sort":           return sortIcon();
+        case "search":         return searchIcon();
+        case "microphone":     return microphoneIcon();
+        case "audio":          return microphoneIcon();
+        case "transcription":  return microphoneIcon();
+        case "emotion":        return emotionIcon();
+        case "camera":         return emotionIcon();
+        default:               return journalIcon();
+    }
+}
+
+SIDEBAR ICONS (used in sidebar):
+1. journalIcon()
+   Content: "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"
+   Purpose: Journal navigation button
+
+2. goalIcon()
+   Content: "M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12z M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"
+   Purpose: Goals navigation button
+
+3. exerciseIcon()
+   Content: "M6.5 6.5h-3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3 M17.5 6.5h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-3 M6.5 4v16 M17.5 4v16 M6.5 12h11"
+   Purpose: Exercise navigation button
+
+4. habitsIcon()
+   Content: "M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3"
+   Purpose: Habits navigation button
+
+5. profileIcon()
+   Content: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"
+   Purpose: Profile navigation button
+
+6. statisticsIcon() / statsIcon()
+   Content: "M12 20V10 M18 20V4 M6 20v-4"
+   Purpose: Statistics navigation button
+
+7. adminIcon()
+   Content: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+   Purpose: Admin/Shield navigation button
+
+8. settingsIcon()
+   Content: "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15 1.65 1.65 0 0 0 3.13 14H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68 1.65 1.65 0 0 0 10 3.13V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9 1.65 1.65 0 0 0 20.87 10H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+   Purpose: Settings navigation button
+
+9. logoutIcon()
+   Content: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9"
+   Purpose: Logout navigation button (danger style)
+
+CARD ACTION ICONS:
+10. editIcon()
+    Content: "M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
+    Purpose: Edit action on cards
+
+11. deleteIcon()
+    Content: "M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6 M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2 M10 11v6 M14 11v6"
+    Purpose: Delete action on cards
+
+12. readMoreIcon()
+    Content: "M5 12h14 M12 5l7 7-7 7"
+    Purpose: Read more / expand action
+
+ACTION ICONS (in panels):
+13. saveIcon()
+    Content: "M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z M17 21v-8H7v8 M7 3v5h8"
+    Purpose: Save/submit action
+    Usage: Button graphics in forms
+
+14. analyseIcon() / searchIcon()
+    Content: "M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z M21 21l-4.35-4.35 M11 8v6 M8 11h6"
+    Purpose: Analysis/search action
+
+15. sortIcon()
+    Content: "M3 6h18 M3 12h12 M3 18h6 M19 15l-3 3-3-3 M16 18V9"
+    Purpose: Sort toggle button
+
+16. searchIcon()
+    Content: "M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z M21 21l-4.35-4.35"
+    Purpose: Search action (same as analyse but simpler)
+
+17. translateIcon()
+    Content: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+    Purpose: Translation feature button
+
+18. microphoneIcon()
+    Content: "M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v4 M8 23h8"
+    Purpose: Audio recording/transcription button
+
+19. emotionIcon()
+    Content: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M8 14s1.5 2 4 2 4-2 4-2 M9 9h.01 M15 9h.01"
+    Purpose: Emotion detection feature
+
+================================================================================
+                    21. DIALOG & MODAL STYLING
+================================================================================
+
+DIALOG ROOT BACKGROUND:
+├─ All dialogs use:      #0f172a
+├─ Border:               0 0 3 0 (bottom accent)
+├─ Border Color:         rgba(6,182,212,0.3)
+├─ Background Image:     none
+
+DIALOG CLASSES (all inherit above):
+├─ .notification-success
+├─ .notification-warning
+├─ .notification-error
+├─ .read-more-root
+├─ .analysis-options-root
+├─ .analysis-result-root
+├─ .confirm-root
+├─ .edit-mood-root
+├─ .loading-root
+├─ .analysis-root
+
+DIALOG TITLES:
+├─ Classes:             confirm-title, read-more-title, analysis-title, edit-mood-title
+├─ Font Size:           18px
+├─ Font Weight:         700
+├─ Color:               #f9fafb
+
+DIALOG MESSAGES/SUBTITLES:
+├─ Classes:             confirm-message, read-more-date, analysis-subtitle
+├─ Font Size:           13px
+├─ Color:               rgba(255,255,255,0.55)
+
+DIALOG CARDS:
+├─ Classes:             read-more-card, analysis-option-card, result-card
+├─ Background:          #0d1117
+├─ Border Radius:       14px
+├─ Padding:             18px
+├─ Border:              1px rgba(6,182,212,0.08)
+
+DIALOG TEXTAREAS:
+├─ Classes:             read-more-textarea, analysis-textarea, analysis-input
+├─ Background:          #0d1117
+├─ Border:              1px rgba(6,182,212,0.08)
+├─ Border Radius:       12px
+├─ Padding:             14px
+├─ Font Size:           14px
+├─ Text Color:          #d1d5db
+├─ Prompt Color:        rgba(255,255,255,0.25)
+├─ Editable:            varies by use case
+├─ Focus Color:         transparent
+
+DIALOG CONTENT TITLES:
+├─ Classes:             read-more-content-title, result-card-title
+├─ Font Size:           11px
+├─ Font Weight:         600
+├─ Color:               rgba(255,255,255,0.4)
+├─ Letter Spacing:      0.5px
+
+================================================================================
+                      22. TRANSLATION RESULT DIALOG
+================================================================================
+
+DIALOG STRUCTURE:
+├─ Title:               "Translation Complete"
+├─ Subtitle:            "Translated from [Language] to English"
+├─ Original Text Area:  read-more-textarea (non-editable)
+├─ Translated Area:     read-more-textarea (non-editable)
+├─ Buttons:             "Use Translated Text" + "Keep Original"
+
+USE TRANSLATED BUTTON:
+├─ Background:          #22d3ee
+├─ Text Color:          #0f172a
+├─ Background Hover:    #06b6d4
+├─ Padding:             10 20
+├─ Font Size:           13px
+├─ Font Weight:         600
+├─ Border Radius:       8px
+
+KEEP ORIGINAL BUTTON:
+├─ Background:          rgba(34,211,238,0.15)
+├─ Text Color:          #22d3ee
+├─ Border:              1.5px #22d3ee
+├─ Border Radius:       8px
+├─ Background Hover:    rgba(34,211,238,0.25)
+├─ Padding:             10 20
+├─ Font Size:           13px
+├─ Font Weight:         600
+
+================================================================================
+                    23. RESPONSIVE & DYNAMIC BEHAVIORS
+================================================================================
+
+WINDOW DECORATION:
+├─ Stage Style:         UNDECORATED (custom controls only)
+├─ Scene Size:          1100 x 750 (initial)
+
+STARTUP ANIMATION:
+├─ Type:                FadeTransition
+├─ Target:              Root VBox opacity
+├─ From:                0.0
+├─ To:                  1.0
+├─ Duration:            600ms
+
+DATE/TIME UPDATES:
+├─ Format:              MMM dd, yyyy (e.g., "Feb 18, 2026")
+├─ Refresh Rate:        Every 30 seconds
+├─ Timeline:            INDEFINITE cycle
+
+WINDOW DRAGGING:
+├─ Tracked in:          xOffset, yOffset variables
+├─ Applied to:          Custom window bar
+├─ Enabled by:          Controller mouse event handlers
+
+MAXIMIZATION:
+├─ Tracks previous:     prevWidth, prevHeight, prevX, prevY
+├─ Toggle behavior:     maximized boolean flag
+├─ Full screen:         Yes, when maximized
+
+SIDEBAR SELECTION:
+├─ Active button:       displayed with selected styling
+├─ Indicator pane:      sidebarIndicator (animatable)
+├─ Transition:          smooth color/border changes
+
+SEARCH OVERLAY:
+├─ Toggle:              searchToggleBtn
+├─ Visibility:          hidden by default, animated on open
+├─ Z-index:             appears above content
+
+================================================================================
+                      24. VALIDATION & ERROR HANDLING
+================================================================================
+
+TEXT AREA VALIDATION:
+├─ Min Length:          10 characters
+├─ Max Length:          5000 characters
+├─ Visual States:
+│  ├─ Empty:            neutral (no border class)
+│  ├─ Warning:          input-warning (10-20 chars or >4900 chars)
+│  └─ Valid:            input-valid (20-4900 chars)
+
+VALIDATION COLOR FEEDBACK:
+├─ input-valid:         Border: rgba(34,197,94,0.5) [green]
+├─ input-warning:       Border: rgba(251,191,36,0.5) [amber]
+├─ input-invalid:       Border: rgba(239,68,68,0.5) [red]
+
+================================================================================
+                      25. ANIMATION & EFFECTS
+================================================================================
+
+DROP SHADOWS (glassmorphism):
+├─ Standard Section:    gaussian blur 20, offset 0,6, color rgba(0,0,0,0.35)
+├─ Sidebar:             gaussian blur 20, offset 2,0, color rgba(0,0,0,0.35)
+├─ Card:                gaussian blur 12, offset 0,4, color rgba(0,0,0,0.3)
+├─ Card Hover:          gaussian blur 18, offset 0,6, color rgba(6,182,212,0.12)
+├─ Search Overlay:      gaussian blur 24, offset 0,8, color rgba(0,0,0,0.5)
+├─ Slider Thumb:        gaussian blur 6, color rgba(6,182,212,0.4)
+├─ Avatar Circle:       gaussian blur 8, color rgba(6,182,212,0.2)
+
+FOCUS EFFECTS:
+├─ TextArea Focus:      Border #06b6d4 + shadow gaussian blur 8 rgba(6,182,212,0.15)
+├─ Button Hover:        Color transition + optional shadow
+├─ Slider Interaction:  Thumb glow effect
+
+================================================================================
+                     26. SPECIAL EMOJI IMAGE ASSETS
+================================================================================
+
+Required Emoji PNG Files (24x24 minimum, preferably 48x48):
+
+1. images/emojis/happy.png
+   Purpose: Happy mood radio button graphic
+   Recommended: 😊 style emoji or happy face icon
+
+2. images/emojis/calm.png
+   Purpose: Calm mood radio button graphic
+   Recommended: 😌 style emoji or peaceful face icon
+
+3. images/emojis/neutral.png
+   Purpose: Neutral mood radio button graphic (default)
+   Recommended: 😐 style emoji or neutral face icon
+
+4. images/emojis/sad.png
+   Purpose: Sad mood radio button graphic
+   Recommended: 😢 style emoji or sad face icon
+
+5. images/emojis/anxious.png
+   Purpose: Anxious mood radio button graphic
+   Recommended: 😰 style emoji or worried face icon
+
+ADDITIONAL IMAGE ASSETS:
+
+6. images/logo.png
+   Purpose: Application logo in top bar
+   Size: 36x36px recommended
+   Location: Top-left of top bar
+
+7. images/user-avatar.png
+   Purpose: User avatar in top-right of top bar
+   Size: 36x36px recommended
+   Style: Circular profile picture or user icon
+
+8. background/background.png
+   Purpose: Background image for root (tiled or cover)
+   Recommended: Abstract dark gradient or geometric pattern
+   Size: 1920x1080 or larger for quality
+
+================================================================================
+                    27. IMPLEMENTATION CHECKLIST
+================================================================================
+
+When creating a new page/feature matching this design:
+
+LAYOUT:
+☐ Sidebar with navigation (fixed 200px width)
+☐ Custom window controls (top right: minimize, maximize, close)
+☐ Top bar with logo and search toggle
+☐ Content area with sections
+☐ Proper spacing and alignment per this spec
+
+STYLING:
+☐ Apply modern-style.css stylesheet
+☐ Use rgba(17,24,39,0.75) for sections
+☐ Apply 1px borders with rgba(255,255,255,0.06)
+☐ Use #06b6d4 as primary accent color
+☐ Apply proper shadow effects (gaussian blur)
+
+ICONS:
+☐ Use IconFactory.getIcon(String name) for all icons
+☐ SVG paths have transparent fill, #9ca3af stroke, 1.8px width
+☐ Set stroke caps/joins to ROUND
+☐ Apply 0.75 scale to all factory icons
+
+BUTTONS:
+☐ Primary actions use .btn-primary (#06b6d4)
+☐ Secondary actions use .btn-secondary with border
+☐ Sort buttons use .btn-sort styling
+☐ Show more buttons are transparent with border
+
+CARDS:
+☐ Use #0d1520 background with rgba(6,182,212,0.2) border
+☐ Include hover state with brighter border and shadow
+☐ Add action buttons in footer with edit icons
+
+COLORS:
+☐ Text colors follow hierarchy (f9fafb → d1d5db)
+☐ Muted text is rgba(255,255,255,0.3-0.5)
+☐ Mood badges use specific colors per mood type
+☐ Cyan accent (#06b6d4) for interactive elements
+
+VALIDATION:
+☐ TextArea shows input-valid/warning/invalid on change
+☐ Min/max length feedback for user input
+☐ Error messages use #ef4444 color
+
+RESPONSIVENESS:
+☐ Window is UNDECORATED with custom controls
+☐ Sidebar stays fixed width (200px)
+☐ Content area uses HBox.hgrow for flexibility
+☐ ScrollPane for overflow content
+
+================================================================================
+                           28. FINAL NOTES
+================================================================================
+
+This document is the MASTER TEMPLATE for the Mind Track UI design system.
+Every visual element, color, spacing, and interaction is defined here.
+
+KEY PRINCIPLES:
+1. Glassmorphism: Semi-transparent cards with subtle borders
+2. Dark Theme: #0f1923 background with light text
+3. Cyan Accent: #06b6d4 for all interactive elements
+4. Feather Icons: All icons are outline style, no fill
+5. Consistency: Use IconFactory for all icons, modern-style.css for all styling
+6. Spacing: 12px vertical, 8px horizontal for consistency
+7. Animation: Smooth transitions, fade effects on startup
+8. Accessibility: High contrast text, clear hover states
+
+BEFORE CREATING NEW FEATURES:
+- Read this entire document
+- Reference the IconFactory for icon patterns
+- Check CSS for existing classes to reuse
+- Match colors exactly to palette above
+- Test responsive behavior at 1100x750 minimum
+- Ensure custom window controls work smoothly
+- Apply glassmorphism shadow effects properly
+
+================================================================================
+                                    END OF DOCUMENT
+================================================================================

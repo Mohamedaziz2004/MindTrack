@@ -9,7 +9,7 @@
 <?import javafx.scene.shape.SVGPath?>
 
 <HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.mindtrack.mindtrackfxx.controller.EmotionalJournalController"
+      fx:controller="controllers.EmotionalJournalController"
       stylesheets="@../styles/modern-style.css"
       styleClass="root"
       spacing="12">

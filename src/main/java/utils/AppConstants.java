@@ -1,4 +1,4 @@
-package org.mindtrack.mindtrackfxx.util;
+package utils;
 
 import java.time.format.DateTimeFormatter;
 
